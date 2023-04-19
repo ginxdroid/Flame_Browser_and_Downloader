@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="zero">0dp</dimen>
+    <dimen name="six">6dp</dimen>
+    <dimen name="two">2dp</dimen>
+    <dimen name="eighty">80dp</dimen>
+    <dimen name="eight">8dp</dimen>
+
+    <dimen name="customActionBarSize">64dp</dimen>
+</resources>

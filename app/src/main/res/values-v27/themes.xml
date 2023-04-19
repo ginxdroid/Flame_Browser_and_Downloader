@@ -1,14 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Base application theme. -->
-    <style name="BaseTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="textAppearanceButton">@style/TextAppearance.Flame.Button</item>
-        <item name="textAppearanceHeadline7">@style/TextAppearance.Flame.Headline7</item>
-        <item name="actionBarSize">@dimen/customActionBarSize</item>
-        <item name="android:windowTranslucentStatus">false</item>
-        <item name="android:windowTranslucentNavigation">false</item>
-        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="bottomSheetDialogTheme">@style/BottomSheetDialog</item>
-    </style>
 
     <style name="AppTheme" parent="BaseTheme">
         <item name="disabledAlphaSpecial">0.26</item>
@@ -42,6 +33,9 @@
         <item name="android:statusBarColor">#FFFFFF</item>
         <item name="android:windowLightStatusBar">true</item>
 
+        <!--        available from api 27-->
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:navigationBarDividerColor">?attr/dividerAndProgressColor</item>
     </style>
 
 
@@ -77,61 +71,10 @@
 
         <item name="android:statusBarColor">#121212</item>
         <item name="android:windowLightStatusBar">false</item>
+
+        <!--        available from api 27-->
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:navigationBarDividerColor">?attr/dividerAndProgressColor</item>
     </style>
 
-    <style name="LightBlueTheme" parent="AppTheme">
-        <item name="colorSecondary">#1a73e8</item>
-        <item name="colorPrimary">#1a73e8</item>
-    </style>
-
-
-    <style name="LightOrangeTheme" parent="AppTheme">
-        <item name="colorSecondary">#ff9118</item>
-        <item name="colorPrimary">#ff9118</item>
-    </style>
-
-    <style name="DarkYellowTheme" parent="DarkAppTheme">
-        <item name="colorSecondary">#ffeb3b</item>
-        <item name="colorPrimary">#ffeb3b</item>
-    </style>
-
-    <style name="DarkLightBlueTheme" parent="DarkAppTheme">
-        <item name="colorSecondary">#03a9f4</item>
-        <item name="colorPrimary">#03a9f4</item>
-    </style>
-
-    <style name="DarkPinkTheme" parent="DarkAppTheme">
-        <item name="colorSecondary">#FF4081</item>
-        <item name="colorPrimary">#FF4081</item>
-    </style>
-
-    <style name="DarkOrangeTheme" parent="DarkAppTheme">
-        <item name="colorSecondary">#ff9118</item>
-        <item name="colorPrimary">#ff9118</item>
-    </style>
-
-    <style name="LightPinkTheme" parent="AppTheme">
-        <item name="colorSecondary">#FF4081</item>
-        <item name="colorPrimary">#FF4081</item>
-    </style>
-
-    <style name="LightLightBlueTheme" parent="AppTheme">
-        <item name="colorSecondary">#03a9f4</item>
-        <item name="colorPrimary">#03a9f4</item>
-    </style>
-
-    <style name="LightTropicalRainForestTheme" parent="AppTheme">
-        <item name="colorSecondary">#01875f</item>
-        <item name="colorPrimary">#01875f</item>
-    </style>
-
-    <style name="LightPurpleTheme" parent="AppTheme">
-        <item name="colorSecondary">#FF6200EE</item>
-        <item name="colorPrimary">#FF6200EE</item>
-    </style>
-
-    <style name="DarkPurpleTheme" parent="DarkAppTheme">
-        <item name="colorSecondary">#FFBB86FC</item>
-        <item name="colorPrimary">#FFBB86FC</item>
-    </style>
 </resources>

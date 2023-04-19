@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ds">
+        <attr name="primaryText" format="color" />
+        <attr name="secondaryText" format="color" />
+        <attr name="dialogButtonTextColor" format="color" />
+        <attr name="dividerAndProgressColor" format="color" />
+        <attr name="etBackgroundColor" format="color" />
+        <attr name="incognitoRippleColor" format="color" />
+        <attr name="tabBackgroundColor" format="color" />
+
+        <attr name="textAppearanceHeadline7" format="reference" />
+        <attr name="disabledAlphaSpecial" format="float" />
+
+    </declare-styleable>
+
+</resources>

@@ -7,4 +7,13 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="primaryText">#de000000</color>
+    <color name="primaryTextDark">#deFFFFFF</color>
+    <color name="secondaryTextDark">#99FFFFFF</color>
+    <color name="dividerAndProgressColorDark">#1FFFFFFF</color>
+    <color name="dividerAndProgressColor">#1F000000</color>
+    <color name="darkSurfaceColor">#121212</color>
+    <color name="colorLightSurface">#FFFFFF</color>
+    <color name="dimBackgroundColor">#E6000000</color>
 </resources>

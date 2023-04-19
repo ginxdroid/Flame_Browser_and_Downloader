@@ -1,3 +1,26 @@
 <resources>
     <string name="app_name">Flame Browser and Downloader</string>
+    <string name="themes">Themes</string>
+    <string name="clear_records">Clear Records</string>
+    <string name="go_incognito">Go Incognito</string>
+    <string name="menu">Menu</string>
+    <string name="add_new_tab">Add new tab</string>
+    <string name="light_themes">Light Themes</string>
+    <string name="dark_themes">Dark Themes</string>
+    <string name="enable_night_mode_for_web_pages">Enable night mode for web pages?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="quick_actions">Quick Actions</string>
+    <string name="day_ui">Day UI</string>
+    <string name="night_ui">Night UI</string>
+    <string name="change_theme_quick_action_button">Change theme quick action button</string>
+    <string name="follow_system">Follow system</string>
+    <string name="current_theme">Current Theme</string>
+    <string name="oops_general_message">Oops… something went wrong.</string>
+    <string name="do_you_want_to_enable_dark_web_ui_to_darken_web_pages_experimental">Do you want to enable dark web UI to darken web pages? (Experimental)</string>
+    <string name="do_you_want_to_also_disable_dark_web_ui">Do you want to also disable Dark Web UI?</string>
+    <string name="do_you_want_to_enable_light_theme_for_app">Do you want to enable light theme for app?</string>
+    <string name="do_you_want_to_enable_dark_theme_for_app">Do you want to enable dark theme for app?</string>
+    <string name="follow_system_theme_settings">Follow system theme settings.</string>
+    <string name="follow_battery_saver_state">Follow battery saver state</string>
 </resources>
