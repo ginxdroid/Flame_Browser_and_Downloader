@@ -21,18 +21,23 @@ import com.ginxdroid.flamebrowseranddownloader.DatabaseHandler;
 import com.ginxdroid.flamebrowseranddownloader.R;
 import com.ginxdroid.flamebrowseranddownloader.models.UserPreferences;
 import com.ginxdroid.flamebrowseranddownloader.sheets.ThemesSheet;
+import com.google.android.material.bottomappbar.BottomAppBar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class MainActivity extends BaseActivity implements ThemesSheet.BottomSheetListener {
+public class MainActivity extends BaseActivity implements ThemesSheet.BottomSheetListener, View.OnClickListener {
 
     private DatabaseHandler db;
     private Toast toast = null;
 
     private CoordinatorLayout recyclerViewContainer;
+    private RecyclerView normalTabsRV;
+    private NormalTabsRVAdapter normalTabsRVAdapter;
+    private CustomHorizontalManager customHorizontalManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,7 +104,7 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
             }
 
 
-
+            userPreferences.setHomePageURL("NewTab");
             db.addUserPreferences(userPreferences);
         }finally {
             initCommon();
@@ -109,12 +114,25 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
     private void initCommon()
     {
         ImageButton themesIB = findViewById(R.id.themesIB);
-        themesIB.setOnClickListener(view -> {
-            try {
-              new ThemesSheet().show(MainActivity.this.getSupportFragmentManager(),"themesSheet");
-            }catch (Exception e)
-            {e.printStackTrace();}
-        });
+        themesIB.setOnClickListener(MainActivity.this);
+
+        final BottomAppBar bottomAppBar = findViewById(R.id.bottomAppBar);
+
+        final FloatingActionButton fabAdd = findViewById(R.id.fabAdd);
+        fabAdd.setOnClickListener(MainActivity.this);
+
+        normalTabsRV = findViewById(R.id.normalTabsRV);
+        customHorizontalManager = new CustomHorizontalManager(recyclerViewContainer,MainActivity.this,bottomAppBar,fabAdd);
+        customHorizontalManager.setItemPrefetchEnabled(false);
+
+        normalTabsRV.setLayoutManager(customHorizontalManager);
+
+        normalTabsRVAdapter = new NormalTabsRVAdapter(MainActivity.this,MainActivity.this,customHorizontalManager,
+                recyclerViewContainer,normalTabsRV, bottomAppBar);
+        normalTabsRVAdapter.setHasStableIds(false);
+
+        normalTabsRV.setAdapter(normalTabsRVAdapter);
+
     }
 
     @Override
@@ -343,4 +361,21 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
     }
 
 
+    @Override
+    public void onClick(View view) {
+        try {
+            int id = view.getId();
+            if(id == R.id.themesIB)
+            {
+                try {
+                    new ThemesSheet().show(MainActivity.this.getSupportFragmentManager(),"themesSheet");
+                }catch (Exception ignored)
+                {}
+            } else if(id == R.id.fabAdd)
+            {
+                normalTabsRVAdapter.addNewTab(db.getHomePageURL(), 4);
+            }
+
+        }catch (Exception ignored){}
+    }
 }

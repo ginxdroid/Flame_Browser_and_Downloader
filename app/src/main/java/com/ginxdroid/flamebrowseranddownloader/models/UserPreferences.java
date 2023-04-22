@@ -8,6 +8,8 @@ public class UserPreferences {
 
     private Integer darkTheme;
 
+    private String homePageURL;
+
 
     public UserPreferences() {
     }
@@ -42,5 +44,13 @@ public class UserPreferences {
 
     public void setDarkTheme(Integer darkTheme) {
         this.darkTheme = darkTheme;
+    }
+
+    public String getHomePageURL() {
+        return homePageURL;
+    }
+
+    public void setHomePageURL(String homePageURL) {
+        this.homePageURL = homePageURL;
     }
 }

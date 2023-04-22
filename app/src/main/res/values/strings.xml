@@ -23,4 +23,9 @@
     <string name="do_you_want_to_enable_dark_theme_for_app">Do you want to enable dark theme for app?</string>
     <string name="follow_system_theme_settings">Follow system theme settings.</string>
     <string name="follow_battery_saver_state">Follow battery saver state</string>
+    <string name="favicon">Favicon</string>
+    <string name="new_tab">New Tab</string>
+    <string name="close_tab">Close tab</string>
+    <string name="tab_preview">Tab Preview</string>
+    <string name="minimize">Minimize</string>
 </resources>

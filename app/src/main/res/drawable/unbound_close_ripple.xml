@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="?attr/dividerAndProgressColor">
+
+        <!--    This is the background for your button-->
+    <item>
+        <!--        Use the shape you want over here-->
+        <shape android:shape="rectangle">
+        <!--    define solid background using solid tag-->
+            <solid android:color="?attr/tabBackgroundColor" />
+        </shape>
+
+    </item>
+</ripple>

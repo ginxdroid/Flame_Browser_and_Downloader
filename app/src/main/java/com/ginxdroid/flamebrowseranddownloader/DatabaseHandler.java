@@ -20,6 +20,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private final String CURRENT_THEME_ID="uCurrentThemeID";
     private final String IS_DARK_WEB_UI="uIsDarkWebUI";
     private final String DARK_THEME = "tHDarkTheme";
+    private final String HOME_PAGE_URL = "uHomePageURL";
 
 
     private final String differentThemesTBL="differentThemesTBL";
@@ -37,7 +38,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
 
     public DatabaseHandler(Context context) {
-        super(context, "flameDatabase", null, 4);
+        super(context, "flameDatabase", null, 5);
     }
 
     @Override
@@ -52,13 +53,19 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             case 1:
                 createDifferentThemesTbl(sqLiteDatabase);
                 addDarkThemeColumnToUP(sqLiteDatabase);
+                addHomePageURLColumnToUP(sqLiteDatabase);
                 break;
             case 2:
                 addDarkThemeColumnToUP(sqLiteDatabase);
                 insertDifferentThemes(sqLiteDatabase);
+                addHomePageURLColumnToUP(sqLiteDatabase);
                 break;
             case 3:
                 insertDifferentThemes(sqLiteDatabase);
+                addHomePageURLColumnToUP(sqLiteDatabase);
+                break;
+            case 4:
+                addHomePageURLColumnToUP(sqLiteDatabase);
                 break;
         }
     }
@@ -70,6 +77,19 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         ContentValues values = new ContentValues();
         values.put(DARK_THEME, 2);
+
+        //update row
+        db.update(userPreferencesTBL, values, UP_KEY_ID + "=?",
+                new String[]{String.valueOf(1)});
+    }
+
+    private void addHomePageURLColumnToUP(SQLiteDatabase db)
+    {
+
+        db.execSQL("ALTER TABLE "+userPreferencesTBL+" ADD COLUMN "+HOME_PAGE_URL +" TEXT;");
+
+        ContentValues values = new ContentValues();
+        values.put(HOME_PAGE_URL, "NewTab");
 
         //update row
         db.update(userPreferencesTBL, values, UP_KEY_ID + "=?",
@@ -100,7 +120,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private void createUserPreferencesTbl(SQLiteDatabase db)
     {
         String CREATE_USER_PREFERENCES_TABLE = "CREATE TABLE IF NOT EXISTS "+ userPreferencesTBL +"("+UP_KEY_ID+" INTEGER PRIMARY KEY,"+
-                CURRENT_THEME_ID+" INTEGER,"+IS_DARK_WEB_UI+" INTEGER,"+DARK_THEME+" INTEGER);";
+                CURRENT_THEME_ID+" INTEGER,"+IS_DARK_WEB_UI+" INTEGER,"+DARK_THEME+" INTEGER,"+HOME_PAGE_URL+" TEXT);";
 
         db.execSQL(CREATE_USER_PREFERENCES_TABLE);
     }
@@ -198,9 +218,22 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(CURRENT_THEME_ID, userPreferences.getCurrentThemeID());
         values.put(IS_DARK_WEB_UI, userPreferences.getIsDarkWebUI());
         values.put(DARK_THEME, userPreferences.getDarkTheme());
+        values.put(HOME_PAGE_URL, userPreferences.getHomePageURL());
 
         writableDB.insert(userPreferencesTBL,null,values);
 
+    }
+    
+    public String getHomePageURL()
+    {
+        Cursor cursor = readableDB.query(userPreferencesTBL,new String[]{HOME_PAGE_URL},UP_KEY_ID+"=?",
+                new String[]{String.valueOf(1)},null,null,null,null);
+
+        cursor.moveToFirst();
+        String homePageURL = cursor.getString(cursor.getColumnIndexOrThrow(HOME_PAGE_URL));
+        cursor.close();
+
+        return homePageURL;
     }
 
 

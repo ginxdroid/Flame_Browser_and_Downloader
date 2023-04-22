@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.ginxdroid.flamebrowseranddownloader.activities.CustomMCV
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/emptyCV">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/outerL"
+        android:background="?attr/colorSurface"
+        >
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/minimizeBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:text="@string/minimize"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintVertical_bias="0.5"
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/emptyFrameRL"
+        >
+
+        <ImageButton
+            android:contentDescription="@string/tab_preview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="?attr/colorSurface"
+            android:id="@+id/tabPreviewIB" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/emptyFrameLRL"
+            >
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:id="@+id/titleRL"
+                android:background="?attr/tabBackgroundColor"
+                android:clickable="false"
+                android:focusable="false"
+                android:layout_alignParentTop="true">
+
+                <ImageView
+                    android:id="@+id/faviconIV"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:src="@drawable/cyclone_bg"
+                    android:contentDescription="@string/favicon"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="8dp"
+                    android:clickable="false"
+                    android:focusable="false" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/cardTitle"
+                    android:maxLines="1"
+                    android:text="@string/new_tab"
+                    android:layout_toEndOf="@id/faviconIV"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="16dp"
+                    android:textStyle="bold"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:textAppearance="?textAppearanceSubtitle1"
+                    android:textColor="?attr/primaryText" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:layout_alignParentBottom="true"
+                    android:background="?attr/dividerAndProgressColor" />
+
+
+            </RelativeLayout>
+
+            <ImageButton
+                android:id="@+id/closeTabIB"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:layout_alignParentBottom="true"
+                android:background="@drawable/unbound_close_ripple"
+                android:src="@drawable/close_background"
+                android:contentDescription="@string/close_tab" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="?attr/dividerAndProgressColor"
+                android:layout_above="@id/closeTabIB" />
+
+
+        </RelativeLayout>
+
+
+
+    </RelativeLayout>
+
+</com.ginxdroid.flamebrowseranddownloader.activities.CustomMCV>
