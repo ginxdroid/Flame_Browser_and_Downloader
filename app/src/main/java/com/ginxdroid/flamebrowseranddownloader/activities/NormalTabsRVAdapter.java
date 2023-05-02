@@ -7,15 +7,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.ginxdroid.flamebrowseranddownloader.DatabaseHandler;
 import com.ginxdroid.flamebrowseranddownloader.R;
 import com.google.android.material.bottomappbar.BottomAppBar;
-import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
 
@@ -38,6 +40,10 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
     private final BottomAppBar bottomAppBar;
     private boolean isScrolling = false;
 
+    private final RecyclerView.RecycledViewPool viewPool;
+
+    private final int eighty;
+
     public NormalTabsRVAdapter(Context context, MainActivity mainActivity,
                                CustomHorizontalManager customHorizontalManager, CoordinatorLayout recyclerViewContainer,
                                RecyclerView recyclerView, BottomAppBar bottomAppBar) {
@@ -48,7 +54,11 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
         this.recyclerView = recyclerView;
         this.bottomAppBar = bottomAppBar;
 
+        eighty=context.getResources().getDimensionPixelSize(R.dimen.eighty);
+
         urlsAL = new ArrayList<>();
+
+        viewPool = new RecyclerView.RecycledViewPool();
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -122,6 +132,20 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
     @Override
     public void onBindViewHolder(@NonNull NormalTabsRVAdapter.ViewHolder holder, int position) {
         String urlString = urlsAL.get(position);
+
+        holder.quickLinksRV.setRecycledViewPool(viewPool);
+
+        if(urlString.equals("NewTab"))
+        {
+            //this means this is our default home page layout
+            holder.homePageCL.setVisibility(View.VISIBLE);
+            holder.webViewContainer.setVisibility(View.INVISIBLE);
+
+        }else {
+            //this means that we need to hide our default home page and load webVIewContainer frame
+            holder.homePageCL.setVisibility(View.INVISIBLE);
+            holder.webViewContainer.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -137,6 +161,17 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
         private boolean isEmptyFrameLRLVisible = true;
 
         private final RelativeLayout emptyFrameLRL;
+        private final ConstraintLayout bottomToolbarCL;
+        private final ImageButton reloadIB,searchIB,showMoreIB,homePageIB;
+        private final RelativeLayout tabsCountChildTVHPRL;
+        private final TextView tabsCountChildTVHP;
+
+        private final CoordinatorLayout homePageCL;
+        private final RecyclerView quickLinksRV;
+        private final QuickLinksRVHomePageAdapter quickLinksRVHomePageAdapter;
+        private final GridLayoutManager gridLayoutManager;
+
+        private final RelativeLayout webViewContainer;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -152,11 +187,46 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
 
             emptyFrameRL.setVisibility(View.INVISIBLE);
 
-            final MaterialButton minimizeBtn = itemView.findViewById(R.id.minimizeBtn);
-            minimizeBtn.setOnClickListener(ViewHolder.this);
+            bottomToolbarCL = itemView.findViewById(R.id.bottomToolbarCL);
+            reloadIB = bottomToolbarCL.findViewById(R.id.reloadIB);
+            searchIB = bottomToolbarCL.findViewById(R.id.searchIB);
+            showMoreIB = bottomToolbarCL.findViewById(R.id.showMoreIB);
+            homePageIB = bottomToolbarCL.findViewById(R.id.homePageIB);
+            tabsCountChildTVHPRL = bottomToolbarCL.findViewById(R.id.tabsCountChildTVHPRL);
+            tabsCountChildTVHP = tabsCountChildTVHPRL.findViewById(R.id.tabsCountChildTVHP);
+
+            homePageCL = itemView.findViewById(R.id.homePageCL);
+            quickLinksRV = homePageCL.findViewById(R.id.quickLinksRV);
+            quickLinksRVHomePageAdapter = new QuickLinksRVHomePageAdapter(db,context,NormalTabsRVAdapter.this,
+                    ViewHolder.this,mainActivity,inflater);
+            gridLayoutManager = new GridLayoutManager(context, 4);
+
+            quickLinksRV.setLayoutManager(gridLayoutManager);
+            quickLinksRV.setAdapter(quickLinksRVHomePageAdapter);
+            setQL();
+
+            webViewContainer = itemView.findViewById(R.id.webViewContainer);
+
+
+            reloadIB.setOnClickListener(ViewHolder.this);
+            searchIB.setOnClickListener(ViewHolder.this);
+            showMoreIB.setOnClickListener(ViewHolder.this);
+            homePageIB.setOnClickListener(ViewHolder.this);
+            tabsCountChildTVHPRL.setOnClickListener(ViewHolder.this);
+
 
             itemView.post(this::doGestureWork);
 
+        }
+
+        private void setQL()
+        {
+            try{
+                gridLayoutManager.setSpanCount(Math.min(recyclerViewContainerWidth,recyclerViewContainerHeight) / eighty);
+            }catch (Exception ignored)
+            {}
+
+            quickLinksRVHomePageAdapter.setQuickLinks();
         }
 
         private void makeTitleInvisible()
@@ -197,10 +267,11 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
             }));
         }
 
+
         @Override
         public void onClick(View view) {
             int id = view.getId();
-            if(id == R.id.minimizeBtn)
+            if(id == R.id.tabsCountChildTVHPRL)
             {
                 customHorizontalManager.minimalDeselectItem(() -> emptyFrameRL.setVisibility(View.VISIBLE));
             }else if(id == R.id.closeTabIB)
@@ -214,6 +285,18 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
                                 isSwiping = false;
                             })).setDuration(175).start();
                 }
+            }else if(id == R.id.reloadIB)
+            {
+
+            }else if(id == R.id.searchIB)
+            {
+
+            }else if(id == R.id.showMoreIB)
+            {
+
+            }else if(id == R.id.homePageIB)
+            {
+
             }
         }
     }

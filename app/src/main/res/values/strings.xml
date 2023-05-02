@@ -28,4 +28,17 @@
     <string name="close_tab">Close tab</string>
     <string name="tab_preview">Tab Preview</string>
     <string name="minimize">Minimize</string>
+    <string name="refresh_web_page">Refresh web page</string>
+    <string name="search">Search</string>
+    <string name="view_tabs">View tabs</string>
+    <string name="max_count">99+</string>
+    <string name="home">Home</string>
+    <string name="show_more">Show more</string>
+    <string name="connection_information_or_search_engine_selector">Connection information or search engine selector</string>
+    <string name="browser_splash_logo">Browser splash logo</string>
+    <string name="qr_code_and_barcode_scanner">QR code and Barcode scanner</string>
+    <string name="quick_link_favicon">Quick Link favicon</string>
+    <string name="ql_item">QL Item</string>
+    <string name="voice_launcher_for_searching">Voice Launcher for searching</string>
+    <string name="search_or_type_web_address">Search or type web address</string>
 </resources>

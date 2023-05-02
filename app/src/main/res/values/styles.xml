@@ -49,4 +49,5 @@
         <item name="textAllCaps">false</item>
         <item name="android:textColor">?attr/primaryText</item>
     </style>
+
 </resources>

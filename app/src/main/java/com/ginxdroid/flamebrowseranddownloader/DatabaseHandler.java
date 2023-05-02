@@ -6,8 +6,11 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.ginxdroid.flamebrowseranddownloader.models.QuickLinkModel;
 import com.ginxdroid.flamebrowseranddownloader.models.ThemeModel;
 import com.ginxdroid.flamebrowseranddownloader.models.UserPreferences;
+
+import java.util.ArrayList;
 
 public class DatabaseHandler extends SQLiteOpenHelper {
     private static DatabaseHandler instance = null;
@@ -36,9 +39,18 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private final String D_TH_SECONDARY_TEXT_COLOR = "dTHSecondaryTextColor";
 
 
+    private final String quickLinksTBL="quickLinksTBL";
+    //Quick links table columns
+    private final String QL_KEY_ID = "qLId";
+    private final String QL_ITEM_FAVICON_PATH = "qLItemFaviconPath";
+    private final String QL_ITEM_TITLE = "qLItemTitle";
+    private final String QL_ITEM_URL = "qLItemURL";
+    private final String QL_VISIBLE_POSITION = "qLVisiblePosition";
+
+
 
     public DatabaseHandler(Context context) {
-        super(context, "flameDatabase", null, 5);
+        super(context, "flameDatabase", null, 6);
     }
 
     @Override
@@ -54,20 +66,121 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 createDifferentThemesTbl(sqLiteDatabase);
                 addDarkThemeColumnToUP(sqLiteDatabase);
                 addHomePageURLColumnToUP(sqLiteDatabase);
+                createQuickLinkTBLWhenModifying(sqLiteDatabase);
                 break;
             case 2:
                 addDarkThemeColumnToUP(sqLiteDatabase);
                 insertDifferentThemes(sqLiteDatabase);
                 addHomePageURLColumnToUP(sqLiteDatabase);
+                createQuickLinkTBLWhenModifying(sqLiteDatabase);
                 break;
             case 3:
                 insertDifferentThemes(sqLiteDatabase);
                 addHomePageURLColumnToUP(sqLiteDatabase);
+                createQuickLinkTBLWhenModifying(sqLiteDatabase);
                 break;
             case 4:
                 addHomePageURLColumnToUP(sqLiteDatabase);
+                createQuickLinkTBLWhenModifying(sqLiteDatabase);
+                break;
+            case 5:
+                createQuickLinkTBLWhenModifying(sqLiteDatabase);
                 break;
         }
+    }
+
+    private void createQuickLinkTBLWhenModifying(SQLiteDatabase db)
+    {
+        String CREATE_QUICK_LINKS_TABLE = "CREATE TABLE IF NOT EXISTS "+quickLinksTBL+"("
+                +QL_KEY_ID+" INTEGER PRIMARY KEY,"+QL_ITEM_FAVICON_PATH+" TEXT,"+
+                QL_ITEM_TITLE+" TEXT,"+QL_ITEM_URL+" TEXT,"+QL_VISIBLE_POSITION+" INTEGER);";
+
+        db.execSQL(CREATE_QUICK_LINKS_TABLE);
+
+        //add default quick link items after table is created.
+        {
+            QuickLinkModel quickLinkModel = new QuickLinkModel();
+            quickLinkModel.setQlURL("https://www.google.com/");
+            quickLinkModel.setQlTitle("Google");
+            quickLinkModel.setQlFaviconPath("R.drawable");
+            quickLinkModel.setQlVisiblePosition(1);
+
+            addQuickLinkItemWhenModifying(db,quickLinkModel);
+        }
+
+        {
+            QuickLinkModel quickLinkModel = new QuickLinkModel();
+            quickLinkModel.setQlURL("https://twitter.com/login?lang=en");
+            quickLinkModel.setQlTitle("Twitter");
+            quickLinkModel.setQlFaviconPath("R.drawable");
+            quickLinkModel.setQlVisiblePosition(2);
+
+            addQuickLinkItemWhenModifying(db,quickLinkModel);
+        }
+
+        {
+            QuickLinkModel quickLinkModel = new QuickLinkModel();
+            quickLinkModel.setQlURL("https://www.instagram.com/accounts/login/?hl=en");
+            quickLinkModel.setQlTitle("Instagram");
+            quickLinkModel.setQlFaviconPath("R.drawable");
+            quickLinkModel.setQlVisiblePosition(3);
+
+            addQuickLinkItemWhenModifying(db,quickLinkModel);
+        }
+
+        {
+            QuickLinkModel quickLinkModel = new QuickLinkModel();
+            quickLinkModel.setQlURL("https://www.facebook.com/");
+            quickLinkModel.setQlTitle("Facebook");
+            quickLinkModel.setQlFaviconPath("R.drawable");
+            quickLinkModel.setQlVisiblePosition(4);
+
+            addQuickLinkItemWhenModifying(db,quickLinkModel);
+        }
+
+        {
+            QuickLinkModel quickLinkModel = new QuickLinkModel();
+            quickLinkModel.setQlURL("https://www.wikipedia.org/");
+            quickLinkModel.setQlTitle("Wikipedia");
+            quickLinkModel.setQlFaviconPath("R.drawable");
+            quickLinkModel.setQlVisiblePosition(5);
+
+            addQuickLinkItemWhenModifying(db,quickLinkModel);
+        }
+
+    }
+
+    private void createQuickLinkTBL(SQLiteDatabase db)
+    {
+        String CREATE_QUICK_LINKS_TABLE = "CREATE TABLE IF NOT EXISTS "+quickLinksTBL+"("
+                +QL_KEY_ID+" INTEGER PRIMARY KEY,"+QL_ITEM_FAVICON_PATH+" TEXT,"+
+                QL_ITEM_TITLE+" TEXT,"+QL_ITEM_URL+" TEXT,"+QL_VISIBLE_POSITION+" INTEGER);";
+
+        db.execSQL(CREATE_QUICK_LINKS_TABLE);
+    }
+
+    private void addQuickLinkItemWhenModifying(SQLiteDatabase db,QuickLinkModel quickLinkModel)
+    {
+        ContentValues values = new ContentValues();
+        values.put(QL_ITEM_TITLE,quickLinkModel.getQlTitle());
+        values.put(QL_ITEM_FAVICON_PATH,quickLinkModel.getQlFaviconPath());
+        values.put(QL_ITEM_URL,quickLinkModel.getQlURL());
+        values.put(QL_VISIBLE_POSITION,quickLinkModel.getQlVisiblePosition());
+
+        //insert our model
+        db.insert(quickLinksTBL,null,values);
+    }
+
+    public void addQuickLinkItem(QuickLinkModel quickLinkModel)
+    {
+        ContentValues values = new ContentValues();
+        values.put(QL_ITEM_TITLE,quickLinkModel.getQlTitle());
+        values.put(QL_ITEM_FAVICON_PATH,quickLinkModel.getQlFaviconPath());
+        values.put(QL_ITEM_URL,quickLinkModel.getQlURL());
+        values.put(QL_VISIBLE_POSITION,quickLinkModel.getQlVisiblePosition());
+
+        //insert our model
+        writableDB.insert(quickLinksTBL,null,values);
     }
 
     private void addDarkThemeColumnToUP(SQLiteDatabase db)
@@ -113,6 +226,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     {
         createUserPreferencesTbl(db);
         createDifferentThemesTbl(db);
+        createQuickLinkTBL(db);
     }
 
     //CRUD: CREATE, READ, UPDATE and DELETE operations
@@ -371,6 +485,38 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
     }
 
+    public QuickLinkModel getQuickLinkModel(int id)
+    {
+        Cursor cursor = readableDB.query(quickLinksTBL,new String[]{QL_KEY_ID,QL_ITEM_FAVICON_PATH,QL_ITEM_TITLE,QL_ITEM_URL},
+                QL_KEY_ID+"=?",new String[]{String.valueOf(id)},null,null,null,null);
+        QuickLinkModel quickLinkModel = new QuickLinkModel();
+        cursor.moveToFirst();
+        quickLinkModel.setQlKeyId(cursor.getInt(cursor.getColumnIndexOrThrow(QL_KEY_ID)));
+        quickLinkModel.setQlTitle(cursor.getString(cursor.getColumnIndexOrThrow(QL_ITEM_TITLE)));
+        quickLinkModel.setQlFaviconPath(cursor.getString(cursor.getColumnIndexOrThrow(QL_ITEM_FAVICON_PATH)));
+        quickLinkModel.setQlURL(cursor.getString(cursor.getColumnIndexOrThrow(QL_ITEM_URL)));
+
+        cursor.close();
+
+        return quickLinkModel;
+    }
+
+    public ArrayList<Integer> getAllQuickLinkItemsIDs() {
+        ArrayList<Integer> quickLinksList = new ArrayList<>();
+
+        Cursor cursor = readableDB.query(quickLinksTBL,new String[]{QL_KEY_ID},
+                null,null,null,null,QL_VISIBLE_POSITION + " ASC",null);
+
+        while (cursor.moveToNext())
+        {
+            //add ql item to list
+            quickLinksList.add(cursor.getInt(cursor.getColumnIndexOrThrow(QL_KEY_ID)));
+        }
+
+        cursor.close();
+
+        return quickLinksList;
+    }
 
 }
 

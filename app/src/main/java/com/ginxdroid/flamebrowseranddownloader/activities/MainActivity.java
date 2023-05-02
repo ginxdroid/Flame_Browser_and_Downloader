@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.ginxdroid.flamebrowseranddownloader.DatabaseHandler;
 import com.ginxdroid.flamebrowseranddownloader.R;
+import com.ginxdroid.flamebrowseranddownloader.models.QuickLinkModel;
 import com.ginxdroid.flamebrowseranddownloader.models.UserPreferences;
 import com.ginxdroid.flamebrowseranddownloader.sheets.ThemesSheet;
 import com.google.android.material.bottomappbar.BottomAppBar;
@@ -106,6 +107,61 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
 
             userPreferences.setHomePageURL("NewTab");
             db.addUserPreferences(userPreferences);
+
+            //add default quick link items after table is created.
+            {
+                QuickLinkModel quickLinkModel = new QuickLinkModel();
+                quickLinkModel.setQlURL("https://www.google.com/");
+                quickLinkModel.setQlTitle("Google");
+                quickLinkModel.setQlFaviconPath("R.drawable");
+                quickLinkModel.setQlVisiblePosition(1);
+
+                db.addQuickLinkItem(quickLinkModel);
+
+            }
+
+            {
+                QuickLinkModel quickLinkModel = new QuickLinkModel();
+                quickLinkModel.setQlURL("https://twitter.com/login?lang=en");
+                quickLinkModel.setQlTitle("Twitter");
+                quickLinkModel.setQlFaviconPath("R.drawable");
+                quickLinkModel.setQlVisiblePosition(2);
+
+                db.addQuickLinkItem(quickLinkModel);
+
+            }
+
+            {
+                QuickLinkModel quickLinkModel = new QuickLinkModel();
+                quickLinkModel.setQlURL("https://www.instagram.com/accounts/login/?hl=en");
+                quickLinkModel.setQlTitle("Instagram");
+                quickLinkModel.setQlFaviconPath("R.drawable");
+                quickLinkModel.setQlVisiblePosition(3);
+
+                db.addQuickLinkItem(quickLinkModel);
+
+            }
+
+            {
+                QuickLinkModel quickLinkModel = new QuickLinkModel();
+                quickLinkModel.setQlURL("https://www.facebook.com/");
+                quickLinkModel.setQlTitle("Facebook");
+                quickLinkModel.setQlFaviconPath("R.drawable");
+                quickLinkModel.setQlVisiblePosition(4);
+
+                db.addQuickLinkItem(quickLinkModel);
+            }
+
+            {
+                QuickLinkModel quickLinkModel = new QuickLinkModel();
+                quickLinkModel.setQlURL("https://www.wikipedia.org/");
+                quickLinkModel.setQlTitle("Wikipedia");
+                quickLinkModel.setQlFaviconPath("R.drawable");
+                quickLinkModel.setQlVisiblePosition(5);
+
+                db.addQuickLinkItem(quickLinkModel);
+            }
+
         }finally {
             initCommon();
         }

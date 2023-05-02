@@ -2,6 +2,7 @@
 <com.ginxdroid.flamebrowseranddownloader.activities.CustomMCV
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/emptyCV">
@@ -13,18 +14,408 @@
         android:background="?attr/colorSurface"
         >
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/minimizeBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="0dp"
+            android:layout_height="?attr/actionBarSize"
+            android:id="@+id/bottomToolbarCL"
+            android:background="?attr/colorSurface"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:text="@string/minimize"
-            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintVertical_bias="1.0">
+
+            <ImageButton
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:id="@+id/reloadIB"
+                android:src="@drawable/round_refresh_24"
+                android:contentDescription="@string/refresh_web_page"
+                android:background="@drawable/unbounded_light_ripple"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintHorizontal_chainStyle="spread"
+                app:layout_constraintHorizontal_weight="1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/searchIB" />
+
+            <ImageButton
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:id="@+id/searchIB"
+                android:src="@drawable/round_search_24"
+                android:contentDescription="@string/search"
+                android:background="@drawable/unbounded_light_ripple"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintHorizontal_weight="1"
+                app:layout_constraintStart_toEndOf="@id/reloadIB"
+                app:layout_constraintEnd_toStartOf="@id/showMoreIB" />
+
+            <ImageButton
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:id="@+id/showMoreIB"
+                android:src="@drawable/round_menu_24"
+                android:contentDescription="@string/show_more"
+                android:background="@drawable/unbounded_light_ripple"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintHorizontal_weight="1"
+                app:layout_constraintStart_toEndOf="@id/searchIB"
+                app:layout_constraintEnd_toStartOf="@id/tabsCountChildTVHPRL" />
+
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:id="@+id/tabsCountChildTVHPRL"
+                android:clickable="true"
+                android:focusable="true"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintHorizontal_weight="1"
+                app:layout_constraintStart_toEndOf="@id/showMoreIB"
+                app:layout_constraintEnd_toStartOf="@id/homePageIB">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/view_tabs_light"
+                    android:contentDescription="@string/view_tabs"
+                    android:layout_centerInParent="true"
+                    android:clickable="false"
+                    android:focusable="false" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="@string/max_count"
+                    android:textColor="?attr/primaryText"
+                    android:id="@+id/tabsCountChildTVHP"
+                    android:textAppearance="?textAppearanceCaption"
+                    android:textStyle="bold"
+                    android:textSize="10sp"
+                    android:layout_centerInParent="true"
+                    android:gravity="center"
+                    android:clickable="false"
+                    android:focusable="false"
+                    tools:ignore="SmallSp" />
+
+            </RelativeLayout>
+
+            <ImageButton
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:id="@+id/homePageIB"
+                android:src="@drawable/home_background_light"
+                android:contentDescription="@string/home"
+                android:background="@drawable/unbounded_light_ripple"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintHorizontal_weight="1"
+                app:layout_constraintStart_toEndOf="@id/tabsCountChildTVHPRL"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0.5dp"
+                android:background="?attr/dividerAndProgressColor"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintVertical_bias="0.0" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.Guideline
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/guideLine"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_begin="?attr/actionBarSize" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:background="@drawable/et_background"
+            android:focusable="true"
+            android:clickable="true"
+            android:focusableInTouchMode="true"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/guideLine"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintVertical_bias="0.5"
-            />
+            >
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:id="@+id/connectionInformationIB"
+                android:src="@drawable/round_lock_24"
+                android:background="@drawable/unbound_small_ripple"
+                app:layout_constraintVertical_bias="0.5"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/searchEditText"
+                app:layout_constraintHorizontal_chainStyle="spread"
+                app:layout_constraintHorizontal_weight="1"
+                android:clickable="true"
+                android:focusable="true"
+                android:contentDescription="@string/connection_information_or_search_engine_selector" />
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/voiceLauncherIBTab"
+                android:src="@drawable/round_keyboard_voice_24"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintVertical_bias="0.5"
+                app:layout_constraintStart_toEndOf="@id/searchEditText"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:contentDescription="@string/voice_launcher_for_searching"
+                android:background="@drawable/unbound_small_ripple"
+                app:layout_constraintHorizontal_weight="1"
+                />
+
+            <com.ginxdroid.flamebrowseranddownloader.classes.CustomEditText
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/searchEditText"
+                android:hint="@string/search_or_type_web_address"
+                android:maxLines="1"
+                android:inputType="textNoSuggestions"
+                android:scrollHorizontally="false"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:background="@null"
+                android:textColor="?attr/secondaryText"
+                android:textColorHint="?attr/secondaryText"
+                app:layout_constraintVertical_bias="0.5"
+                app:layout_constraintStart_toEndOf="@id/connectionInformationIB"
+                app:layout_constraintEnd_toStartOf="@id/voiceLauncherIBTab"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintHorizontal_weight="7"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp" />
+
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0.5dp"
+            android:background="?attr/dividerAndProgressColor"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/guideLine"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintVertical_bias="1.0" />
+
+        <androidx.coordinatorlayout.widget.CoordinatorLayout
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:id="@+id/homePageCL"
+            android:visibility="invisible"
+            android:background="?attr/colorSurface"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/bottomToolbarCL">
+
+            <com.google.android.material.appbar.AppBarLayout
+                android:layout_width="match_parent"
+                android:layout_height="250dp"
+                android:id="@+id/appBarLayoutInner"
+                style="@style/Widget.MaterialComponents.AppBarLayout.Surface"
+                android:background="@android:color/transparent"
+                android:stateListAnimator="@null"
+                >
+
+                <com.google.android.material.appbar.CollapsingToolbarLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/collapsingToolbarLayout"
+                    app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+                    app:contentScrim="?attr/colorSurface">
+
+                    <ImageButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/splashLogoIB"
+                        android:src="@drawable/splash_logo_light"
+                        android:background="@drawable/unbounded_light_ripple"
+                        android:layout_gravity="center"
+                        android:contentDescription="@string/browser_splash_logo" />
+
+                    <ImageButton
+                        android:layout_gravity="top|end"
+                        android:layout_width="wrap_content"
+                        android:layout_height="?attr/actionBarSize"
+                        android:id="@+id/qrCodeScannerIB"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:background="@drawable/unbounded_light_ripple"
+                        android:src="@drawable/round_qr_code_scanner"
+                        android:contentDescription="@string/qr_code_and_barcode_scanner" />
+
+
+                    <com.google.android.material.appbar.MaterialToolbar
+                        android:layout_width="match_parent"
+                        android:layout_height="?attr/actionBarSize"
+                        style="@style/Widget.MaterialComponents.Toolbar.Surface"
+                        app:layout_collapseMode="pin"
+                        android:elevation="0dp"
+                        android:layout_gravity="bottom"
+                        android:background="@android:color/transparent"
+                        app:contentInsetStart="0dp"
+                        app:contentInsetStartWithNavigation="0dp"
+                        >
+
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/tabFSControlsInner"
+                            android:layout_marginStart="10dp"
+                            android:layout_marginEnd="10dp"
+                            android:paddingStart="10dp"
+                            android:paddingEnd="10dp"
+
+                            android:background="@drawable/et_background"
+                            android:focusable="true"
+                            android:clickable="true"
+                            android:focusableInTouchMode="true"
+                            android:layout_gravity="center_vertical">
+
+                            <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:id="@+id/connectionInformationIBInner"
+                                android:src="@drawable/round_lock_24"
+                                android:background="@drawable/unbound_small_ripple"
+                                app:layout_constraintVertical_bias="0.5"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintEnd_toStartOf="@id/searchEditTextInner"
+                                app:layout_constraintHorizontal_chainStyle="spread"
+                                app:layout_constraintHorizontal_weight="1"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:contentDescription="@string/connection_information_or_search_engine_selector" />
+
+                            <ImageButton
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/voiceLauncherIBTabInner"
+                                android:src="@drawable/round_keyboard_voice_24"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintVertical_bias="0.5"
+                                app:layout_constraintStart_toEndOf="@id/searchEditTextInner"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                android:contentDescription="@string/voice_launcher_for_searching"
+                                android:background="@drawable/unbound_small_ripple"
+                                app:layout_constraintHorizontal_weight="1"
+                                />
+
+                            <com.ginxdroid.flamebrowseranddownloader.classes.CustomEditText
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/searchEditTextInner"
+                                android:hint="@string/search_or_type_web_address"
+                                android:maxLines="1"
+                                android:inputType="textNoSuggestions"
+                                android:scrollHorizontally="false"
+                                android:focusable="true"
+                                android:focusableInTouchMode="true"
+                                android:background="@null"
+                                android:textColor="?attr/secondaryText"
+                                android:textColorHint="?attr/secondaryText"
+                                app:layout_constraintVertical_bias="0.5"
+                                app:layout_constraintStart_toEndOf="@id/connectionInformationIBInner"
+                                app:layout_constraintEnd_toStartOf="@id/voiceLauncherIBTabInner"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintHorizontal_weight="7"
+                                android:layout_marginStart="5dp"
+                                android:layout_marginEnd="5dp"
+                                android:paddingTop="8dp"
+                                android:paddingBottom="8dp" />
+
+
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+
+                        </com.google.android.material.appbar.MaterialToolbar>
+
+                </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+            </com.google.android.material.appbar.AppBarLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="?attr/dividerAndProgressColor"
+                app:layout_anchor="@id/appBarLayoutInner"
+                app:layout_anchorGravity="bottom" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/quickLinksRV"
+                android:overScrollMode="never"
+                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
+
+        </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toBottomOf="@id/guideLine"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/bottomToolbarCL"
+            android:id="@+id/webViewContainer"
+            android:visibility="invisible"
+            >
+
+            <WebView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/webView"
+                android:overScrollMode="never"
+                android:focusable="true"
+                android:focusableInTouchMode="true" />
+
+            <ProgressBar
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                style="@android:style/Widget.ProgressBar.Horizontal"
+                android:id="@+id/progressBar"
+                android:background="@android:color/transparent"
+                android:indeterminate="false"
+                android:visibility="invisible"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:layout_alignParentTop="true"
+                android:max="1000"
+                android:progressDrawable="@drawable/special_progress_drawable"
+                />
+
+
+        </RelativeLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
