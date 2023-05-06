@@ -41,4 +41,5 @@
     <string name="ql_item">QL Item</string>
     <string name="voice_launcher_for_searching">Voice Launcher for searching</string>
     <string name="search_or_type_web_address">Search or type web address</string>
+    <string name="pdf_viewer_is_not_available">PDF Viewer is not available on your device.</string>
 </resources>

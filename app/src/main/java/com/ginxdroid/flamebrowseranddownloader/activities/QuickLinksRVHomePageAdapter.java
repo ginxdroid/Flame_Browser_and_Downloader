@@ -17,6 +17,7 @@ import com.ginxdroid.flamebrowseranddownloader.DatabaseHandler;
 import com.ginxdroid.flamebrowseranddownloader.R;
 import com.ginxdroid.flamebrowseranddownloader.classes.TextDrawable;
 import com.ginxdroid.flamebrowseranddownloader.models.QuickLinkModel;
+import com.google.android.material.card.MaterialCardView;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -112,11 +113,41 @@ public class QuickLinksRVHomePageAdapter extends RecyclerView.Adapter<QuickLinks
         private final TextView qlTitle;
         private final ImageView qlFaviconIV;
 
+        private final MaterialCardView qlCV;
+
+
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
+            qlCV = itemView.findViewById(R.id.qlCV);
             qlTitle = itemView.findViewById(R.id.qlTitle);
-            qlFaviconIV = itemView.findViewById(R.id.qlFaviconIV);
+            qlFaviconIV = qlCV.findViewById(R.id.qlFaviconIV);
+
+            View.OnClickListener onClickListener = view -> {
+                try{
+                    int itemId = quickLinksItems.get(getBindingAdapterPosition());
+                    QuickLinkModel quickLinkModel = db.getQuickLinkModel(itemId);
+
+                    viewHolder.webView.evaluateJavascript("javascript:document.open();document.close();",null);
+                    viewHolder.homePageCL.setVisibility(View.INVISIBLE);
+                    viewHolder.isHPCVisible = false;
+                    viewHolder.webViewContainer.setVisibility(View.VISIBLE);
+
+                    viewHolder.setClearHistory();
+                    viewHolder.webView.loadUrl(quickLinkModel.getQlURL());
+
+                    if(!viewHolder.isProgressBarVisible)
+                    {
+                        viewHolder.makeProgressBarVisible();
+                    }
+
+                    normalTabsRVAdapter.setDecorations(quickLinkModel.getQlURL(),viewHolder);
+                }catch (Exception ignored){}
+            };
+
+            qlTitle.setOnClickListener(onClickListener);
+            qlCV.setOnClickListener(onClickListener);
 
         }
     }

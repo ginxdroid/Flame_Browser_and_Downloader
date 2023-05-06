@@ -468,6 +468,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
     }
 
+
+
     private boolean isDarkThemeModel(int currentThemeId)
     {
         try {

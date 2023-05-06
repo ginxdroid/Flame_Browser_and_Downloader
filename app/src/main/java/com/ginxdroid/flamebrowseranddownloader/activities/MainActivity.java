@@ -407,7 +407,7 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
         {}
     }
 
-    private void showToast(int resID)
+    void showToast(int resID)
     {
         if (toast != null) {
             toast.cancel();

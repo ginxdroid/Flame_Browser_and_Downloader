@@ -426,11 +426,16 @@
         >
 
         <ImageButton
-            android:contentDescription="@string/tab_preview"
+            android:id="@+id/tabPreviewIB"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="?attr/colorSurface"
-            android:id="@+id/tabPreviewIB" />
+            android:background="@android:color/transparent"
+            android:src="@android:color/transparent"
+            android:contentDescription="@string/tab_preview"
+            android:scaleType="centerCrop"
+            android:adjustViewBounds="true"
+            />
+
 
         <RelativeLayout
             android:layout_width="match_parent"
