@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="?attr/actionBarSize"
+    android:id="@+id/findBoxRL"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
+    android:clickable="true"
+    android:background="?attr/colorSurface"
+    tools:ignore="Overdraw">
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_centerVertical="true"
+        android:layout_alignParentEnd="true"
+        android:id="@+id/closeIBFB"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:background="@drawable/unbounded_light_ripple"
+        android:src="@drawable/close_background"
+        android:contentDescription="@string/close_find_box" />
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:id="@+id/findBelowIBFB"
+        android:layout_centerVertical="true"
+        android:layout_toStartOf="@id/closeIBFB"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:background="@drawable/unbounded_light_ripple"
+        android:contentDescription="@string/find_below"
+        android:src="@drawable/round_keyboard_arrow_down_24" />
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:id="@+id/findAboveIBFB"
+        android:layout_centerVertical="true"
+        android:layout_toStartOf="@id/findBelowIBFB"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:background="@drawable/unbounded_light_ripple"
+        android:contentDescription="@string/find_above"
+        android:src="@drawable/round_keyboard_arrow_up_24" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:id="@+id/occurrenceCountTV"
+        android:text="@string/_100_100"
+        android:textColor="?attr/primaryText"
+        android:layout_centerVertical="true"
+        android:layout_toStartOf="@id/findAboveIBFB"
+        android:background="@drawable/unbounded_light_ripple"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:textAppearance="?textAppearanceSubtitle1" />
+
+    <com.ginxdroid.flamebrowseranddownloader.classes.CustomEditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/findEditTextFBLL"
+        android:hint="@string/find_in_page"
+        android:textColor="?attr/primaryText"
+        android:imeOptions="actionSearch"
+        android:maxLines="1"
+        android:inputType="textNoSuggestions"
+        android:scrollHorizontally="false"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:background="@null"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:layout_centerVertical="true"
+        android:layout_toStartOf="@id/occurrenceCountTV"
+        android:textColorHint="?attr/secondaryText" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="?attr/dividerAndProgressColor"
+        android:layout_alignParentTop="true" />
+
+
+</RelativeLayout>

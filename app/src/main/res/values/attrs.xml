@@ -14,4 +14,16 @@
 
     </declare-styleable>
 
+    <attr name="RVIndicatorStyle"/>
+
+    <declare-styleable name="RVIndicator">
+        <attr name="dotColor" format="color" />
+        <attr name="dotSelectedColor" format="color" />
+        <attr name="dotSize" format="dimension" />
+        <attr name="dotSpacing" format="dimension" />
+        <attr name="visibleDotCount" format="integer" />
+        <attr name="looped" format="boolean" />
+    </declare-styleable>
+
+
 </resources>

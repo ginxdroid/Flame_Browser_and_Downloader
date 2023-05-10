@@ -3,6 +3,8 @@ import android.content.Context;
 import android.view.View;
 
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.ginxdroid.flamebrowseranddownloader.R;
@@ -76,10 +78,23 @@ public class CustomHorizontalManager extends RecyclerView.LayoutManager {
         this.layDownType = layDownType;
     }
 
+    void setCurrentActivePos(int currentActivePos)
+    {
+        this.currentActivePos = currentActivePos;
+    }
+
+    int getCurrentActivePos()
+    {
+        return currentActivePos;
+    }
+
     @Override
     public RecyclerView.LayoutParams generateDefaultLayoutParams() {
         return new RecyclerView.LayoutParams(RecyclerView.LayoutParams.WRAP_CONTENT,RecyclerView.LayoutParams.WRAP_CONTENT);
     }
+
+
+
 
     @Override
     public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
@@ -92,6 +107,57 @@ public class CustomHorizontalManager extends RecyclerView.LayoutManager {
                     if(currentFSView != null)
                     {
                         //We will run default layout related code
+                        try {
+                            scrolling = true;
+                            WindowInsetsCompat windowInsetsCompat = ViewCompat.getRootWindowInsets(recyclerViewContainer);
+                            boolean isKeyBoardVisible = false;
+                            if(windowInsetsCompat != null)
+                            {
+                                isKeyBoardVisible = windowInsetsCompat.isVisible(WindowInsetsCompat.Type.ime());
+                            }
+
+                            try {
+                                height = recyclerViewContainer.getHeight();
+                                width = recyclerViewContainer.getWidth();
+                                differ = (width * 0.36f);
+                                invertedWidth = -width;
+                                maxBoundary = ((2 * width) - (2 * differ));
+                                invertedMaxBoundary = -maxBoundary;
+                                nextTrans = width - differ;
+                                previousTrans = -width + differ;
+                            } finally {
+                                //normal
+                                final NormalTabsRVAdapter.ViewHolder viewHolder = normalTabsRVAdapter.getViewHolder();
+                                if(!viewHolder.isInFullScreenMode)
+                                {
+                                    if(isKeyBoardVisible)
+                                    {
+
+                                        if(viewHolder.findBoxRL == null)
+                                        {
+                                            viewHolder.bottomToolbarCL.setVisibility(View.GONE);
+                                        }else {
+                                            if(viewHolder.findBoxRL.getVisibility() == View.VISIBLE)
+                                            {
+                                                viewHolder.bottomToolbarCL.setVisibility(View.VISIBLE);
+                                            } else {
+                                                viewHolder.bottomToolbarCL.setVisibility(View.GONE);
+                                            }
+                                        }
+
+                                    }else {
+                                        viewHolder.bottomToolbarCL.setVisibility(View.VISIBLE);
+                                    }
+                                }
+
+                                normalTabsRVAdapter.setSpecs(width,height);
+                                measureChild(currentFSView, 0,0);
+                                layoutDecorated(currentFSView,0,0,width,height);
+
+                                scrolling = false;
+                            }
+                        } catch (Exception e)
+                        { scrolling = false; }
                     }
 
                 } else {
@@ -286,12 +352,108 @@ public class CustomHorizontalManager extends RecyclerView.LayoutManager {
                     scrolling = true;
                     openBlockedPopupHorizontal();
                     break;
+                case 9:
+                    noMoreLeft = false;
+                    noMoreRight = false;
+                    layDownType = -1;
+                    scrolling = true;
+
+                    removeAndSwitch(itemCount);
+                    break;
+                case 10:
+                    noMoreLeft = false;
+                    noMoreRight = false;
+                    layDownType = -1;
+                    scrolling = true;
+
+                    removeAll();
+                    break;
             }
 
 
         } catch (Exception e)
         {
             layDownType = -1;
+            scrolling = false;
+        }
+    }
+
+    private void removeAndSwitch(int itemCount)
+    {
+        detachAndScrapAttachedViews(hereRecycler);
+        if(currentActivePos != -1)
+        {
+            try {
+                for(int i = 0;i < currentActivePos; i++)
+                {
+                    final View view = hereRecycler.getViewForPosition(i);
+                    view.setTranslationX(invertedWidth);
+                    view.setScaleX(minimizeScale);
+                    view.setScaleY(minimizeScale);
+
+                    addView(view);
+                    measureChild(view,0,0);
+
+                    layoutDecorated(view,0,0,width,height);
+
+                    detachAndScrapView(view,hereRecycler);
+                }
+
+                for (int i = currentActivePos + 1; i<itemCount;i++)
+                {
+                    final View view = hereRecycler.getViewForPosition(i);
+                    view.setTranslationX(width);
+
+                    view.setScaleX(minimizeScale);
+                    view.setScaleY(minimizeScale);
+
+                    addView(view);
+                    measureChild(view,0,0);
+
+                    layoutDecorated(view,0,0,width,height);
+
+                    detachAndScrapView(view,hereRecycler);
+                }
+            } finally {
+                final View view = hereRecycler.getViewForPosition(currentActivePos);
+                final CustomMCV materialCardView = view.findViewById(R.id.emptyCV);
+                materialCardView.setRadius(zero);
+                addView(view);
+
+                measureChild(view,0,0);
+
+                layoutDecorated(view,0,0,width,height);
+                materialCardView.callStartSelect();
+
+                view.animate().scaleX(1.0f).scaleY(1.0f).translationX(0f).setDuration(175)
+                        .withEndAction(() -> {
+                            try {
+                                materialCardView.setCardElevation(maxElevation);
+                                currentFSView = view;
+
+                                materialCardView.callSelectNow();
+                            }finally {
+                                scrolling = false;
+                            }
+                        }).start();
+            }
+        } else {
+
+            try {
+                currentFSView = null;
+                isScrollUnlocked = true;
+                showButtons();
+            } finally {
+                scrolling = false;
+            }
+        }
+    }
+
+    private void removeAll()
+    {
+        try {
+            detachAndScrapAttachedViews(hereRecycler);
+        } finally {
             scrolling = false;
         }
     }

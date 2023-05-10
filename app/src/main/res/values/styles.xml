@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <style name="CustomMenuButtonStyle" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="shapeAppearance">?attr/shapeAppearanceLargeComponent</item>
+        <item name="android:padding">14dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:textAppearance">?textAppearanceButton</item>
+        <item name="android:textColor">?attr/primaryText</item>
+        <item name="rippleColor">?attr/dividerAndProgressColor</item>
+        <item name="android:textAlignment">viewStart</item>
+    </style>
+
     <style name="TextAppearance.Flame.Headline7" parent="TextAppearance.MaterialComponents.Headline5">
         <item name="android:textSize">18sp</item>
     </style>
@@ -49,5 +61,36 @@
         <item name="textAllCaps">false</item>
         <item name="android:textColor">?attr/primaryText</item>
     </style>
+
+
+
+
+
+
+    <style name="CustomToolButtonStyle" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="shapeAppearance">?attr/shapeAppearanceLargeComponent</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:textAppearance">?textAppearanceCaption</item>
+        <item name="android:letterSpacing">0</item>
+        <item name="android:textColor">?attr/primaryText</item>
+        <item name="android:textAlignment">center</item>
+        <item name="iconGravity">top</item>
+        <item name="iconTint">@null</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:background">@drawable/unbound_menu_ripple</item>
+    </style>
+
+    <style name="RVIndicator">
+        <item name="dotColor">?attr/dividerAndProgressColor</item>
+        <item name="dotSelectedColor">?attr/colorPrimary</item>
+        <item name="dotSize">8dp</item>
+        <item name="dotSpacing">8dp</item>
+        <item name="visibleDotCount">5</item>
+        <item name="looped">false</item>
+        <item name="android:layoutDirection">ltr</item>
+    </style>
+
 
 </resources>

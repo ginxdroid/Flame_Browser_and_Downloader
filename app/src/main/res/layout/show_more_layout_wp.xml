@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/menuPagerRV"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:overScrollMode="never"
+        android:nestedScrollingEnabled="false"
+
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/barrier" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/barrier"
+        app:barrierDirection="top"
+
+        app:constraint_referenced_ids="settingsBtn,forwardBtn,rvIndicatorRL,fullScreenBtn,exitBtn"
+        />
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0.5dp"
+        android:background="?attr/dividerAndProgressColor"
+
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/barrier" />
+
+    <com.google.android.material.button.MaterialButton
+        android:layout_width="0dp"
+        android:layout_height="?attr/actionBarSize"
+        android:id="@+id/settingsBtn"
+        app:icon="@drawable/round_settings_24"
+        android:background="@drawable/unbounded_light_ripple"
+        app:iconGravity="textStart"
+        style="@style/CustomToolButtonStyle"
+
+        app:layout_constraintTop_toBottomOf="@id/menuPagerRV"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/forwardBtn" />
+
+    <com.google.android.material.button.MaterialButton
+        android:layout_width="0dp"
+        android:layout_height="?attr/actionBarSize"
+        android:id="@+id/forwardBtn"
+        app:icon="@drawable/round_arrow_forward_24"
+        android:background="@drawable/unbounded_light_ripple"
+        app:iconGravity="textStart"
+        style="@style/CustomToolButtonStyle"
+
+        app:layout_constraintTop_toBottomOf="@id/menuPagerRV"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toEndOf="@id/settingsBtn"
+        app:layout_constraintEnd_toStartOf="@id/rvIndicatorRL" />
+
+    <RelativeLayout
+        android:layout_width="0dp"
+        android:layout_height="?attr/actionBarSize"
+        android:id="@+id/rvIndicatorRL"
+        android:background="@drawable/unbounded_light_ripple"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintTop_toBottomOf="@id/menuPagerRV"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintEnd_toStartOf="@id/fullScreenBtn"
+        app:layout_constraintStart_toEndOf="@id/forwardBtn">
+
+        <com.ginxdroid.flamebrowseranddownloader.activities.RVIndicator
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/indicator"
+            android:layout_centerInParent="true" />
+
+    </RelativeLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:layout_width="0dp"
+        android:layout_height="?attr/actionBarSize"
+        android:id="@+id/fullScreenBtn"
+        app:icon="@drawable/round_fullscreen_24"
+        android:background="@drawable/unbounded_light_ripple"
+        app:iconGravity="textStart"
+        style="@style/CustomToolButtonStyle"
+
+        app:layout_constraintTop_toBottomOf="@id/menuPagerRV"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toEndOf="@id/rvIndicatorRL"
+        app:layout_constraintEnd_toStartOf="@id/exitBtn" />
+
+    <com.google.android.material.button.MaterialButton
+        android:layout_width="0dp"
+        android:layout_height="?attr/actionBarSize"
+        android:id="@+id/exitBtn"
+        app:icon="@drawable/round_power_settings_new_24"
+        android:background="@drawable/unbounded_light_ripple"
+        app:iconGravity="textStart"
+        style="@style/CustomToolButtonStyle"
+
+        app:layout_constraintTop_toBottomOf="@id/menuPagerRV"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/fullScreenBtn"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

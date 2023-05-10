@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/container"
+    android:orientation="vertical"
+    tools:context=".activities.SettingsActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:id="@+id/backIB"
+            android:layout_gravity="center_vertical"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:background="@drawable/unbounded_light_ripple"
+            android:src="@drawable/round_arrow_back_ios_new_24"
+            android:contentDescription="@string/back"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?textAppearanceHeadline6"
+            android:text="@string/settings"
+            android:textColor="?attr/primaryText"
+            android:layout_gravity="center_vertical" />
+
+
+    </LinearLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:overScrollMode="never">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/basics"
+                android:textColor="?attr/colorPrimary"
+                android:padding="4dp"
+                android:textAppearance="?textAppearanceSubtitle1" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/searchEngineLL"
+                android:orientation="vertical"
+                android:clickable="true"
+                android:focusable="true"
+                style="@style/CustomMenuButtonStyle"
+                >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/search_engine"
+                    android:layout_gravity="start"
+                    android:textAppearance="?textAppearanceButton"
+                    android:clickable="false"
+                    android:focusable="false" />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/searchEngineTVSettings"
+                    android:text="@string/value"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:textAppearance="?textAppearanceCaption"
+                    android:layout_gravity="start"
+                    android:textColor="?attr/secondaryText" />
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="?attr/dividerAndProgressColor" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/tipsTV"
+                android:text="@string/tips"
+                style="@style/CustomMenuButtonStyle" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/manage"
+                android:textColor="?attr/colorPrimary"
+                android:padding="4dp"
+                android:textAppearance="?textAppearanceSubtitle1" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/manageSHTV"
+                android:text="@string/search_history"
+                style="@style/CustomMenuButtonStyle" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="?attr/dividerAndProgressColor" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/manageHTV"
+                android:text="@string/history"
+                style="@style/CustomMenuButtonStyle" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="?attr/dividerAndProgressColor" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/manageBTV"
+                android:text="@string/bookmarks"
+                style="@style/CustomMenuButtonStyle" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="?attr/dividerAndProgressColor" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/manageHPTV"
+                android:text="@string/home_pages"
+                style="@style/CustomMenuButtonStyle" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/advanced"
+                android:textColor="?attr/colorPrimary"
+                android:padding="4dp"
+                android:textAppearance="?textAppearanceSubtitle1" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/securityTV"
+                android:text="@string/site_settings_2"
+                style="@style/CustomMenuButtonStyle" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="?attr/dividerAndProgressColor" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/clearRecordsTV"
+                android:text="@string/clear_records"
+                style="@style/CustomMenuButtonStyle" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="?attr/dividerAndProgressColor" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/resetToDefaultTV"
+                android:text="@string/reset_to_default"
+                style="@style/CustomMenuButtonStyle" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/about_our_app"
+                android:textColor="?attr/colorPrimary"
+                android:padding="4dp"
+                android:textAppearance="?textAppearanceSubtitle1" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/shareLinkBtn"
+                android:text="@string/share_link_of_app"
+                style="@style/CustomMenuButtonStyle" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="?attr/dividerAndProgressColor" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/aboutBtn"
+                android:text="@string/about"
+                style="@style/CustomMenuButtonStyle" />
+
+        </LinearLayout>
+
+
+    </androidx.core.widget.NestedScrollView>
+
+</LinearLayout>

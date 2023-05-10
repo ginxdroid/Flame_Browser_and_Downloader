@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/findInPageBtn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:icon="@drawable/round_find_in_page_24"
+        android:text="@string/find_in_page"
+        style="@style/CustomToolButtonStyle"
+
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/addToQuickLinkBtn"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/shareBtn" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/shareBtn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:icon="@drawable/round_share_24"
+        android:text="@string/share"
+        style="@style/CustomToolButtonStyle"
+
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bookmarkThisBtn"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintEnd_toStartOf="@id/copyLinkBtn"
+        app:layout_constraintStart_toEndOf="@id/findInPageBtn"
+        />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/copyLinkBtn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:icon="@drawable/round_content_copy_24"
+        android:text="@string/copy_link"
+        style="@style/CustomToolButtonStyle"
+
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/setAsHPBtn"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintEnd_toStartOf="@id/printBtn"
+        app:layout_constraintStart_toEndOf="@id/shareBtn"
+        />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/printBtn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:icon="@drawable/round_print_24"
+        android:text="@string/print_save"
+        style="@style/CustomToolButtonStyle"
+
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/textScaleBtn"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/copyLinkBtn"
+        />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/addToQuickLinkBtn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:icon="@drawable/round_add_circle_24"
+        android:text="@string/add_to_speed_dial"
+        style="@style/CustomToolButtonStyle"
+
+        app:layout_constraintTop_toBottomOf="@id/findInPageBtn"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/bookmarkThisBtn" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/bookmarkThisBtn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:icon="@drawable/round_star_outline_24"
+        android:text="@string/bookmark_this"
+        style="@style/CustomToolButtonStyle"
+
+        app:layout_constraintTop_toBottomOf="@id/shareBtn"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toEndOf="@id/addToQuickLinkBtn"
+        app:layout_constraintEnd_toStartOf="@id/setAsHPBtn" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/setAsHPBtn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:icon="@drawable/set_as_hp"
+        android:text="@string/set_as_homepage"
+        style="@style/CustomToolButtonStyle"
+
+        app:layout_constraintTop_toBottomOf="@id/copyLinkBtn"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toEndOf="@id/bookmarkThisBtn"
+        app:layout_constraintEnd_toStartOf="@id/textScaleBtn" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/textScaleBtn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:icon="@drawable/round_text_format_24"
+        android:text="@string/text_scaling"
+        style="@style/CustomToolButtonStyle"
+
+        app:layout_constraintTop_toBottomOf="@id/printBtn"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toEndOf="@id/setAsHPBtn"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

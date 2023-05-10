@@ -21,6 +21,8 @@ import com.ginxdroid.flamebrowseranddownloader.DatabaseHandler;
 import com.ginxdroid.flamebrowseranddownloader.R;
 import com.ginxdroid.flamebrowseranddownloader.models.QuickLinkModel;
 import com.ginxdroid.flamebrowseranddownloader.models.UserPreferences;
+import com.ginxdroid.flamebrowseranddownloader.sheets.MainMenuSheet;
+import com.ginxdroid.flamebrowseranddownloader.sheets.TextScalingSheet;
 import com.ginxdroid.flamebrowseranddownloader.sheets.ThemesSheet;
 import com.google.android.material.bottomappbar.BottomAppBar;
 import com.google.android.material.button.MaterialButton;
@@ -30,7 +32,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class MainActivity extends BaseActivity implements ThemesSheet.BottomSheetListener, View.OnClickListener {
+public class MainActivity extends BaseActivity implements ThemesSheet.BottomSheetListener, View.OnClickListener,
+    MainMenuSheet.BottomSheetListener, TextScalingSheet.BottomSheetListener {
 
     private DatabaseHandler db;
     private Toast toast = null;
@@ -169,13 +172,17 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
 
     private void initCommon()
     {
-        ImageButton themesIB = findViewById(R.id.themesIB);
-        themesIB.setOnClickListener(MainActivity.this);
+
 
         final BottomAppBar bottomAppBar = findViewById(R.id.bottomAppBar);
 
         final FloatingActionButton fabAdd = findViewById(R.id.fabAdd);
         fabAdd.setOnClickListener(MainActivity.this);
+
+        ImageButton themesIB = bottomAppBar.findViewById(R.id.themesIB);
+        themesIB.setOnClickListener(MainActivity.this);
+        final ImageButton mainMenuIB = bottomAppBar.findViewById(R.id.mainMenuIB);
+        mainMenuIB.setOnClickListener(MainActivity.this);
 
         normalTabsRV = findViewById(R.id.normalTabsRV);
         customHorizontalManager = new CustomHorizontalManager(recyclerViewContainer,MainActivity.this,bottomAppBar,fabAdd);
@@ -430,8 +437,45 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
             } else if(id == R.id.fabAdd)
             {
                 normalTabsRVAdapter.addNewTab(db.getHomePageURL(), 4);
+            } else if(id == R.id.mainMenuIB)
+            {
+                //open our menu
+                try{
+                    new MainMenuSheet().show(MainActivity.this.getSupportFragmentManager(), "mainMenuBottomSheet");
+                }catch (Exception ignored){}
             }
 
         }catch (Exception ignored){}
+    }
+
+
+    @Override
+    public void onShowMenu(View popupView, MainMenuSheet sheet) {
+        try{
+            NormalTabsRVAdapter.ViewHolder viewHolder = normalTabsRVAdapter.getViewHolder();
+            if(viewHolder != null)
+            {
+                viewHolder.showMoreWP(popupView, sheet);
+            } else {
+                showMore(popupView, sheet);
+            }
+
+        }catch (Exception ignored){}
+    }
+
+    private void showMore(View popupView, MainMenuSheet mainMenuSheet)
+    {
+        try {
+            MenuHelper.showMenu(popupView, mainMenuSheet, MainActivity.this, null, db,
+                    MainActivity.this,recyclerViewContainer, normalTabsRVAdapter, customHorizontalManager, true,
+                    normalTabsRVAdapter.getLayoutInflater());
+        } catch (Exception ignored){}
+    }
+
+    @Override
+    public void showTextScalingPopup(View view) {
+        try {
+            normalTabsRVAdapter.getViewHolder().holderUtility.showTextScalingPopup(view);
+        } catch (Exception ignored) {}
     }
 }

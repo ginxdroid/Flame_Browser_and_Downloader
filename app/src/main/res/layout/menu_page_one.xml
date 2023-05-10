@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/bookmarksBtn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:icon="@drawable/round_star_outline_24"
+        android:text="@string/bookmarks"
+        style="@style/CustomToolButtonStyle"
+
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/closeBtn"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/downloadsBtn" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/downloadsBtn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:icon="@drawable/round_download_24"
+        android:text="@string/downloads"
+        style="@style/CustomToolButtonStyle"
+
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/siteSettingsBtn"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintEnd_toStartOf="@id/historyBtn"
+        app:layout_constraintStart_toEndOf="@id/bookmarksBtn"
+        />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/historyBtn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:icon="@drawable/round_history_24"
+        android:text="@string/history"
+        style="@style/CustomToolButtonStyle"
+
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/upgradeBtn"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintEnd_toStartOf="@id/webModeBtn"
+        app:layout_constraintStart_toEndOf="@id/downloadsBtn"
+        />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/webModeBtn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:icon="@drawable/round_smartphone_24"
+        android:text="@string/mobile_mode"
+        style="@style/CustomToolButtonStyle"
+
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/themesBtn"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/historyBtn"
+        />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/closeBtn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:icon="@drawable/close_background"
+        android:text="@string/close_this_tab"
+        style="@style/CustomToolButtonStyle"
+
+        app:layout_constraintTop_toBottomOf="@id/bookmarksBtn"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/siteSettingsBtn" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/siteSettingsBtn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:icon="@drawable/round_miscellaneous_services_24"
+        android:text="@string/site_settings"
+        style="@style/CustomToolButtonStyle"
+
+        app:layout_constraintTop_toBottomOf="@id/downloadsBtn"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toEndOf="@id/closeBtn"
+        app:layout_constraintEnd_toStartOf="@id/upgradeBtn" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/upgradeBtn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:icon="@drawable/flame_logo"
+        android:text="@string/flame_pro_at_50_off"
+        style="@style/CustomToolButtonStyle"
+
+        app:layout_constraintTop_toBottomOf="@id/historyBtn"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toEndOf="@id/siteSettingsBtn"
+        app:layout_constraintEnd_toStartOf="@id/themesBtn" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/themesBtn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:icon="@drawable/themes_background"
+        android:text="@string/themes"
+        style="@style/CustomToolButtonStyle"
+
+        app:layout_constraintTop_toBottomOf="@id/webModeBtn"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toEndOf="@id/upgradeBtn"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,5 +1,7 @@
 package com.ginxdroid.flamebrowseranddownloader.activities;
 
+import static android.view.View.VISIBLE;
+
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
@@ -16,15 +18,19 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Message;
 import android.text.Editable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStub;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.CookieManager;
 import android.webkit.WebChromeClient;
@@ -40,6 +46,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.Guideline;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -51,6 +58,7 @@ import com.ginxdroid.flamebrowseranddownloader.DatabaseHandler;
 import com.ginxdroid.flamebrowseranddownloader.R;
 import com.ginxdroid.flamebrowseranddownloader.classes.CustomEditText;
 import com.ginxdroid.flamebrowseranddownloader.classes.HelperTextUtility;
+import com.ginxdroid.flamebrowseranddownloader.sheets.MainMenuSheet;
 import com.google.android.material.bottomappbar.BottomAppBar;
 
 import java.io.ByteArrayOutputStream;
@@ -65,6 +73,9 @@ import java.util.concurrent.Future;
 
 public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapter.ViewHolder>{
     private final ArrayList<String> urlsAL;
+    private final ArrayList<Message> webViews;
+    private final ArrayList<ViewHolder> viewHolders;
+
     private final MainActivity mainActivity;
     private final Context context;
     private final DatabaseHandler db;
@@ -111,6 +122,8 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
         eighty=context.getResources().getDimensionPixelSize(R.dimen.eighty);
 
         urlsAL = new ArrayList<>();
+        webViews = new ArrayList<>();
+        viewHolders = new ArrayList<>();
 
         paint = new Paint(Paint.FILTER_BITMAP_FLAG);
 
@@ -196,12 +209,82 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
 
     synchronized void removeTab(int position, View itemView)
     {
+        webViews.remove(position);
+        viewHolders.remove(position);
         urlsAL.remove(position);
 
         customHorizontalManager.setDeletePos(position);
         customHorizontalManager.setLayDownType(0);
         recyclerView.removeView(itemView);
         notifyItemRemoved(position);
+    }
+
+    synchronized void removeTabRange()
+    {
+        int size = webViews.size();
+        if(size > 0)
+        {
+            webViews.clear();
+            viewHolders.clear();
+            urlsAL.clear();
+        }
+
+        customHorizontalManager.setLayDownType(10);
+        recyclerView.removeAllViews();
+        notifyItemRangeRemoved(0,size);
+
+        recyclerView.setItemViewCacheSize(0);
+        recyclerView.setLayoutManager(null);
+        recyclerView.setAdapter(null);
+        recyclerView.setLayoutManager(customHorizontalManager);
+        recyclerView.setAdapter(NormalTabsRVAdapter.this);
+    }
+
+    synchronized void removeTabAndSwitch(int position, View view)
+    {
+        try {
+            webViews.remove(position);
+            viewHolders.remove(position);
+            urlsAL.remove(position);
+        } finally {
+            try {
+                customHorizontalManager.setLayDownType(9);
+                int itemCount = getItemCount();
+                if(itemCount == 0)
+                {
+                    customHorizontalManager.setCurrentActivePos(-1);
+                    viewHolder = null;
+                } else {
+                    int currentActivePosition = customHorizontalManager.getCurrentActivePos();
+                    int nextLast = itemCount - 1;
+                    if(currentActivePosition > nextLast)
+                    {
+                        customHorizontalManager.setCurrentActivePos(nextLast);
+                    }
+                }
+            } finally {
+                recyclerView.removeView(view);
+                notifyItemRemoved(position);
+            }
+        }
+    }
+
+    synchronized void removeAllTabs()
+    {
+        int size = viewHolders.size();
+
+        if(size > 0)
+        {
+            int last = size - 1;
+            try{
+                for(int i = 0;i < last;i++)
+                {
+                    viewHolders.get(i).removeThisTab();
+                }
+            }finally {
+                viewHolders.get(last).removeLastTab();
+            }
+        }
     }
 
     @NonNull
@@ -220,27 +303,30 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
         {
             case "NewTab":
             {
-                holder.homePageCL.setVisibility(View.VISIBLE);
+                holder.homePageCL.setVisibility(VISIBLE);
                 holder.isHPCVisible = true;
                 holder.lastURL = null;
 
                 holder.showHPControls();
-                //todo: webViews.add(null);
+                webViews.add(null);
                 holder.changeImageTo(R.drawable.round_refresh_24);
                 break;
             }
         }
 
+        viewHolders.add(holder);
+        setTabCountTVText(getItemCount(),holder.tabsCountChildTVHP);
+
         if(urlString.equals("NewTab"))
         {
             //this means this is our default home page layout
-            holder.homePageCL.setVisibility(View.VISIBLE);
+            holder.homePageCL.setVisibility(VISIBLE);
             holder.webViewContainer.setVisibility(View.INVISIBLE);
 
         }else {
             //this means that we need to hide our default home page and load webVIewContainer frame
             holder.homePageCL.setVisibility(View.INVISIBLE);
-            holder.webViewContainer.setVisibility(View.VISIBLE);
+            holder.webViewContainer.setVisibility(VISIBLE);
         }
     }
 
@@ -407,8 +493,17 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
         }
     }
 
+    LayoutInflater getLayoutInflater()
+    {
+        return inflater;
+    }
+
     ViewHolder getViewHolder() {
         return viewHolder;
+    }
+
+    int getRecyclerViewContainerHeight() {
+        return recyclerViewContainerHeight;
     }
 
     void set()
@@ -426,6 +521,11 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
         }
     }
 
+    void showToastFromMainActivity(int resId)
+    {
+        mainActivity.showToast(resId);
+    }
+
     @Override
     public int getItemCount() {
         return urlsAL.size();
@@ -439,7 +539,7 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
         private boolean isEmptyFrameLRLVisible = true;
 
         private final RelativeLayout emptyFrameLRL;
-        private final ConstraintLayout bottomToolbarCL;
+        final ConstraintLayout bottomToolbarCL;
         private final ImageButton reloadIB,searchIB,showMoreIB,homePageIB;
         private final RelativeLayout tabsCountChildTVHPRL;
         private final TextView tabsCountChildTVHP;
@@ -459,7 +559,7 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
 
         private boolean clearHistory = false;
 
-        private String webViewURLString = null;
+        String webViewURLString = null;
 
         private boolean isLayoutInvisible;
 
@@ -484,6 +584,228 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
 
         private final ExecutorService service;
         private Future<?> future = null;
+
+        boolean desktopMode = false;
+
+        boolean isInFullScreenMode = false;
+
+        final ConstraintLayout tabFSControlsRL;
+        final View dividerView;
+        final Guideline guideLine;
+
+        private final ViewStub findBoxVS;
+        private View inflatedView = null;
+
+        RelativeLayout findBoxRL;
+
+        final HolderUtility holderUtility;
+
+        void showSearchInPageDialog()
+        {
+            try {
+                try {
+                    if (findBoxRL == null)
+                    {
+                        inflatedView = findBoxVS.inflate();
+
+                        final TextView occurrenceCountTV;
+                        final ImageButton closeIBFB,findAboveIBFB,findBelowIBFB;
+                        final CustomEditText findEditTextFBLL;
+
+                        findBoxRL = inflatedView.findViewById(R.id.findBoxRL);
+                        occurrenceCountTV = findBoxRL.findViewById(R.id.occurrenceCountTV);
+                        closeIBFB = findBoxRL.findViewById(R.id.closeIBFB);
+                        findAboveIBFB = findBoxRL.findViewById(R.id.findAboveIBFB);
+                        findBelowIBFB = findBoxRL.findViewById(R.id.findBelowIBFB);
+                        findEditTextFBLL = findBoxRL.findViewById(R.id.findEditTextFBLL);
+
+                        String value = (0) + "/" + 0;
+                        occurrenceCountTV.setText(value);
+
+                        findEditTextFBLL.setOnEditorActionListener((v, actionId, event) -> {
+
+                                if(actionId == EditorInfo.IME_ACTION_SEARCH) {
+                                    //Do our action search work
+                                    try {
+                                        InputMethodManager imm = (InputMethodManager) context.getSystemService(Activity.INPUT_METHOD_SERVICE);
+                                        if (imm != null) {
+                                            imm.hideSoftInputFromWindow(findEditTextFBLL.getWindowToken(), 0);
+                                        }
+                                    } catch (Exception ignored) {
+                                    }
+
+                                    Editable editable = findEditTextFBLL.getText();
+
+                                    if (HelperTextUtility.isNotEmpty(editable)) {
+                                        webView.setFindListener((i, i1, b) -> {
+                                            String value13;
+                                            if (i1 != 0) {
+                                                value13 = (i + 1) + "/" + i1;
+                                            } else {
+                                                value13 = i + "/" + i1;
+                                            }
+
+                                            occurrenceCountTV.setText(value13);
+
+                                            if (i1 > 0) {
+                                                findAboveIBFB.setOnClickListener(view -> webView.findNext(false));
+
+                                                findBelowIBFB.setOnClickListener(view -> webView.findNext(true));
+
+                                            }
+                                        });
+                                        webView.findAllAsync(editable.toString());
+
+                                    } else {
+                                        String value14 = (0) + "/" + 0;
+                                        occurrenceCountTV.setText(value14);
+                                    }
+                                    return true;
+                                }
+                                return false;
+                            });
+
+                        findEditTextFBLL.addTextChangedListener(new TextWatcher() {
+                            @Override
+                            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                            }
+
+                            @Override
+                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                webView.clearMatches();
+                                Editable editable = findEditTextFBLL.getText();
+
+                                if(HelperTextUtility.isNotEmpty(editable))
+                                {
+                                    webView.setFindListener((i, i1, b) -> {
+
+                                        String value12;
+                                        if(i1 != 0)
+                                        {
+                                            value12 = (i + 1) + "/"+i1;
+                                        }else {
+                                            value12 = i +"/" +i1;
+                                        }
+
+                                        occurrenceCountTV.setText(value12);
+
+                                        if(i1 > 0)
+                                        {
+                                            findAboveIBFB.setOnClickListener(view -> webView.findNext(false));
+
+                                            findBelowIBFB.setOnClickListener(view -> webView.findNext(true));
+                                        }
+
+                                    });
+
+                                    webView.findAllAsync(editable.toString());
+                                } else {
+                                    Editable editableHere = findEditTextFBLL.getText();
+                                    if(editableHere != null)
+                                    {
+                                        editableHere.clear();
+                                    }
+
+                                    String value = (0) +"/" +0;
+                                    occurrenceCountTV.setText(value);
+
+                                }
+                            }
+
+                            @Override
+                            public void afterTextChanged(Editable editable) {
+
+                            }
+                        });
+
+                        closeIBFB.setOnClickListener(view -> {
+                            Editable editableHere = findEditTextFBLL.getText();
+                            if(editableHere != null)
+                            {
+                                editableHere.clear();
+                            }
+
+                            findBoxRL.setVisibility(View.INVISIBLE);
+                            webView.clearMatches();
+
+                            try {
+                                InputMethodManager imm = (InputMethodManager) context.getSystemService(Activity.INPUT_METHOD_SERVICE);
+                                if (imm != null) {
+                                    imm.hideSoftInputFromWindow(findEditTextFBLL.getWindowToken(), 0);
+                                }
+                            } catch (Exception ignored) {
+                            }
+                        });
+                    }
+                } finally {
+                    inflatedView.bringToFront();
+                    findBoxRL.setVisibility(VISIBLE);
+                }
+            } catch (Exception ignored){}
+        }
+
+
+        private void removeThisTab()
+        {
+            isSwiping = true;
+            itemView.animate()
+                    .translationY(-recyclerViewContainerHeight)
+                    .withEndAction(() -> mainActivity.runOnUiThread(() -> {
+                        webViewContainer.removeView(webView);
+                        webView.removeAllViews();
+                        webView.destroy();
+
+                        stopService();
+                        isSwiping = false;
+
+                    })).setDuration(175).start();
+
+        }
+
+        private void removeLastTab()
+        {
+            isSwiping = true;
+            itemView.animate()
+                    .translationY(-recyclerViewContainerHeight)
+                    .withEndAction(() -> mainActivity.runOnUiThread(() -> {
+                        webViewContainer.removeView(webView);
+                        webView.removeAllViews();
+                        webView.destroy();
+
+                        stopService();
+                        removeTabRange();
+
+                        isSwiping = false;
+                    })).setDuration(175).start();
+
+        }
+
+
+        void enterFullScreenMode()
+        {
+            isInFullScreenMode = true;
+            bottomToolbarCL.setVisibility(View.GONE);
+            tabFSControlsRL.setVisibility(View.GONE);
+            dividerView.setVisibility(View.GONE);
+
+            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) guideLine.getLayoutParams();
+            params.guideBegin = 0;
+            guideLine.setLayoutParams(params);
+        }
+
+        void exitFullScreenMode()
+        {
+            isInFullScreenMode = false;
+            tabFSControlsRL.setVisibility(VISIBLE);
+            dividerView.setVisibility(VISIBLE);
+            bottomToolbarCL.setVisibility(VISIBLE);
+
+            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) guideLine.getLayoutParams();
+            params.guideBegin = appBarHeight;
+            guideLine.setLayoutParams(params);
+
+        }
 
 
         private void showHPControls()
@@ -514,7 +836,7 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
         void makeProgressBarVisible()
         {
             progressBar.setProgress(0);
-            progressBar.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(VISIBLE);
             isProgressBarVisible = true;
             changeImageTo(R.drawable.close_background);
         }
@@ -565,8 +887,12 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
             super(itemView);
 
             outerL = itemView.findViewById(R.id.outerL);
-            connectionInformationIB = outerL.findViewById(R.id.connectionInformationIB);
-            searchEditText = outerL.findViewById(R.id.searchEditText);
+            guideLine = outerL.findViewById(R.id.guideLine);
+            dividerView = outerL.findViewById(R.id.dividerView);
+            tabFSControlsRL = outerL.findViewById(R.id.tabFSControlsRL);
+
+            connectionInformationIB = tabFSControlsRL.findViewById(R.id.connectionInformationIB);
+            searchEditText = tabFSControlsRL.findViewById(R.id.searchEditText);
 
             emptyFrameRL = itemView.findViewById(R.id.emptyFrameRL);
             emptyFrameLRL = emptyFrameRL.findViewById(R.id.emptyFrameLRL);
@@ -583,8 +909,10 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
 
             emptyFrameRL.setVisibility(View.INVISIBLE);
             isLayoutInvisible = true;
+            viewHolder = ViewHolder.this;
 
             bottomToolbarCL = itemView.findViewById(R.id.bottomToolbarCL);
+            findBoxVS = bottomToolbarCL.findViewById(R.id.findBoxVS);
             reloadIB = bottomToolbarCL.findViewById(R.id.reloadIB);
             searchIB = bottomToolbarCL.findViewById(R.id.searchIB);
             showMoreIB = bottomToolbarCL.findViewById(R.id.showMoreIB);
@@ -608,6 +936,39 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
             webViewContainer = itemView.findViewById(R.id.webViewContainer);
             webView = webViewContainer.findViewById(R.id.webView);
             progressBar = webViewContainer.findViewById(R.id.progressBar);
+
+
+            holderUtility = new HolderUtility(ViewHolder.this,context,mainActivity,recyclerViewContainer,
+                    NormalTabsRVAdapter.this,db);
+
+            emptyCV.setListener(new CustomMCV.SetterListener() {
+                @Override
+                public void miniSetNow() {
+                    setQL();
+                }
+
+                @Override
+                public void selectNow() {
+                    stopFetcher();
+                    makeTitleInvisible();
+                    selectThisTab(false);
+                }
+
+                @Override
+                public void startSelect() {
+                    emptyFrameLRL.setVisibility(View.INVISIBLE);
+                }
+
+                @Override
+                public void makeTitleBarVisible() {
+                    makeTitleVisible();
+                }
+
+                @Override
+                public void makeTitleBarInvisible() {
+                    makeTitleInvisible();
+                }
+            });
 
 
             reloadIB.setOnClickListener(ViewHolder.this);
@@ -764,6 +1125,19 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
             };
 
             webViewClient = new WebViewClient(){
+
+                @Override
+                public void onLoadResource(WebView view, String url) {
+                    super.onLoadResource(view, url);
+
+                    try {
+                        if(desktopMode)
+                        {
+                            view.evaluateJavascript("document.querySelector('meta[name=\"viewport\"]')"+
+                            ".setAttribute('content','width=1024px, initial-scale='+ (window.screen.width / 1024));", null);
+                        }
+                    } catch (Exception ignored){}
+                }
 
                 @Override
                 public void doUpdateVisitedHistory(WebView view, String url, boolean isReload) {
@@ -960,7 +1334,7 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
 
         private void makeTitleVisible()
         {
-            emptyFrameLRL.setVisibility(View.VISIBLE);
+            emptyFrameLRL.setVisibility(VISIBLE);
             isEmptyFrameLRLVisible = true;
         }
 
@@ -1062,7 +1436,7 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
                         tabPreviewIB.setBackgroundColor(colorSurface);
                     }
                 });
-                emptyFrameRL.setVisibility(View.VISIBLE);
+                emptyFrameRL.setVisibility(VISIBLE);
 
             }else if(id == R.id.closeTabIB)
             {
@@ -1101,7 +1475,9 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
 
             }else if(id == R.id.showMoreIB)
             {
-
+                try{
+                    new MainMenuSheet().show(mainActivity.getSupportFragmentManager(), "mainMenuBottomSheet");
+                }catch (Exception ignored){}
             }else if(id == R.id.homePageIB)
             {
 
@@ -1112,6 +1488,16 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
             {
 
             }
+        }
+
+        void showMoreWP(View popupView, MainMenuSheet mainMenuSheet)
+        {
+            try{
+                MenuHelper.showMenu(popupView,mainMenuSheet,context,
+                        ViewHolder.this,db,mainActivity,
+                        recyclerViewContainer, NormalTabsRVAdapter.this,
+                        customHorizontalManager,false,inflater);
+            }catch (Exception ignored) {}
         }
     }
 }
