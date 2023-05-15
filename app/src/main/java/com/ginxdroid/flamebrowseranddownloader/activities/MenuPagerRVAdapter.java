@@ -8,10 +8,12 @@ import android.graphics.drawable.Drawable;
 import android.print.PrintAttributes;
 import android.print.PrintDocumentAdapter;
 import android.print.PrintManager;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebSettings;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
@@ -22,11 +24,17 @@ import com.ginxdroid.flamebrowseranddownloader.BuildConfig;
 import com.ginxdroid.flamebrowseranddownloader.DatabaseHandler;
 import com.ginxdroid.flamebrowseranddownloader.R;
 import com.ginxdroid.flamebrowseranddownloader.classes.HelperTextUtility;
+import com.ginxdroid.flamebrowseranddownloader.models.BookmarkItem;
+import com.ginxdroid.flamebrowseranddownloader.models.HomePageItem;
+import com.ginxdroid.flamebrowseranddownloader.models.QuickLinkModel;
 import com.ginxdroid.flamebrowseranddownloader.sheets.MainMenuSheet;
 import com.ginxdroid.flamebrowseranddownloader.sheets.TextScalingSheet;
 import com.ginxdroid.flamebrowseranddownloader.sheets.ThemesSheet;
 import com.ginxdroid.flamebrowseranddownloader.sheets.UpgradeSheet;
 import com.google.android.material.button.MaterialButton;
+
+import java.io.File;
+import java.net.URL;
 
 public class MenuPagerRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -151,13 +159,17 @@ public class MenuPagerRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 if(id == R.id.bookmarksBtn)
                 {
 
+                    mainMenuSheet.dismiss();
+                    new BookmarksHelper(normalTabsRVAdapter,activity,context,recyclerViewContainer);
+
                 } else if(id == R.id.downloadsBtn)
                 {
                     mainMenuSheet.dismiss();
                     activity.startActivity(new Intent(context, DownloadsActivity.class));
                 }else if(id == R.id.historyBtn)
                 {
-
+                    mainMenuSheet.dismiss();
+                    new HistoryHelper(db,normalTabsRVAdapter,activity,context,recyclerViewContainer);
                 }else if(id == R.id.webModeBtn)
                 {
                     if(viewHolder != null)
@@ -363,6 +375,20 @@ public class MenuPagerRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             setAsHPBtn = itemView.findViewById(R.id.setAsHPBtn);
             textScaleBtn = itemView.findViewById(R.id.textScaleBtn);
 
+            if(HelperTextUtility.isNotEmpty(viewHolder.webViewURLString))
+            {
+                if(db.checkContainsBookmarkItem(viewHolder.webViewURLString))
+                {
+                    Drawable bookmarked = ContextCompat.getDrawable(context,R.drawable.round_star_24);
+                    bookmarkThisBtn.setIcon(bookmarked);
+                    bookmarkThisBtn.setText(R.string.bookmarked);
+                } else {
+                    Drawable drawable = ContextCompat.getDrawable(context,R.drawable.round_star_outline_24);
+                    bookmarkThisBtn.setIcon(drawable);
+                    bookmarkThisBtn.setText(R.string.bookmark_this);
+                }
+            }
+
             View.OnClickListener onClickListener = view -> {
                 int id = view.getId();
                 if(id == R.id.findInPageBtn)
@@ -425,12 +451,173 @@ public class MenuPagerRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     }
                 } else if(id == R.id.addToQuickLinkBtn)
                 {
+                    if(HelperTextUtility.isNotEmpty(viewHolder.webViewURLString))
+                    {
+                        if(db.checkNotContainsQuickLinks(viewHolder.webViewURLString))
+                        {
+                            QuickLinkModel quickLinkModel = new QuickLinkModel();
+                            String webTitle = viewHolder.webView.getTitle();
+
+                            if(!TextUtils.isEmpty(webTitle))
+                            {
+                                quickLinkModel.setQlTitle(webTitle);
+                            } else {
+                                try {
+                                    URL aURL = new URL(viewHolder.webViewURLString);
+                                    String host = aURL.getHost();
+
+                                    if(!TextUtils.isEmpty(host))
+                                    {
+                                        quickLinkModel.setQlTitle(host);
+                                    } else {
+                                        quickLinkModel.setQlTitle("No title");
+                                    }
+
+                                } catch (Exception e)
+                                {
+                                    quickLinkModel.setQlTitle("No title");
+                                }
+                            }
+
+                            if(!TextUtils.isEmpty(webTitle))
+                            {
+                                String path = normalTabsRVAdapter.getFileDirPath() + webTitle;
+                                quickLinkModel.setQlFaviconPath(path);
+                            } else {
+                                quickLinkModel.setQlFaviconPath(normalTabsRVAdapter.getDumpPath());
+                            }
+
+                            quickLinkModel.setQlURL(viewHolder.webViewURLString);
+
+                            new AddQuickLink(quickLinkModel).start();
+                        }
+
+                        normalTabsRVAdapter.showToastFromMainActivity(R.string.success);
+                    } else {
+                        normalTabsRVAdapter.showToastFromMainActivity(R.string.unable_to_find_webpage_url_retry_again_by_refreshing_webpage);
+                    }
 
                 } else if(id == R.id.bookmarkThisBtn)
                 {
+                    if(HelperTextUtility.isNotEmpty(viewHolder.webViewURLString)) {
+                        if(db.checkContainsBookmarkItem(viewHolder.webViewURLString))
+                        {
+                            BookmarkItem bookmarkItem = db.getBookmarkItem(db.getBookmarkItemId(viewHolder.webViewURLString));
+
+                            new Thread(() -> {
+                                final String faviconPath = bookmarkItem.getBFaviconPath();
+                                if(db.checkNotContainsFaviconInQuickLinks(faviconPath)
+                                    && db.checkNotContainsHomePages(faviconPath)
+                                && db.checkNotContainsFaviconInHistory(faviconPath))
+                                {
+                                    File file = new File(faviconPath);
+
+                                    if(file.exists())
+                                    {
+                                        //noinspection ResultOfMethodCallIgnored
+                                        file.delete();
+                                    }
+                                }
+                            }).start();
+
+                            db.deleteBookmarkItem(bookmarkItem.getBKeyId());
+
+                            Drawable bookmarkThis = ContextCompat.getDrawable(context,R.drawable.round_star_outline_24);
+                            bookmarkThisBtn.setIcon(bookmarkThis);
+                            bookmarkThisBtn.setText(R.string.bookmark_this);
+
+                            Toast.makeText(context, context.getString(R.string.bookmark_removed), Toast.LENGTH_SHORT).show();
+                        } else {
+                            BookmarkItem bookmarkItem = new BookmarkItem();
+                            String webTitle = viewHolder.webView.getTitle();
+
+                            if(!TextUtils.isEmpty(webTitle))
+                            {
+                                bookmarkItem.setBTitle(webTitle);
+                            } else {
+                                try {
+                                    URL aURL = new URL(viewHolder.webViewURLString);
+                                    String host = aURL.getHost();
+
+                                    if(!TextUtils.isEmpty(host))
+                                    {
+                                        bookmarkItem.setBTitle(host);
+                                    } else {
+                                        bookmarkItem.setBTitle("No title");
+                                    }
+                                } catch (Exception e) {
+                                    bookmarkItem.setBTitle("No title");
+                                }
+                            }
+
+                            bookmarkItem.setBURL(viewHolder.webViewURLString);
+
+                            if(!TextUtils.isEmpty(webTitle))
+                            {
+                                String path = normalTabsRVAdapter.getFileDirPath() + webTitle;
+                                bookmarkItem.setBFaviconPath(path);
+                            } else {
+                                bookmarkItem.setBFaviconPath(normalTabsRVAdapter.getDumpPath());
+                            }
+
+                            new AddBookMark(bookmarkItem).start();
+
+                            Drawable bookmarked = ContextCompat.getDrawable(context,R.drawable.round_star_24);
+                            bookmarkThisBtn.setIcon(bookmarked);
+                            bookmarkThisBtn.setText(R.string.bookmarked);
+                        }
+                    }
+
 
                 } else if(id == R.id.setAsHPBtn)
                 {
+                    if(HelperTextUtility.isNotEmpty(viewHolder.webViewURLString))
+                    {
+                        if(!db.checkNotContainsHomePages(viewHolder.webViewURLString))
+                        {
+                            db.updateHomePageURL(viewHolder.webViewURLString);
+                        } else {
+                            HomePageItem homePageItem = new HomePageItem();
+                            String webTitle = viewHolder.webView.getTitle();
+
+                            if(!TextUtils.isEmpty(webTitle))
+                            {
+                                homePageItem.setHpTitle(webTitle);
+                            } else {
+                                try {
+                                    URL aURL = new URL(viewHolder.webViewURLString);
+                                    String host = aURL.getHost();
+
+                                    if(!TextUtils.isEmpty(host))
+                                    {
+                                        homePageItem.setHpTitle(host);
+                                    } else {
+                                        homePageItem.setHpTitle("No title");
+                                    }
+
+                                } catch (Exception e)
+                                {
+                                    homePageItem.setHpTitle("No title");
+                                }
+                            }
+
+                            if(!TextUtils.isEmpty(webTitle))
+                            {
+                                String path = normalTabsRVAdapter.getFileDirPath() + webTitle;
+                                homePageItem.setHpFaviconPath(path);
+                            } else {
+                                homePageItem.setHpFaviconPath(normalTabsRVAdapter.getDumpPath());
+                            }
+
+                            homePageItem.setHpURL(viewHolder.webViewURLString);
+
+                            new AddHomePage(homePageItem).start();
+                        }
+
+                        normalTabsRVAdapter.showToastFromMainActivity(R.string.success);
+                    } else {
+                        normalTabsRVAdapter.showToastFromMainActivity(R.string.unable_to_find_webpage_url_retry_again_by_refreshing_webpage);
+                    }
 
                 } else if(id == R.id.textScaleBtn)
                 {
@@ -450,6 +637,79 @@ public class MenuPagerRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             bookmarkThisBtn.setOnClickListener(onClickListener);
             setAsHPBtn.setOnClickListener(onClickListener);
             textScaleBtn.setOnClickListener(onClickListener);
+        }
+
+        private class AddBookMark extends Thread
+        {
+            final BookmarkItem bookmarkItem;
+
+            private AddBookMark(BookmarkItem bookmarkItem)
+            {
+                this.bookmarkItem = bookmarkItem;
+            }
+
+            @Override
+            public void run() {
+                super.run();
+                try{
+                    db.addBookMarkItem(bookmarkItem);
+                } catch (Exception e)
+                {
+                    activity.runOnUiThread(() -> normalTabsRVAdapter.showToastFromMainActivity(R.string.unable_to_add_bookmark_at_this_time_try_again));
+                }
+            }
+        }
+
+        private class AddHomePage extends Thread
+        {
+            final HomePageItem homePageItem;
+
+            private AddHomePage(HomePageItem homePageItem)
+            {
+                this.homePageItem = homePageItem;
+            }
+
+            @Override
+            public void run() {
+                super.run();
+                try{
+                    db.addHomePageItem(homePageItem);
+                } catch (Exception ignored)
+                {}
+                finally {
+                    activity.runOnUiThread(() -> db.updateHomePageURL(homePageItem.getHpURL()));
+                }
+            }
+        }
+
+        private class AddQuickLink extends Thread
+        {
+            final QuickLinkModel quickLinkModel;
+
+            private AddQuickLink(QuickLinkModel quickLinkModel)
+            {
+                this.quickLinkModel = quickLinkModel;
+            }
+
+            @Override
+            public void run() {
+                super.run();
+                try{
+                    db.addQuickLinkItem(quickLinkModel);
+                } catch (Exception e)
+                {
+                    activity.runOnUiThread(() -> normalTabsRVAdapter.showToastFromMainActivity(R.string.oops_general_message));
+
+                }
+                finally {
+                    activity.runOnUiThread(() -> {
+                        if(viewHolder != null)
+                        {
+                            viewHolder.quickLinksRVHomePageAdapter.setQuickLinks();
+                        }
+                    });
+                }
+            }
         }
     }
 }

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:overScrollMode="never"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
+    <com.google.android.material.card.MaterialCardView android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardElevation="8dp"
+        app:cardCornerRadius="6dp"
+        >
+
+        <LinearLayout android:id="@+id/menuLayoutLL"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            >
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/smOpenInBackground"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/open_in_background"
+
+                style="@style/CustomMenuButtonStyle"
+                />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/smOpenInNewTabAndSwitch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/open_in_new_tab_and_switch"
+
+                style="@style/CustomMenuButtonStyle"
+                />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/smEditName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/edit_name"
+
+                style="@style/CustomMenuButtonStyle"
+                />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/smRemoveQL"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/remove"
+
+                style="@style/CustomMenuButtonStyle"
+                />
+
+
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+</androidx.core.widget.NestedScrollView>

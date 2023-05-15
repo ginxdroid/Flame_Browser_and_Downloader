@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardElevation="8dp"
+    app:cardCornerRadius="6dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="10dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/heyHTV"
+            android:text="@string/hey"
+            android:textColor="?attr/primaryText"
+            android:textAppearance="?textAppearanceHeadline6"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/doYouReallyHTV"
+            android:text="@string/do_you_really_want_to_delete_all_history"
+            android:textColor="?attr/primaryText"
+            android:textAppearance="?textAppearanceSubtitle1"
+            android:layout_marginBottom="4dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/yesNoButtonsLLH"
+            style="?android:attr/buttonBarStyle"
+            android:padding="4dp"
+            android:layout_marginTop="2dp"
+            android:weightSum="2">
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:id="@+id/noButtonDeleteHistory"
+                android:text="@string/no"
+                style="@style/CancelButtonStyle" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:id="@+id/yesButtonDeleteHistory"
+                android:text="@string/yes"
+                style="@style/CustomFilledButton" />
+
+        </LinearLayout>
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/deletingProgressBarH"
+            android:layout_gravity="center"
+            android:visibility="gone" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/deletedIVH"
+            android:background="@drawable/check_background"
+            android:layout_gravity="center"
+            android:contentDescription="@string/done"
+            android:visibility="gone" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/doneTVH"
+            android:text="@string/done"
+            android:textAppearance="?textAppearanceSubtitle1"
+            android:textColor="?attr/primaryText"
+            android:layout_gravity="center_horizontal"
+            android:visibility="gone" />
+
+        <com.google.android.material.button.MaterialButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/closeButtonH"
+            android:text="@string/close"
+            style="@style/CancelButtonStyle"
+            android:visibility="gone"
+            />
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

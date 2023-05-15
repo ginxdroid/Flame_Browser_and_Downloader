@@ -3,10 +3,15 @@ package com.ginxdroid.flamebrowseranddownloader.activities;
 import static com.ginxdroid.flamebrowseranddownloader.classes.ResourceFinder.getResId;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -17,6 +22,8 @@ import com.ginxdroid.flamebrowseranddownloader.DatabaseHandler;
 import com.ginxdroid.flamebrowseranddownloader.R;
 import com.ginxdroid.flamebrowseranddownloader.classes.TextDrawable;
 import com.ginxdroid.flamebrowseranddownloader.models.QuickLinkModel;
+import com.ginxdroid.flamebrowseranddownloader.sheets.EditQLNameSheet;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 
 import java.io.File;
@@ -31,6 +38,7 @@ public class QuickLinksRVHomePageAdapter extends RecyclerView.Adapter<QuickLinks
     private final MainActivity mainActivity;
     private final LayoutInflater inflater;
     private final String dumpPath;
+
 
     public QuickLinksRVHomePageAdapter(DatabaseHandler db, Context context, NormalTabsRVAdapter normalTabsRVAdapter,
                                        NormalTabsRVAdapter.ViewHolder viewHolder, MainActivity mainActivity, LayoutInflater inflater) {
@@ -92,16 +100,49 @@ public class QuickLinksRVHomePageAdapter extends RecyclerView.Adapter<QuickLinks
             {
                 if(quickLinkModel.getQlTitle().equals("No title"))
                 {
-                    holder.qlFaviconIV.setBackgroundResource(R.drawable.cyclone_bg);
+                    holder.qlFaviconIV.setBackgroundResource(R.drawable.public_earth_bg);
                 } else {
                     String firstC = quickLinkModel.getQlTitle().substring(0,1);
                     holder.qlFaviconIV.setBackground(new TextDrawable(context, firstC));
+                }
+            }
+        } else {
+            try {
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inPreferredConfig = Bitmap.Config.RGB_565;
+                File file = new File(quickLinkModel.getQlFaviconPath());
+                if(file.exists() && !quickLinkModel.getQlFaviconPath().equals(dumpPath))
+                {
+                    Bitmap bitmap = BitmapFactory.decodeFile(quickLinkModel.getQlFaviconPath(), options);
+                    holder.qlFaviconIV.setImageBitmap(bitmap);
+                } else
+                {
+                    if(quickLinkModel.getQlTitle().equals("No title"))
+                    {
+                        holder.qlFaviconIV.setBackgroundResource(R.drawable.public_earth_bg);
+                    } else {
+                        String firstC = quickLinkModel.getQlTitle().substring(0,1);
+                        holder.qlFaviconIV.setBackground(new TextDrawable(context,firstC));
+                    }
+                }
+            } catch (Exception e)
+            {
+                if(quickLinkModel.getQlTitle().equals("No title"))
+                {
+                    holder.qlFaviconIV.setBackgroundResource(R.drawable.public_earth_bg);
+                } else {
+                    String firstC = quickLinkModel.getQlTitle().substring(0,1);
+                    holder.qlFaviconIV.setBackground(new TextDrawable(context,firstC));
                 }
             }
         }
 
 
         holder.qlTitle.setText(quickLinkModel.getQlTitle());
+    }
+
+    void onItemTitleChanged(int position)
+    {    notifyItemChanged(position);
     }
 
     @Override
@@ -114,6 +155,8 @@ public class QuickLinksRVHomePageAdapter extends RecyclerView.Adapter<QuickLinks
         private final ImageView qlFaviconIV;
 
         private final MaterialCardView qlCV;
+
+        private PopupWindow popupWindow = null;
 
 
 
@@ -149,6 +192,92 @@ public class QuickLinksRVHomePageAdapter extends RecyclerView.Adapter<QuickLinks
             qlTitle.setOnClickListener(onClickListener);
             qlCV.setOnClickListener(onClickListener);
 
+            View.OnLongClickListener onLongClickListener = view -> {
+                int bindingAdapterPosition = getBindingAdapterPosition();
+                openMorePopupQL(view,db.getQuickLinkModel(quickLinksItems.get(bindingAdapterPosition)),bindingAdapterPosition);
+                return true;
+            };
+
+            qlTitle.setOnLongClickListener(onLongClickListener);
+            qlCV.setOnLongClickListener(onLongClickListener);
+        }
+
+        private void openMorePopupQL(View anchor, QuickLinkModel quickLinkModel, int bindingAdapterPosition)
+        {
+            View popupView = mainActivity.getLayoutInflater().inflate(R.layout.show_more_ql_options, (ViewGroup) itemView,false);
+            popupView.setTranslationX(popupView.getTranslationX() - 10);
+            popupView.setTranslationY(popupView.getTranslationY() - 10);
+
+            int finalWidth = Math.min(normalTabsRVAdapter.getRecyclerViewContainerWidth(),
+                    normalTabsRVAdapter.getRecyclerViewContainerHeight());
+
+            popupWindow = new PopupWindow(popupView,(int)(finalWidth * 0.5),ViewGroup.LayoutParams.WRAP_CONTENT,true);
+            popupWindow.setElevation(normalTabsRVAdapter.getEight());
+            popupWindow.setOutsideTouchable(true);
+            popupWindow.setAnimationStyle(R.style.PopupWindowAnimationStyleSmallPopupWindow);
+
+            MaterialButton smOpenInBackground, smOpenInNewTabAndSwitch, smEditName, smRemoveQL;
+            smOpenInBackground = popupView.findViewById(R.id.smOpenInBackground);
+            smOpenInNewTabAndSwitch = popupView.findViewById(R.id.smOpenInNewTabAndSwitch);
+            smEditName = popupView.findViewById(R.id.smEditName);
+            smRemoveQL = popupView.findViewById(R.id.smRemoveQL);
+
+            View.OnClickListener onClickListener = view -> {
+                int id = view.getId();
+                if(id == R.id.smOpenInBackground)
+                {
+                    normalTabsRVAdapter.set();
+                    normalTabsRVAdapter.addNewTab(quickLinkModel.getQlURL(),1);
+                    popupWindow.dismiss();
+                } else if(id == R.id.smOpenInNewTabAndSwitch)
+                {
+                    popupWindow.dismiss();
+                    normalTabsRVAdapter.addNewTab(quickLinkModel.getQlURL(),4);
+                    viewHolder.veryCommonAddWork();
+                } else if(id == R.id.smEditName)
+                {
+                    try {
+                        EditQLNameSheet editQLNameSheet = new EditQLNameSheet();
+                        Bundle bundle = new Bundle();
+                        bundle.putInt("qlKeyId",quickLinkModel.getQlKeyId());
+                        bundle.putString("existingQLName",quickLinkModel.getQlTitle());
+                        bundle.putInt("bindingAdapterPosition",bindingAdapterPosition);
+
+                        editQLNameSheet.setArguments(bundle);
+                        editQLNameSheet.show(mainActivity.getSupportFragmentManager(),"editQLNameSheet");
+                    } catch (Exception ignored) {}
+
+                    popupWindow.dismiss();
+                } else if(id == R.id.smRemoveQL)
+                {
+                    new Thread(() -> {
+                        final String faviconPath = quickLinkModel.getQlFaviconPath();
+                        if(db.checkNotContainsFaviconInBookmarks(faviconPath) &&
+                        db.checkNotContainsFaviconInHistory(faviconPath) &&
+                        db.checkNotContainsFaviconInHomePages(faviconPath))
+                        {
+                            File file = new File(faviconPath);
+                            if(file.exists())
+                            {
+                                //noinspection ResultOfMethodCallIgnored
+                                file.delete();
+                            }
+                        }
+                    }).start();
+                    db.deleteQuickLinkItem(quickLinkModel.getQlKeyId());
+                    setQuickLinks();
+                    viewHolder.quickLinksRV.scrollBy(1,1);
+                    popupWindow.dismiss();
+                }
+            };
+
+            smOpenInBackground.setOnClickListener(onClickListener);
+            smOpenInNewTabAndSwitch.setOnClickListener(onClickListener);
+            smEditName.setOnClickListener(onClickListener);
+            smRemoveQL.setOnClickListener(onClickListener);
+
+            popupWindow.setOnDismissListener(() -> popupWindow = null);
+            popupWindow.showAsDropDown(anchor,0,0, Gravity.START);
         }
     }
 }

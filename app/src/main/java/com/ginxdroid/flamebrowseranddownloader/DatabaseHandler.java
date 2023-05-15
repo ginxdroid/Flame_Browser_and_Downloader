@@ -6,6 +6,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.ginxdroid.flamebrowseranddownloader.models.BookmarkItem;
+import com.ginxdroid.flamebrowseranddownloader.models.HistoryItem;
+import com.ginxdroid.flamebrowseranddownloader.models.HomePageItem;
 import com.ginxdroid.flamebrowseranddownloader.models.QuickLinkModel;
 import com.ginxdroid.flamebrowseranddownloader.models.ThemeModel;
 import com.ginxdroid.flamebrowseranddownloader.models.UserPreferences;
@@ -47,10 +50,35 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private final String QL_ITEM_URL = "qLItemURL";
     private final String QL_VISIBLE_POSITION = "qLVisiblePosition";
 
+    private final String homePagesTBL="homePagesTBL";
+    //Home page table columns
+
+    private final String HP_KEY_ID = "hPId";
+    private final String HP_ITEM_FAVICON_PATH = "hPItemFaviconPath";
+    private final String HP_ITEM_TITLE = "hPItemTitle";
+    private final String HP_ITEM_URL = "hPItemURL";
+
+    private final String historyTBL="historyTBL";
+    //History table columns
+
+    private final String H_KEY_ID = "hId";
+    private final String H_ITEM_FAVICON_PATH = "hItemFaviconPath";
+    private final String H_ITEM_TITLE = "hItemTitle";
+    private final String H_ITEM_URL = "hItemURL";
+    private final String H_ITEM_DATE = "hItemDate";
+    private final String H_ITEM_TYPE = "hItemType";
+
+    private final String bookmarksTbl="bookmarksTBL";
+    //Bookmark table columns
+    private final String B_KEY_ID = "bId";
+    private final String B_ITEM_FAVICON_PATH = "bItemFaviconPath";
+    private final String B_ITEM_TITLE = "bItemTitle";
+    private final String B_ITEM_URL = "bItemURL";
+
 
 
     public DatabaseHandler(Context context) {
-        super(context, "flameDatabase", null, 6);
+        super(context, "flameDatabase", null, 1);
     }
 
     @Override
@@ -60,95 +88,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        switch (oldVersion)
-        {
-            case 1:
-                createDifferentThemesTbl(sqLiteDatabase);
-                addDarkThemeColumnToUP(sqLiteDatabase);
-                addHomePageURLColumnToUP(sqLiteDatabase);
-                createQuickLinkTBLWhenModifying(sqLiteDatabase);
-                break;
-            case 2:
-                addDarkThemeColumnToUP(sqLiteDatabase);
-                insertDifferentThemes(sqLiteDatabase);
-                addHomePageURLColumnToUP(sqLiteDatabase);
-                createQuickLinkTBLWhenModifying(sqLiteDatabase);
-                break;
-            case 3:
-                insertDifferentThemes(sqLiteDatabase);
-                addHomePageURLColumnToUP(sqLiteDatabase);
-                createQuickLinkTBLWhenModifying(sqLiteDatabase);
-                break;
-            case 4:
-                addHomePageURLColumnToUP(sqLiteDatabase);
-                createQuickLinkTBLWhenModifying(sqLiteDatabase);
-                break;
-            case 5:
-                createQuickLinkTBLWhenModifying(sqLiteDatabase);
-                break;
-        }
-    }
-
-    private void createQuickLinkTBLWhenModifying(SQLiteDatabase db)
-    {
-        String CREATE_QUICK_LINKS_TABLE = "CREATE TABLE IF NOT EXISTS "+quickLinksTBL+"("
-                +QL_KEY_ID+" INTEGER PRIMARY KEY,"+QL_ITEM_FAVICON_PATH+" TEXT,"+
-                QL_ITEM_TITLE+" TEXT,"+QL_ITEM_URL+" TEXT,"+QL_VISIBLE_POSITION+" INTEGER);";
-
-        db.execSQL(CREATE_QUICK_LINKS_TABLE);
-
-        //add default quick link items after table is created.
-        {
-            QuickLinkModel quickLinkModel = new QuickLinkModel();
-            quickLinkModel.setQlURL("https://www.google.com/");
-            quickLinkModel.setQlTitle("Google");
-            quickLinkModel.setQlFaviconPath("R.drawable");
-            quickLinkModel.setQlVisiblePosition(1);
-
-            addQuickLinkItemWhenModifying(db,quickLinkModel);
-        }
-
-        {
-            QuickLinkModel quickLinkModel = new QuickLinkModel();
-            quickLinkModel.setQlURL("https://twitter.com/login?lang=en");
-            quickLinkModel.setQlTitle("Twitter");
-            quickLinkModel.setQlFaviconPath("R.drawable");
-            quickLinkModel.setQlVisiblePosition(2);
-
-            addQuickLinkItemWhenModifying(db,quickLinkModel);
-        }
-
-        {
-            QuickLinkModel quickLinkModel = new QuickLinkModel();
-            quickLinkModel.setQlURL("https://www.instagram.com/accounts/login/?hl=en");
-            quickLinkModel.setQlTitle("Instagram");
-            quickLinkModel.setQlFaviconPath("R.drawable");
-            quickLinkModel.setQlVisiblePosition(3);
-
-            addQuickLinkItemWhenModifying(db,quickLinkModel);
-        }
-
-        {
-            QuickLinkModel quickLinkModel = new QuickLinkModel();
-            quickLinkModel.setQlURL("https://www.facebook.com/");
-            quickLinkModel.setQlTitle("Facebook");
-            quickLinkModel.setQlFaviconPath("R.drawable");
-            quickLinkModel.setQlVisiblePosition(4);
-
-            addQuickLinkItemWhenModifying(db,quickLinkModel);
-        }
-
-        {
-            QuickLinkModel quickLinkModel = new QuickLinkModel();
-            quickLinkModel.setQlURL("https://www.wikipedia.org/");
-            quickLinkModel.setQlTitle("Wikipedia");
-            quickLinkModel.setQlFaviconPath("R.drawable");
-            quickLinkModel.setQlVisiblePosition(5);
-
-            addQuickLinkItemWhenModifying(db,quickLinkModel);
-        }
 
     }
+
 
     private void createQuickLinkTBL(SQLiteDatabase db)
     {
@@ -159,17 +101,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.execSQL(CREATE_QUICK_LINKS_TABLE);
     }
 
-    private void addQuickLinkItemWhenModifying(SQLiteDatabase db,QuickLinkModel quickLinkModel)
-    {
-        ContentValues values = new ContentValues();
-        values.put(QL_ITEM_TITLE,quickLinkModel.getQlTitle());
-        values.put(QL_ITEM_FAVICON_PATH,quickLinkModel.getQlFaviconPath());
-        values.put(QL_ITEM_URL,quickLinkModel.getQlURL());
-        values.put(QL_VISIBLE_POSITION,quickLinkModel.getQlVisiblePosition());
 
-        //insert our model
-        db.insert(quickLinksTBL,null,values);
-    }
 
     public void addQuickLinkItem(QuickLinkModel quickLinkModel)
     {
@@ -183,31 +115,67 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         writableDB.insert(quickLinksTBL,null,values);
     }
 
-    private void addDarkThemeColumnToUP(SQLiteDatabase db)
+
+    public boolean checkNotContainsFaviconInQuickLinks(String faviconPath)
     {
+        Cursor cursor = readableDB.query(quickLinksTBL, new String[]{QL_KEY_ID},QL_ITEM_FAVICON_PATH + "=?",
+                new String[]{faviconPath},null,null,null,null);
 
-        db.execSQL("ALTER TABLE "+userPreferencesTBL+" ADD COLUMN "+DARK_THEME +" INTEGER;");
-
-        ContentValues values = new ContentValues();
-        values.put(DARK_THEME, 2);
-
-        //update row
-        db.update(userPreferencesTBL, values, UP_KEY_ID + "=?",
-                new String[]{String.valueOf(1)});
+        if(cursor.moveToFirst())
+        {
+            cursor.close();
+            return false;
+        } else {
+            cursor.close();
+            return true;
+        }
     }
 
-    private void addHomePageURLColumnToUP(SQLiteDatabase db)
+    public boolean checkNotContainsFaviconInHomePages(String faviconPath)
     {
+        Cursor cursor = readableDB.query(homePagesTBL, new String[]{HP_KEY_ID},HP_ITEM_FAVICON_PATH + "=?",
+                new String[]{faviconPath},null,null,null,null);
 
-        db.execSQL("ALTER TABLE "+userPreferencesTBL+" ADD COLUMN "+HOME_PAGE_URL +" TEXT;");
-
-        ContentValues values = new ContentValues();
-        values.put(HOME_PAGE_URL, "NewTab");
-
-        //update row
-        db.update(userPreferencesTBL, values, UP_KEY_ID + "=?",
-                new String[]{String.valueOf(1)});
+        if(cursor.moveToFirst())
+        {
+            cursor.close();
+            return false;
+        } else {
+            cursor.close();
+            return true;
+        }
     }
+
+    public boolean checkNotContainsFaviconInHistory(String faviconPath)
+    {
+        Cursor cursor = readableDB.query(historyTBL, new String[]{H_KEY_ID},H_ITEM_FAVICON_PATH + "=?",
+                new String[]{faviconPath},null,null,null,null);
+
+        if(cursor.moveToFirst())
+        {
+            cursor.close();
+            return false;
+        } else {
+            cursor.close();
+            return true;
+        }
+    }
+
+    public boolean checkNotContainsFaviconInBookmarks(String faviconPath)
+    {
+        Cursor cursor = readableDB.query(bookmarksTbl, new String[]{B_KEY_ID},B_ITEM_FAVICON_PATH + "=?",
+                new String[]{faviconPath},null,null,null,null);
+
+        if(cursor.moveToFirst())
+        {
+            cursor.close();
+            return false;
+        } else {
+            cursor.close();
+            return true;
+        }
+    }
+
 
 
     public static synchronized DatabaseHandler getInstance(Context context)
@@ -227,9 +195,30 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         createUserPreferencesTbl(db);
         createDifferentThemesTbl(db);
         createQuickLinkTBL(db);
+        createHomePagesTbl(db);
+        createHistoryTbl(db);
+        createBookmarksTbl(db);
     }
 
+
+
     //CRUD: CREATE, READ, UPDATE and DELETE operations
+
+    private void createBookmarksTbl(SQLiteDatabase db)
+    {
+        String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS "+ bookmarksTbl +"("+B_KEY_ID+" INTEGER PRIMARY KEY,"+
+                B_ITEM_FAVICON_PATH+" TEXT,"+B_ITEM_TITLE+" TEXT,"+B_ITEM_URL+" TEXT);";
+        db.execSQL(CREATE_TABLE);
+    }
+
+    private void createHistoryTbl(SQLiteDatabase db)
+    {
+        String CREATE_HISTORY_TABLE = "CREATE TABLE IF NOT EXISTS "+ historyTBL +"("+H_KEY_ID+" INTEGER PRIMARY KEY,"+
+                H_ITEM_FAVICON_PATH+" TEXT,"+H_ITEM_TITLE+" TEXT,"+H_ITEM_URL+" TEXT,"+
+                H_ITEM_TYPE+" INTEGER,"+H_ITEM_DATE+" TEXT);";
+        db.execSQL(CREATE_HISTORY_TABLE);
+    }
+
 
     private void createUserPreferencesTbl(SQLiteDatabase db)
     {
@@ -237,6 +226,217 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 CURRENT_THEME_ID+" INTEGER,"+IS_DARK_WEB_UI+" INTEGER,"+DARK_THEME+" INTEGER,"+HOME_PAGE_URL+" TEXT);";
 
         db.execSQL(CREATE_USER_PREFERENCES_TABLE);
+    }
+
+    private void createHomePagesTbl(SQLiteDatabase db)
+    {
+        String CREATE_HP_TABLE = "CREATE TABLE IF NOT EXISTS "+ homePagesTBL +"("+HP_KEY_ID+" INTEGER PRIMARY KEY,"+
+                HP_ITEM_FAVICON_PATH+" TEXT,"+HP_ITEM_TITLE+" TEXT,"+HP_ITEM_URL+" TEXT);";
+
+        db.execSQL(CREATE_HP_TABLE);
+    }
+
+    public boolean checkContainsBookmarkItem(String urlString)
+    {
+        Cursor cursor = readableDB.query(bookmarksTbl, new String[]{B_KEY_ID},B_ITEM_URL + "=?",new String[]{urlString},
+                null,null,null,null);
+
+        if(cursor.moveToFirst())
+        {
+            cursor.close();
+            return true;
+        } else {
+            cursor.close();
+            return false;
+        }
+    }
+
+    public boolean checkNotContainsQuickLinks(String urlString)
+    {
+        Cursor cursor = readableDB.query(quickLinksTBL, new String[]{QL_KEY_ID},QL_ITEM_URL + "=?",new String[]{urlString},
+                null,null,null,null);
+
+        if(cursor.moveToFirst())
+        {
+            cursor.close();
+            return false;
+        } else {
+            cursor.close();
+            return true;
+        }
+    }
+
+    public boolean checkNotContainsHomePages(String urlString)
+    {
+        Cursor cursor = readableDB.query(homePagesTBL, new String[]{HP_KEY_ID},HP_ITEM_URL + "=?",new String[]{urlString},
+                null,null,null,null);
+
+        if(cursor.moveToFirst())
+        {
+            cursor.close();
+            return false;
+        } else {
+            cursor.close();
+            return true;
+        }
+    }
+
+    public void updateQLName(String qlName, int qlKeyId)
+    {
+        ContentValues values = new ContentValues();
+        values.put(QL_ITEM_TITLE, qlName);
+
+        writableDB.update(quickLinksTBL, values, QL_KEY_ID + "=?",new String[]{String.valueOf(qlKeyId)});
+    }
+
+    public void updateHomePageURL(String urlString)
+    {
+        ContentValues values = new ContentValues();
+        values.put(HOME_PAGE_URL, urlString);
+
+        writableDB.update(userPreferencesTBL, values, UP_KEY_ID + "=?",new String[]{String.valueOf(1)});
+    }
+
+    public void addHomePageItem(HomePageItem homePageItem)
+    {
+        ContentValues values = new ContentValues();
+        values.put(HP_ITEM_TITLE, homePageItem.getHpTitle());
+        values.put(HP_ITEM_URL, homePageItem.getHpURL());
+        values.put(HP_ITEM_FAVICON_PATH, homePageItem.getHpFaviconPath());
+
+        writableDB.insert(homePagesTBL,null,values);
+    }
+
+    public void addBookMarkItem(BookmarkItem bookmarkItem)
+    {
+        ContentValues values = new ContentValues();
+        values.put(B_ITEM_TITLE, bookmarkItem.getBTitle());
+        values.put(B_ITEM_FAVICON_PATH, bookmarkItem.getBFaviconPath());
+        values.put(B_ITEM_URL, bookmarkItem.getBURL());
+
+        writableDB.insert(bookmarksTbl,null,values);
+    }
+
+    public ArrayList<Integer> getAllHomePageItemsIDs()
+    {
+        ArrayList<Integer> resultList = new ArrayList<>();
+
+        Cursor cursor = readableDB.query(homePagesTBL,new String[]{HP_KEY_ID},null,
+                null,null,null,null);
+
+        while (cursor.moveToNext())
+        {
+            resultList.add(cursor.getInt(cursor.getColumnIndexOrThrow(HP_KEY_ID)));
+        }
+
+        cursor.close();
+
+        return resultList;
+    }
+
+    public ArrayList<Integer> getAllBookmarkItemsIDs()
+    {
+        ArrayList<Integer> resultList = new ArrayList<>();
+
+        Cursor cursor = readableDB.query(bookmarksTbl,new String[]{B_KEY_ID},null,
+                null,null,null,null);
+
+        while (cursor.moveToNext())
+        {
+            resultList.add(cursor.getInt(cursor.getColumnIndexOrThrow(B_KEY_ID)));
+        }
+
+        cursor.close();
+
+        return resultList;
+    }
+
+    public ArrayList<Integer> getAllHomePageItemsIDsWithTitle(String title)
+    {
+        ArrayList<Integer> resultList = new ArrayList<>();
+
+        Cursor cursor = readableDB.query(homePagesTBL,new String[]{HP_KEY_ID},HP_ITEM_TITLE+" LIKE ?",
+                new String[]{"%"+title+"%"},null,null,HP_KEY_ID + " DESC");
+
+        while (cursor.moveToNext())
+        {
+            resultList.add(cursor.getInt(cursor.getColumnIndexOrThrow(HP_KEY_ID)));
+        }
+
+        cursor.close();
+
+        return resultList;
+    }
+
+    public ArrayList<Integer> getAllBookmarkIDsWithTitle(String title)
+    {
+        ArrayList<Integer> resultList = new ArrayList<>();
+
+        Cursor cursor = readableDB.query(bookmarksTbl,new String[]{B_KEY_ID},B_ITEM_TITLE+" LIKE ?",
+                new String[]{"%"+title+"%"},null,null,B_KEY_ID + " DESC");
+
+        while (cursor.moveToNext())
+        {
+            resultList.add(cursor.getInt(cursor.getColumnIndexOrThrow(B_KEY_ID)));
+        }
+
+        cursor.close();
+
+        return resultList;
+    }
+
+    public BookmarkItem getBookmarkItem(int id)
+    {
+        Cursor cursor = readableDB.query(bookmarksTbl,new String[]{B_KEY_ID,B_ITEM_FAVICON_PATH,B_ITEM_TITLE,B_ITEM_URL},B_KEY_ID+"=?",
+                new String[]{String.valueOf(id)},null,null,null);
+
+        BookmarkItem bookmarkItem = new BookmarkItem();
+
+        cursor.moveToFirst();
+        bookmarkItem.setBKeyId(cursor.getInt(cursor.getColumnIndexOrThrow(B_KEY_ID)));
+        bookmarkItem.setBTitle(cursor.getString(cursor.getColumnIndexOrThrow(B_ITEM_TITLE)));
+        bookmarkItem.setBURL(cursor.getString(cursor.getColumnIndexOrThrow(B_ITEM_URL)));
+        bookmarkItem.setBFaviconPath(cursor.getString(cursor.getColumnIndexOrThrow(B_ITEM_FAVICON_PATH)));
+
+        cursor.close();
+        return bookmarkItem;
+    }
+
+    public int getBookmarkItemId(String urlString)
+    {
+        Cursor cursor = readableDB.query(bookmarksTbl,new String[]{B_KEY_ID},B_ITEM_URL+"=?",
+                new String[]{urlString},null,null,null);
+
+        cursor.moveToFirst();
+        int result = cursor.getInt(cursor.getColumnIndexOrThrow(B_KEY_ID));
+        cursor.close();
+        return result;
+    }
+
+    public void deleteBookmarkItem(int id)
+    {
+        writableDB.delete(bookmarksTbl,B_KEY_ID + "=?",new String[]{String.valueOf(id)});
+    }
+
+    public HomePageItem getHomePageItem(int id)
+    {
+        Cursor cursor = readableDB.query(homePagesTBL,new String[]{HP_ITEM_TITLE,HP_ITEM_URL,HP_ITEM_FAVICON_PATH},HP_KEY_ID+"=?",
+                new String[]{String.valueOf(id)},null,null,null);
+
+        HomePageItem homePageItem = new HomePageItem();
+
+        cursor.moveToFirst();
+        homePageItem.setHpFaviconPath(cursor.getString(cursor.getColumnIndexOrThrow(HP_ITEM_FAVICON_PATH)));
+        homePageItem.setHpTitle(cursor.getString(cursor.getColumnIndexOrThrow(HP_ITEM_TITLE)));
+        homePageItem.setHpURL(cursor.getString(cursor.getColumnIndexOrThrow(HP_ITEM_URL)));
+
+        cursor.close();
+        return homePageItem;
+    }
+
+    public void deleteHomePageItem(int id)
+    {
+        writableDB.delete(homePagesTBL,HP_KEY_ID + "=?",new String[]{String.valueOf(id)});
     }
 
     public int getUserPreferencesCount()
@@ -518,6 +718,237 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         cursor.close();
 
         return quickLinksList;
+    }
+
+    public void deleteQuickLinkItem(int id) {
+        writableDB.delete(quickLinksTBL,QL_KEY_ID + "=?",new String[]{String.valueOf(id)});
+    }
+
+    public void addHistoryItem(HistoryItem historyItem)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(H_ITEM_FAVICON_PATH,historyItem.getHiFaviconPath());
+        contentValues.put(H_ITEM_TITLE,historyItem.getHiTitle());
+        contentValues.put(H_ITEM_URL,historyItem.getHiURL());
+        contentValues.put(H_ITEM_DATE,historyItem.getHiDate());
+        contentValues.put(H_ITEM_TYPE,historyItem.getHiType());
+        writableDB.insert(historyTBL,null,contentValues);
+    }
+
+    public HistoryItem getHistoryItem(int id)
+    {
+        Cursor cursor = readableDB.query(historyTBL, new String[]{H_KEY_ID,H_ITEM_FAVICON_PATH,H_ITEM_TITLE,H_ITEM_URL,
+        H_ITEM_DATE,H_ITEM_TYPE},H_KEY_ID + "=?",new String[]{String.valueOf(id)},null,null,null,null);
+
+        HistoryItem historyItem = new HistoryItem();
+        cursor.moveToFirst();
+        historyItem.setHiKeyId(cursor.getInt((cursor.getColumnIndexOrThrow(H_KEY_ID))));
+        historyItem.setHiFaviconPath(cursor.getString(cursor.getColumnIndexOrThrow(H_ITEM_FAVICON_PATH)));
+        historyItem.setHiTitle(cursor.getString(cursor.getColumnIndexOrThrow(H_ITEM_TITLE)));
+        historyItem.setHiURL(cursor.getString(cursor.getColumnIndexOrThrow(H_ITEM_URL)));
+        historyItem.setHiDate(cursor.getString(cursor.getColumnIndexOrThrow(H_ITEM_DATE)));
+        historyItem.setHiType(cursor.getInt(cursor.getColumnIndexOrThrow(H_ITEM_TYPE)));
+        cursor.close();
+        return historyItem;
+    }
+
+    public int getHistoryItemType(int id)
+    {
+        Cursor cursor = readableDB.query(historyTBL, new String[]{H_ITEM_TYPE},H_KEY_ID + "=?",new String[]{String.valueOf(id)},
+                null,null,null,null);
+        int type;
+        cursor.moveToFirst();
+        type = cursor.getInt(cursor.getColumnIndexOrThrow(H_ITEM_TYPE));
+        cursor.close();
+        return type;
+    }
+
+    public ArrayList<Integer> getAllHistoryItemsIDs()
+    {
+        ArrayList<Integer> historyItemsIDsList = new ArrayList<>();
+        ArrayList<String> uniqueHistoryItemsDates = getUniqueHistoryItemsDates();
+
+        for(int i = 0; i < uniqueHistoryItemsDates.size(); i++)
+        {
+            String date = uniqueHistoryItemsDates.get(i);
+            int id = getUniqueIDHistoryItemsDates(date);
+
+            if(id != -1)
+            {
+                historyItemsIDsList.add(id);
+                historyItemsIDsList.addAll(getHistoryItemsByDate(date));
+            } else {
+                deleteHistoryItemWithDate(date);
+            }
+        }
+
+        return historyItemsIDsList;
+    }
+
+    public boolean checkNotContainsFaviconInHistoryMore(String faviconPath,int keyID)
+    {
+
+        Cursor cursor = readableDB.query(historyTBL, new String[]{H_KEY_ID
+                }
+                , H_ITEM_FAVICON_PATH + "=? AND "+H_KEY_ID+" !=?",
+                new String[]{String.valueOf(faviconPath),String.valueOf(keyID)}, null, null, null, null
+        );
+
+
+        if(cursor.moveToFirst())
+        {
+            cursor.close();
+            return false;
+        }
+        else
+        {
+            cursor.close();
+            return true;
+        }
+    }
+
+    public ArrayList<Integer> getAllHistoryItemsIDsWithTitle(String title)
+    {
+        ArrayList<Integer> historyItemsIDsList = new ArrayList<>();
+        ArrayList<String> uniqueHistoryItemsDates = getUniqueHistoryItemsDates();
+        for(int i = 0; i < uniqueHistoryItemsDates.size(); i++)
+        {
+            ArrayList<Integer> prefetch = getHistoryItemsByDateWithTitle(uniqueHistoryItemsDates.get(i),title);
+            if(prefetch.size() > 0)
+            {
+                historyItemsIDsList.add(getUniqueIDHistoryItemsDateWithTitle(uniqueHistoryItemsDates.get(i)));
+                historyItemsIDsList.addAll(prefetch);
+            }
+        }
+
+        return historyItemsIDsList;
+    }
+
+    private ArrayList<Integer> getHistoryItemsByDate(String historyItemDate)
+    {
+        ArrayList<Integer> historyItemsByDateAL = new ArrayList<>();
+        Cursor cursor = readableDB.query(historyTBL,new String[]{H_KEY_ID},H_ITEM_DATE + "=? AND "+H_ITEM_TYPE+"!=?",
+                new String[]{historyItemDate,"0"},null,null,H_KEY_ID + " DESC",null);
+        while (cursor.moveToNext())
+        {
+            historyItemsByDateAL.add(cursor.getInt(cursor.getColumnIndexOrThrow(H_KEY_ID)));
+        }
+        cursor.close();
+        return historyItemsByDateAL;
+    }
+
+    public int getHistoryItemsByDateSize(String historyItemDate)
+    {
+        Cursor cursor = readableDB.query(historyTBL,new String[]{H_KEY_ID},H_ITEM_DATE + "=? AND "+H_ITEM_TYPE+"!=?",
+                new String[]{historyItemDate,"0"},null,null,H_KEY_ID + " DESC",null);
+        int count = cursor.getCount();
+        cursor.close();
+        return count;
+    }
+
+    public int getHistoryItemIdWithDate(String historyItemDate)
+    {
+        Cursor cursor = readableDB.query(historyTBL,new String[]{H_KEY_ID},H_ITEM_DATE + "=? AND "+H_ITEM_TYPE+"==?",
+                new String[]{historyItemDate,"0"},null,null,null,null);
+        cursor.moveToFirst();
+        int id = cursor.getInt(cursor.getColumnIndexOrThrow(H_KEY_ID));
+        cursor.close();
+        return id;
+    }
+
+    private ArrayList<Integer> getHistoryItemsByDateWithTitle(String historyItemDate, String itemTitle)
+    {
+        ArrayList<Integer> historyItemsByDateAL = new ArrayList<>();
+        Cursor cursor = readableDB.query(historyTBL,new String[]{H_KEY_ID},H_ITEM_DATE + "=? AND "+H_ITEM_TYPE+"!=? AND "+H_ITEM_TITLE+" LIKE ?",
+                new String[]{historyItemDate,"0","%"+itemTitle+"%"},null,null,H_KEY_ID +" DESC",null);
+
+        while (cursor.moveToNext())
+        {
+            historyItemsByDateAL.add(cursor.getInt(cursor.getColumnIndexOrThrow(H_KEY_ID)));
+        }
+        cursor.close();
+        return historyItemsByDateAL;
+    }
+
+    private ArrayList<String> getUniqueHistoryItemsDates()
+    {
+        ArrayList<String> uniqueHistoryItemsDates = new ArrayList<>();
+        Cursor cursor = readableDB.query(true,historyTBL,new String[]{H_ITEM_DATE},null,
+                null,null,null,H_KEY_ID +" DESC",null);
+        while (cursor.moveToNext())
+        {
+            uniqueHistoryItemsDates.add(cursor.getString(cursor.getColumnIndexOrThrow(H_ITEM_DATE)));
+        }
+        cursor.close();
+        return uniqueHistoryItemsDates;
+    }
+
+    private int getUniqueIDHistoryItemsDates(String historyItemDate)
+    {
+        Cursor cursor = readableDB.query(historyTBL,new String[]{H_KEY_ID},H_ITEM_DATE + "=? AND "+H_ITEM_TYPE+"=?",
+                new String[]{historyItemDate,"0"},null,null,null,null);
+        boolean result = cursor.moveToFirst();
+        if(result)
+        {
+            return cursor.getInt(cursor.getColumnIndexOrThrow(H_KEY_ID));
+        }
+        cursor.close();
+
+        return -1;
+    }
+
+    private int getUniqueIDHistoryItemsDateWithTitle(String historyItemDate)
+    {
+        Cursor cursor = readableDB.query(historyTBL,new String[]{H_KEY_ID},H_ITEM_DATE + "=? AND "+H_ITEM_TYPE+"=?",
+                new String[]{historyItemDate,"0"},null,null,null,null);
+        cursor.moveToFirst();
+        int uniqueKeyId = cursor.getInt(cursor.getColumnIndexOrThrow(H_KEY_ID));
+        cursor.close();
+
+        return uniqueKeyId;
+    }
+
+    public boolean checkNotContainsHistoryItem(String historyItemURL, String historyItemDate)
+    {
+        Cursor cursor = readableDB.query(historyTBL, new String[]{H_KEY_ID},H_ITEM_URL + "=? AND "+H_ITEM_DATE+"=?",
+                new String[]{historyItemURL,historyItemDate},null,null,null,null);
+
+        if(cursor.moveToFirst())
+        {
+            cursor.close();
+            return false;
+        } else {
+            cursor.close();
+            return true;
+        }
+    }
+
+    public boolean checkNotContainsHistoryItemDate(String historyItemDate)
+    {
+        Cursor cursor = readableDB.query(historyTBL, new String[]{H_KEY_ID},H_ITEM_DATE + "=?",
+                new String[]{historyItemDate},null,null,null,null);
+        if(cursor.moveToFirst())
+        {
+            cursor.close();
+            return false;
+        } else {
+            cursor.close();
+            return true;
+        }
+
+    }
+
+    public void deleteHistoryItem(int id)
+    {
+        writableDB.delete(historyTBL,H_KEY_ID + "=?",new String[]{String.valueOf(id)});
+    }
+
+    private void deleteHistoryItemWithDate(String date)
+    {
+
+
+        writableDB.delete(historyTBL, H_ITEM_DATE + "=?",
+                new String[]{date});
     }
 
 }

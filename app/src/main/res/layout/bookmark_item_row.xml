@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/card_ripple_effect_light"
+    android:layout_margin="4dp"
+    android:padding="2dp">
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:id="@+id/bookmarksRL"
+        android:layout_centerVertical="true"
+        android:layout_alignParentStart="true"
+        app:cardBackgroundColor="?attr/etBackgroundColor"
+        app:shapeAppearanceOverlay="@style/CircularMaterialCardView"
+        app:cardElevation="0dp"
+        android:clickable="true"
+        android:focusable="true">
+
+        <ImageView
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:id="@+id/bFaviconIV"
+            android:contentDescription="@string/favicon"
+            android:layout_gravity="center"
+            android:clickable="false"
+            android:focusable="false" />
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/bDeleteIB"
+        android:contentDescription="@string/delete"
+        android:layout_alignParentEnd="true"
+        android:src="@drawable/round_delete_forever_24"
+        android:background="@drawable/unbound_small_ripple"
+        android:layout_centerVertical="true" />
+
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:orientation="vertical"
+        android:layout_toEndOf="@id/bookmarksRL"
+        android:layout_toStartOf="@id/bDeleteIB"
+        android:padding="2dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="4dp">
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fillViewport="true"
+            android:scrollbars="none">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/bookmarkTitle"
+                android:maxLines="1"
+                android:textColor="?attr/primaryText"
+                android:textAppearance="?textAppearanceSubtitle1"
+                android:textStyle="bold"
+                android:text="@string/title" />
+
+        </HorizontalScrollView>
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fillViewport="true"
+            android:scrollbars="none">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/bookmarkUrl"
+                android:maxLines="1"
+                android:textColor="?attr/secondaryText"
+                android:textAppearance="?textAppearanceCaption"
+                android:text="@string/url" />
+
+        </HorizontalScrollView>
+
+    </LinearLayout>
+
+</RelativeLayout>

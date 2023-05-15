@@ -19,6 +19,15 @@
         android:theme="@style/AppTheme"
         tools:targetApi="31">
         <activity
+            android:name=".activities.ManageHistory"
+            android:exported="false" />
+        <activity
+            android:name=".activities.ManageBookmarks"
+            android:exported="false" />
+        <activity
+            android:name=".activities.ManageHomePages"
+            android:exported="false" />
+        <activity
             android:name=".activities.SiteSettingsActivity"
             android:exported="false" />
         <activity

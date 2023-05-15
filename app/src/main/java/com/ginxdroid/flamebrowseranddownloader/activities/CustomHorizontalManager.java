@@ -336,7 +336,12 @@ public class CustomHorizontalManager extends RecyclerView.LayoutManager {
                     break;
             }
                 case 1:
+                    noMoreLeft = false;
+                    noMoreRight = false;
+                    layDownType = -1;
+                    scrolling = true;
 
+                    openInNewTabHorizontal();
                     break;
                 case 2:
 
@@ -351,6 +356,16 @@ public class CustomHorizontalManager extends RecyclerView.LayoutManager {
                     layDownType = -1;
                     scrolling = true;
                     openBlockedPopupHorizontal();
+                    break;
+                case 5:
+
+                    break;
+                case 6:
+                    noMoreLeft = false;
+                    noMoreRight = false;
+                    layDownType = -1;
+                    scrolling = true;
+                    openInNewTabHorizontalNoPeek();
                     break;
                 case 9:
                     noMoreLeft = false;
@@ -376,6 +391,52 @@ public class CustomHorizontalManager extends RecyclerView.LayoutManager {
             layDownType = -1;
             scrolling = false;
         }
+    }
+
+    private void openInNewTabHorizontal()
+    {
+        isScrollUnlocked = false;
+        final View lastView = hereRecycler.getViewForPosition(lastPos);
+        lastView.setScaleX(0f);
+        lastView.setScaleY(0f);
+
+        final CustomMCV materialCardView = lastView.findViewById(R.id.emptyCV);
+        materialCardView.setCardElevation(maxOpenElevation);
+        materialCardView.setRadius(six);
+
+        addView(lastView);
+        measureChild(lastView,0,0);
+        layoutDecorated(lastView,0,0,width,height);
+
+        lastView.setTranslationX(0f);
+
+        lastView.post(() -> lastView.animate().scaleX(minimizeScale).scaleY(minimizeScale).setDuration(175)
+                .withEndAction(() -> lastView.animate().translationX(width).setDuration(175).withEndAction(() -> {
+                    materialCardView.setCardElevation(two);
+                    detachAndScrapView(lastView,hereRecycler);
+                    scrolling = false;
+                })));
+    }
+
+    private void openInNewTabHorizontalNoPeek()
+    {
+        isScrollUnlocked = false;
+
+        final View lastView = hereRecycler.getViewForPosition(lastPos);
+        lastView.setScaleX(minimizeScale);
+        lastView.setScaleY(minimizeScale);
+
+        final CustomMCV materialCardView = lastView.findViewById(R.id.emptyCV);
+        materialCardView.setCardElevation(two);
+        materialCardView.setRadius(six);
+
+        addView(lastView);
+        measureChild(lastView,0,0);
+        layoutDecorated(lastView,0,0,width,height);
+
+        lastView.setTranslationX(width);
+        detachAndScrapView(lastView,hereRecycler);
+        scrolling = false;
     }
 
     private void removeAndSwitch(int itemCount)
@@ -463,6 +524,7 @@ public class CustomHorizontalManager extends RecyclerView.LayoutManager {
         if (currentFSView != null)
         {
           //write code for current full screen tab also
+            animateCurrentAndAddNew();
         } else {
             isScrollUnlocked = false;
             currentActivePos = lastPos;
@@ -471,10 +533,51 @@ public class CustomHorizontalManager extends RecyclerView.LayoutManager {
         }
     }
 
+    private void animateCurrentAndAddNew()
+    {
+        View tempView = currentFSView;
+        currentActivePos = lastPos;
+        currentFSView = hereRecycler.getViewForPosition(lastPos);
+
+        CustomMCV materialCardView = currentFSView.findViewById(R.id.emptyCV);
+        materialCardView.callMakeTitleBarInvisible();
+        materialCardView.setRadius(zero);
+
+        addView(currentFSView);
+        measureChild(currentFSView,0,0);
+        layoutDecorated(currentFSView, 0, 0, width, height);
+
+        currentFSView.setScaleX(1f);
+        currentFSView.setScaleY(1f);
+
+        currentFSView.setTranslationX(nextTrans);
+
+        materialCardView.setCardElevation(maxElevation);
+
+        tempView.animate().translationX(previousTrans)
+                .setDuration(175)
+                .withEndAction(() -> {
+                    tempView.setScaleX(minimizeScale);
+                    tempView.setScaleY(minimizeScale);
+
+                    CustomMCV specialOldCV = tempView.findViewById(R.id.emptyCV);
+                    specialOldCV.setCardElevation(two);
+                    specialOldCV.setRadius(six);
+                    specialOldCV.callMakeTitleBarVisible();
+                    detachAndScrapView(tempView,hereRecycler);
+                }).start();
+
+        currentFSView.post(() -> currentFSView.animate().translationX(0f).setDuration(175)
+                .withEndAction(() -> {
+                    materialCardView.findViewById(R.id.emptyFrameRL).setVisibility(View.INVISIBLE);
+                    scrolling = false;
+                }).start());
+    }
+
     private void setFSViewPropertiesHorizontal(final View view)
     {
         CustomMCV materialCardView = currentFSView.findViewById(R.id.emptyCV);
-
+        materialCardView.callMakeTitleBarInvisible();
         materialCardView.setRadius(zero);
 
         addView(view);
@@ -491,7 +594,7 @@ public class CustomHorizontalManager extends RecyclerView.LayoutManager {
         view.post(() -> {
             view.animate().scaleY(1f).scaleX(1f).setDuration(175).withEndAction(() -> {
                 //This runnable will gets called when animation is finished
-//                        materialCardView.findViewById(R.id.emptyFrameRL).setVisibility(View.INVISIBLE);
+                materialCardView.findViewById(R.id.emptyFrameRL).setVisibility(View.INVISIBLE);
                 scrolling = false;
             }).start();
 

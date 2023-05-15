@@ -1,6 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <style name="ChooserStyle">
+        <item name="android:windowEnterAnimation">@anim/slide_up</item>
+        <item name="android:windowExitAnimation">@anim/slide_down</item>
+    </style>
+
+    <style name="DialogStyle2">
+        <item name="android:windowEnterAnimation">@anim/slide_left</item>
+        <item name="android:windowExitAnimation">@anim/slide_right</item>
+    </style>
+
+
+    <style name="full_screen_dialog">
+        <item name="android:backgroundDimAmount">0</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+
+    <style name="PopupWindowAnimationStyleSmallPopupWindow">
+        <item name="android:windowEnterAnimation">@anim/enter_animation_small_popup_window</item>
+        <item name="android:windowExitAnimation">@anim/exit_animation_small_popup_window</item>
+    </style>
+
+
     <style name="CustomMenuButtonStyle" parent="Widget.MaterialComponents.Button.TextButton">
         <item name="shapeAppearance">?attr/shapeAppearanceLargeComponent</item>
         <item name="android:padding">14dp</item>

@@ -19,8 +19,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.ginxdroid.flamebrowseranddownloader.DatabaseHandler;
 import com.ginxdroid.flamebrowseranddownloader.R;
+import com.ginxdroid.flamebrowseranddownloader.models.HomePageItem;
 import com.ginxdroid.flamebrowseranddownloader.models.QuickLinkModel;
 import com.ginxdroid.flamebrowseranddownloader.models.UserPreferences;
+import com.ginxdroid.flamebrowseranddownloader.sheets.EditQLNameSheet;
 import com.ginxdroid.flamebrowseranddownloader.sheets.MainMenuSheet;
 import com.ginxdroid.flamebrowseranddownloader.sheets.TextScalingSheet;
 import com.ginxdroid.flamebrowseranddownloader.sheets.ThemesSheet;
@@ -33,7 +35,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class MainActivity extends BaseActivity implements ThemesSheet.BottomSheetListener, View.OnClickListener,
-    MainMenuSheet.BottomSheetListener, TextScalingSheet.BottomSheetListener {
+    MainMenuSheet.BottomSheetListener, TextScalingSheet.BottomSheetListener, EditQLNameSheet.BottomSheetListener {
 
     private DatabaseHandler db;
     private Toast toast = null;
@@ -110,6 +112,12 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
 
             userPreferences.setHomePageURL("NewTab");
             db.addUserPreferences(userPreferences);
+
+            HomePageItem homePageItem = new HomePageItem();
+            homePageItem.setHpURL("NewTab");
+            homePageItem.setHpTitle("Flame Browser Default");
+            homePageItem.setHpFaviconPath("R.drawable");
+            db.addHomePageItem(homePageItem);
 
             //add default quick link items after table is created.
             {
@@ -476,6 +484,13 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
     public void showTextScalingPopup(View view) {
         try {
             normalTabsRVAdapter.getViewHolder().holderUtility.showTextScalingPopup(view);
+        } catch (Exception ignored) {}
+    }
+
+    @Override
+    public void changeQLNameSetQLNow(int bindingAdapterPosition) {
+        try {
+            normalTabsRVAdapter.getViewHolder().quickLinksRVHomePageAdapter.onItemTitleChanged(bindingAdapterPosition);
         } catch (Exception ignored) {}
     }
 }
