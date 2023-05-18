@@ -10,6 +10,8 @@ import com.ginxdroid.flamebrowseranddownloader.models.BookmarkItem;
 import com.ginxdroid.flamebrowseranddownloader.models.HistoryItem;
 import com.ginxdroid.flamebrowseranddownloader.models.HomePageItem;
 import com.ginxdroid.flamebrowseranddownloader.models.QuickLinkModel;
+import com.ginxdroid.flamebrowseranddownloader.models.SearchEngineItem;
+import com.ginxdroid.flamebrowseranddownloader.models.SearchItem;
 import com.ginxdroid.flamebrowseranddownloader.models.ThemeModel;
 import com.ginxdroid.flamebrowseranddownloader.models.UserPreferences;
 
@@ -27,6 +29,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private final String IS_DARK_WEB_UI="uIsDarkWebUI";
     private final String DARK_THEME = "tHDarkTheme";
     private final String HOME_PAGE_URL = "uHomePageURL";
+    private final String SEARCH_ENGINE_URL = "uSearchEngineURL";
 
 
     private final String differentThemesTBL="differentThemesTBL";
@@ -40,6 +43,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private final String D_TH_ACCENT_TEXT_COLOR = "dTHAccentTC";
     private final String D_TH_TEXT_COLOR = "dTHTextColor";
     private final String D_TH_SECONDARY_TEXT_COLOR = "dTHSecondaryTextColor";
+
+    private final String searchItemTBL = "searchItemTBL";
+    //search table columns
+    private final String S_KEY_ID = "sId";
+    private final String S_ITEM_TITLE = "sItemTitle";
+
 
 
     private final String quickLinksTBL="quickLinksTBL";
@@ -74,6 +83,15 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private final String B_ITEM_FAVICON_PATH = "bItemFaviconPath";
     private final String B_ITEM_TITLE = "bItemTitle";
     private final String B_ITEM_URL = "bItemURL";
+
+    private final String searchEnginesTBL="searchEnginesTBL";
+    //Search engine table columns
+    private final String SE_KEY_ID = "sEKetId";
+    private final String SE_ITEM_TITLE = "sEItemTitle";
+    private final String SE_ITEM_URL = "sEItemURL";
+    private final String SE_IS_DEFAULT = "sEIsDefault";
+    private final String SE_ITEM_IS_CURRENT = "sEItemIsCurrent";
+
 
 
 
@@ -113,6 +131,29 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         //insert our model
         writableDB.insert(quickLinksTBL,null,values);
+    }
+
+    public boolean checkNotContainsSearchItem(String keyWord)
+    {
+        Cursor cursor = readableDB.query(searchItemTBL, new String[]{S_KEY_ID},S_ITEM_TITLE + "=?",
+                new String[]{keyWord},null,null,null,null);
+
+        if(cursor.moveToFirst())
+        {
+            cursor.close();
+            return false;
+        } else {
+            cursor.close();
+            return true;
+        }
+    }
+
+    public void addSearchItem(SearchItem searchItem)
+    {
+        ContentValues values = new ContentValues();
+        values.put(S_ITEM_TITLE,searchItem.getSeItemTitle());
+
+        writableDB.insert(searchItemTBL,null,values);
     }
 
 
@@ -198,11 +239,68 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         createHomePagesTbl(db);
         createHistoryTbl(db);
         createBookmarksTbl(db);
+        createSearchEnginesTbl(db);
+        createSearchItemsTbl(db);
     }
 
 
 
     //CRUD: CREATE, READ, UPDATE and DELETE operations
+
+    private void createSearchItemsTbl(SQLiteDatabase db) {
+        String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS " + searchItemTBL + "(" + S_KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                S_ITEM_TITLE + " TEXT);";
+        db.execSQL(CREATE_TABLE);
+    }
+
+    private void createSearchEnginesTbl(SQLiteDatabase db)
+    {
+        String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS "+ searchEnginesTBL +"("+SE_KEY_ID+" INTEGER PRIMARY KEY AUTOINCREMENT,"+
+                SE_ITEM_TITLE+" TEXT,"+SE_ITEM_URL+" TEXT,"+SE_IS_DEFAULT+" INTEGER,"+SE_ITEM_IS_CURRENT+" INTEGER);";
+        db.execSQL(CREATE_TABLE);
+
+        {
+            SearchEngineItem searchEngineItem = new SearchEngineItem();
+            searchEngineItem.setSEItemTitle("Google");
+            searchEngineItem.setSEItemURL("https://www.google.com/search?q=");
+            searchEngineItem.setSEIsDefault(1);
+            searchEngineItem.setSEItemIsCurrent(1);
+
+            addSearchEngineItemsWhenCreation(db,searchEngineItem);
+        }
+
+        {
+            SearchEngineItem searchEngineItem = new SearchEngineItem();
+            searchEngineItem.setSEItemTitle("DuckDuckGo");
+            searchEngineItem.setSEItemURL("https://duckduckgo.com/?q=");
+            searchEngineItem.setSEIsDefault(1);
+            searchEngineItem.setSEItemIsCurrent(0);
+
+            addSearchEngineItemsWhenCreation(db,searchEngineItem);
+        }
+
+        {
+            SearchEngineItem searchEngineItem = new SearchEngineItem();
+            searchEngineItem.setSEItemTitle("Bing");
+            searchEngineItem.setSEItemURL("https://www.bing.com/search?q=");
+            searchEngineItem.setSEIsDefault(1);
+            searchEngineItem.setSEItemIsCurrent(0);
+
+            addSearchEngineItemsWhenCreation(db,searchEngineItem);
+        }
+
+    }
+
+    private void addSearchEngineItemsWhenCreation(SQLiteDatabase db, SearchEngineItem searchEngineItem)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(SE_ITEM_TITLE,searchEngineItem.getSEItemTitle());
+        contentValues.put(SE_ITEM_URL,searchEngineItem.getSEItemURL());
+        contentValues.put(SE_IS_DEFAULT,searchEngineItem.getSEIsDefault());
+        contentValues.put(SE_ITEM_IS_CURRENT,searchEngineItem.getSEItemIsCurrent());
+
+        db.insert(searchEnginesTBL,null,contentValues);
+    }
 
     private void createBookmarksTbl(SQLiteDatabase db)
     {
@@ -223,7 +321,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private void createUserPreferencesTbl(SQLiteDatabase db)
     {
         String CREATE_USER_PREFERENCES_TABLE = "CREATE TABLE IF NOT EXISTS "+ userPreferencesTBL +"("+UP_KEY_ID+" INTEGER PRIMARY KEY,"+
-                CURRENT_THEME_ID+" INTEGER,"+IS_DARK_WEB_UI+" INTEGER,"+DARK_THEME+" INTEGER,"+HOME_PAGE_URL+" TEXT);";
+                CURRENT_THEME_ID+" INTEGER,"+IS_DARK_WEB_UI+" INTEGER,"+DARK_THEME+" INTEGER,"+HOME_PAGE_URL+" TEXT,"+SEARCH_ENGINE_URL+
+                " TEXT);";
 
         db.execSQL(CREATE_USER_PREFERENCES_TABLE);
     }
@@ -533,6 +632,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(IS_DARK_WEB_UI, userPreferences.getIsDarkWebUI());
         values.put(DARK_THEME, userPreferences.getDarkTheme());
         values.put(HOME_PAGE_URL, userPreferences.getHomePageURL());
+        values.put(SEARCH_ENGINE_URL, userPreferences.getSearchEngineURL());
 
         writableDB.insert(userPreferencesTBL,null,values);
 
@@ -951,6 +1051,191 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 new String[]{date});
     }
 
+    public ArrayList<Integer> getAllSearchEngineItemIDs()
+    {
+        ArrayList<Integer> resultList = new ArrayList<>();
+
+        Cursor cursor = readableDB.query(searchEnginesTBL,new String[]{SE_KEY_ID},null,
+                null,null,null,null);
+
+        while (cursor.moveToNext())
+        {
+            resultList.add(cursor.getInt(cursor.getColumnIndexOrThrow(SE_KEY_ID)));
+        }
+
+        cursor.close();
+
+        return resultList;
+    }
+
+    public SearchEngineItem getCurrentSearchEngineItem()
+    {
+        Cursor cursor = readableDB.query(searchEnginesTBL,new String[]{SE_IS_DEFAULT,SE_ITEM_TITLE,SE_ITEM_URL,SE_ITEM_IS_CURRENT},SE_ITEM_IS_CURRENT+"=?",
+                new String[]{String.valueOf(1)},null,null,null);
+
+        SearchEngineItem searchEngineItem = new SearchEngineItem();
+
+        cursor.moveToFirst();
+        searchEngineItem.setSEIsDefault(cursor.getInt(cursor.getColumnIndexOrThrow(SE_IS_DEFAULT)));
+        searchEngineItem.setSEItemTitle(cursor.getString(cursor.getColumnIndexOrThrow(SE_ITEM_TITLE)));
+        searchEngineItem.setSEItemURL(cursor.getString(cursor.getColumnIndexOrThrow(SE_ITEM_URL)));
+        searchEngineItem.setSEItemIsCurrent(cursor.getInt(cursor.getColumnIndexOrThrow(SE_ITEM_IS_CURRENT)));
+
+        cursor.close();
+        return searchEngineItem;
+    }
+
+    public SearchEngineItem getSearchEngineItem(int id)
+    {
+        Cursor cursor = readableDB.query(searchEnginesTBL,new String[]{SE_KEY_ID,SE_IS_DEFAULT,SE_ITEM_TITLE,SE_ITEM_URL,SE_ITEM_IS_CURRENT},
+                SE_KEY_ID+"=?",
+                new String[]{String.valueOf(id)},null,null,null);
+
+        SearchEngineItem searchEngineItem = new SearchEngineItem();
+
+        cursor.moveToFirst();
+        searchEngineItem.setSEKeyId(cursor.getInt(cursor.getColumnIndexOrThrow(SE_KEY_ID)));
+        searchEngineItem.setSEIsDefault(cursor.getInt(cursor.getColumnIndexOrThrow(SE_IS_DEFAULT)));
+        searchEngineItem.setSEItemTitle(cursor.getString(cursor.getColumnIndexOrThrow(SE_ITEM_TITLE)));
+        searchEngineItem.setSEItemURL(cursor.getString(cursor.getColumnIndexOrThrow(SE_ITEM_URL)));
+        searchEngineItem.setSEItemIsCurrent(cursor.getInt(cursor.getColumnIndexOrThrow(SE_ITEM_IS_CURRENT)));
+
+        cursor.close();
+        return searchEngineItem;
+    }
+
+    public void updateOldSeId()
+    {
+        Cursor cursor = readableDB.query(searchEnginesTBL,new String[]{SE_KEY_ID},
+                SE_ITEM_IS_CURRENT+"=?",
+                new String[]{String.valueOf(1)},null,null,null);
+        int currentSEId;
+        cursor.moveToFirst();
+        currentSEId = cursor.getInt(cursor.getColumnIndexOrThrow(SE_KEY_ID));
+        cursor.close();
+
+        ContentValues values = new ContentValues();
+        values.put(SE_ITEM_IS_CURRENT,0);
+
+        writableDB.update(searchEnginesTBL,values,SE_KEY_ID + "=?",new String[]{String.valueOf(currentSEId)});
+    }
+
+    public void updateSearchEngineURL(String searchEngineURL)
+    {
+        ContentValues values = new ContentValues();
+        values.put(SEARCH_ENGINE_URL, searchEngineURL);
+
+        writableDB.update(userPreferencesTBL,values,UP_KEY_ID + "=?",new String[]{String.valueOf(1)});
+    }
+
+    public void updateSEIsCurrent(int id)
+    {
+        ContentValues values = new ContentValues();
+        values.put(SE_ITEM_IS_CURRENT, 1);
+
+        writableDB.update(searchEnginesTBL,values,SE_KEY_ID + "=?",new String[]{String.valueOf(id)});
+    }
+
+    public ArrayList<String> getAllSearchItems()
+    {
+        ArrayList<String> result = new ArrayList<>();
+        Cursor cursor = readableDB.query(searchItemTBL,new String[]{S_ITEM_TITLE},null,null,null,null,
+                S_KEY_ID + " DESC");
+
+        while (cursor.moveToNext())
+        {
+            result.add(cursor.getString(cursor.getColumnIndexOrThrow(S_ITEM_TITLE)));
+        }
+
+        cursor.close();
+        return result;
+    }
+
+    public ArrayList<String> getAllSearchItemsWithTitle(String title)
+    {
+        ArrayList<String> result = new ArrayList<>();
+        Cursor cursor = readableDB.query(searchItemTBL,new String[]{S_ITEM_TITLE},S_ITEM_TITLE + " LIKE ?",new String[]{"%"+title+"%"},
+                null,null,
+                S_KEY_ID + " DESC");
+
+        while (cursor.moveToNext())
+        {
+            result.add(cursor.getString(cursor.getColumnIndexOrThrow(S_ITEM_TITLE)));
+        }
+
+        cursor.close();
+        return result;
+    }
+
+    public Integer getIsSaveSearchHistory()
+    {
+
+//  todo      Cursor cursor = readableDB.query(siteSettingsTBL, new String[]{SS_SAVE_SEARCH_HISTORY}
+//                , SS_ID + "=?",
+//                new String[]{String.valueOf(1)}, null, null, null
+//        );
+//
+//
+//        cursor.moveToFirst();
+//
+//        Integer isSave = cursor.getInt(cursor.getColumnIndexOrThrow(SS_SAVE_SEARCH_HISTORY));
+//
+//
+//
+//        cursor.close();
+//
+//        return isSave;
+
+        return 1;
+    }
+
+    public ArrayList<Integer> getAllSearchHistoryItemsIDs()
+    {
+        ArrayList<Integer> result = new ArrayList<>();
+        Cursor cursor = readableDB.query(searchItemTBL,new String[]{S_KEY_ID},null,null,null,null,
+                null);
+
+        while (cursor.moveToNext())
+        {
+            result.add(cursor.getInt(cursor.getColumnIndexOrThrow(S_KEY_ID)));
+        }
+
+        cursor.close();
+        return result;
+    }
+
+    public ArrayList<Integer> getAllSearchItemsIDsWithTitleAs(String title)
+    {
+        ArrayList<Integer> result = new ArrayList<>();
+        Cursor cursor = readableDB.query(searchItemTBL,new String[]{S_KEY_ID},S_ITEM_TITLE + " LIKE ?",new String[]{"%"+title+"%"},
+                null,null,
+                S_KEY_ID + " DESC");
+
+        while (cursor.moveToNext())
+        {
+            result.add(cursor.getInt(cursor.getColumnIndexOrThrow(S_KEY_ID)));
+        }
+
+        cursor.close();
+        return result;
+    }
+
+    public String getSearchItemTitle(int id)
+    {
+        Cursor cursor = readableDB.query(searchItemTBL,new String[]{S_ITEM_TITLE},S_KEY_ID+"=?",
+                new String[]{String.valueOf(id)},null,null,null,null);
+
+        cursor.moveToFirst();
+        String result = cursor.getString(cursor.getColumnIndexOrThrow(S_ITEM_TITLE));
+        cursor.close();
+
+        return result;
+    }
+
+    public void deleteSearchItem(int id)
+    {
+        writableDB.delete(searchItemTBL,S_KEY_ID + "=?",new String[]{String.valueOf(id)});
+    }
 }
 
 

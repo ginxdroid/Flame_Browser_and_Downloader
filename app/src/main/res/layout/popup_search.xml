@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="?attr/colorSurface"
+    android:focusable="true"
+    android:focusableInTouchMode="true">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/guidLine"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="?attr/actionBarSize" />
+
+    <RelativeLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/et_background"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        app:layout_constraintTop_toTopOf="parent"
+        android:id="@+id/searchETRL"
+        app:layout_constraintBottom_toTopOf="@id/guidLine"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintVertical_bias="0.5">
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/controlsRL"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            >
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/voiceLauncherIB"
+                android:contentDescription="@string/voice_launcher_for_searching"
+                android:layout_centerInParent="true"
+                android:background="@drawable/unbound_small_ripple"
+                android:src="@drawable/round_keyboard_voice_24" />
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/closeSearchETHP"
+                android:contentDescription="@string/clear_text"
+                android:layout_centerInParent="true"
+                android:background="@drawable/unbound_small_ripple"
+                android:src="@drawable/close_background"
+                android:visibility="invisible"
+                />
+        </RelativeLayout>
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:id="@+id/innerSearchEngineIV"
+            android:contentDescription="@string/search_engine"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/round_search_24"
+            android:background="@drawable/unbound_small_ripple"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <com.ginxdroid.flamebrowseranddownloader.classes.CustomEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/popupSearchETHP"
+            android:layout_toStartOf="@id/controlsRL"
+            android:layout_toEndOf="@id/innerSearchEngineIV"
+            android:hint="@string/search_or_type_web_address"
+            android:maxLines="1"
+            android:imeOptions="actionGo"
+            android:inputType="textNoSuggestions"
+            android:scrollHorizontally="false"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:background="@null"
+            android:textColor="?attr/primaryText"
+            android:textColorHint="?attr/secondaryText"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp" />
+
+    </RelativeLayout>
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0.5dp"
+        android:background="?attr/dividerAndProgressColor"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/guidLine"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="0dp"
+        android:layout_height="?attr/actionBarSize"
+        android:id="@+id/cbMetaDataRL"
+        app:layout_constraintTop_toBottomOf="@id/guidLine"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageButton
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:id="@+id/loadCBIB"
+            android:background="@drawable/unbounded_light_ripple"
+            android:src="@drawable/round_arrow_forward_ios_24"
+            android:contentDescription="@string/load_now"
+
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/editCBIB"
+            app:layout_constraintHorizontal_chainStyle="spread"
+            app:layout_constraintHorizontal_weight="1.5" />
+
+
+        <ImageButton
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:id="@+id/editCBIB"
+            android:background="@drawable/unbounded_light_ripple"
+            android:src="@drawable/round_keyboard_return_24"
+            android:contentDescription="@string/edit"
+
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/loadCBIB"
+            app:layout_constraintStart_toEndOf="@id/contentLL"
+            app:layout_constraintHorizontal_weight="1.5" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:clickable="false"
+            android:focusable="false"
+            android:id="@+id/contentLL"
+
+            android:layout_marginStart="10dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/editCBIB"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintVertical_bias="0.5"
+            app:layout_constraintHorizontal_weight="7">
+
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textStyle="bold"
+                android:clickable="true"
+                android:focusable="true"
+                android:textColor="?attr/primaryText"
+                android:text="@string/clipboard_has" />
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fillViewport="true"
+                android:scrollbars="none"
+                android:layout_marginTop="2dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/clipBoardDataTV"
+                    android:maxLines="1"
+                    android:clickable="true"
+                    android:textColor="?attr/colorPrimary"
+                    android:focusable="true"
+                    android:text="@string/url" />
+
+            </HorizontalScrollView>
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0.5dp"
+            android:background="?attr/dividerAndProgressColor"
+
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintVertical_bias="1.0" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:id="@+id/searchRVHomePage"
+        android:overScrollMode="never"
+
+        app:layout_constraintTop_toBottomOf="@id/cbMetaDataRL"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

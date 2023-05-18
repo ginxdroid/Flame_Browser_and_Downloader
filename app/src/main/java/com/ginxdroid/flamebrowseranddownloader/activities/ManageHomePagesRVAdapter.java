@@ -144,6 +144,7 @@ public class ManageHomePagesRVAdapter extends RecyclerView.Adapter<ManageHomePag
         private final ImageButton hpDeleteIB;
         private final RadioButton hpRadioBtn;
 
+        @SuppressLint("NotifyDataSetChanged")
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 

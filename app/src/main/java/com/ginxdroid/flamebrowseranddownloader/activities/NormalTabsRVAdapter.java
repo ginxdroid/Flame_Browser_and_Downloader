@@ -2,10 +2,16 @@ package com.ginxdroid.flamebrowseranddownloader.activities;
 
 import static android.view.View.VISIBLE;
 
+import static com.ginxdroid.flamebrowseranddownloader.classes.ResourceFinder.getResId;
+
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -36,6 +42,7 @@ import android.view.ViewStub;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.CookieManager;
+import android.webkit.PermissionRequest;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
@@ -51,6 +58,8 @@ import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.Guideline;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.webkit.WebSettingsCompat;
@@ -62,8 +71,10 @@ import com.ginxdroid.flamebrowseranddownloader.R;
 import com.ginxdroid.flamebrowseranddownloader.classes.CustomEditText;
 import com.ginxdroid.flamebrowseranddownloader.classes.HelperTextUtility;
 import com.ginxdroid.flamebrowseranddownloader.models.HistoryItem;
+import com.ginxdroid.flamebrowseranddownloader.models.SearchEngineItem;
 import com.ginxdroid.flamebrowseranddownloader.sheets.MainMenuSheet;
 import com.google.android.material.bottomappbar.BottomAppBar;
+import com.google.android.material.button.MaterialButton;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -107,6 +118,13 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
     private NormalTabsRVAdapter.ViewHolder viewHolder;
     private final String fileDirPath,dumpPath;
     private boolean saveHistory;
+    Dialog searchDialog = null;
+    private String searchEngineURL;
+    boolean incognitoMode;
+    private final int WEB_REQUEST_RECORD_AUDIO = 11;
+
+    private PermissionRequest mPermissionRequest = null;
+
     public NormalTabsRVAdapter(Context context, MainActivity mainActivity,
                                CustomHorizontalManager customHorizontalManager, CoordinatorLayout recyclerViewContainer,
                                RecyclerView recyclerView, BottomAppBar bottomAppBar) {
@@ -116,6 +134,8 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
         this.recyclerViewContainer = recyclerViewContainer;
         this.recyclerView = recyclerView;
         this.bottomAppBar = bottomAppBar;
+
+        incognitoMode = false;
 
         fileDirPath = context.getFilesDir().getAbsolutePath()+ File.separator+ "favicon" + File.separator;
         dumpPath = fileDirPath + "no_file_ABC_XYZ";
@@ -146,8 +166,21 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
         });
 
         db = DatabaseHandler.getInstance(context);
+        SearchEngineItem searchEngineItem = db.getCurrentSearchEngineItem();
+        this.searchEngineURL = searchEngineItem.getSEItemURL();
+        try {
+            if(searchEngineItem.getSEIsDefault() == 1)
+            {
+                seFavResId = getResId(context,searchEngineItem.getSEItemTitle().toLowerCase(),"drawable",context.getPackageName());
+            }else {
+                seFavResId = R.drawable.round_search_24;
+            }
+        } catch (Exception e)
+        {
+            seFavResId = R.drawable.round_search_24;
+        }
 
-        seFavResId = R.drawable.round_search_24;
+
 
         isDarkWebUI = db.getDarkWebUI() == 1;
         javaScriptEnabled = true;
@@ -179,6 +212,81 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
         });
 
     }
+
+    void loadVoiceSearchQuery(String keyWord)
+    {
+
+        if(searchDialog!=null)
+        {
+            searchDialog.dismiss();
+        }
+
+        if(viewHolder.homePageCL.getVisibility()== VISIBLE)
+        {
+            viewHolder.setClearHistory();
+        }
+        viewHolder.homePageCL.setVisibility(View.INVISIBLE);
+        viewHolder.isHPCVisible = false;
+
+        viewHolder.webViewContainer.setVisibility(VISIBLE);
+
+
+        String url = viewHolder.holderUtility.checkAndGet(keyWord);
+
+        viewHolder.webView.evaluateJavascript("javascript:document.open();document.close();",null);
+        viewHolder.webView.loadUrl(url);
+
+        if(!viewHolder.isProgressBarVisible)
+        {
+            viewHolder.makeProgressBarVisible();
+        }
+
+        setDecorations(url, viewHolder);
+    }
+
+    void setSearchFaviconResId(int seFavResId, String searchEngineURL)
+    {
+        this.seFavResId = seFavResId;
+        this.searchEngineURL = searchEngineURL;
+    }
+
+    void setSearchFaviconOnResume()
+    {
+        SearchEngineItem searchEngineItem = db.getCurrentSearchEngineItem();
+        this.searchEngineURL = searchEngineItem.getSEItemURL();
+        try {
+            if(searchEngineItem.getSEIsDefault() == 1)
+            {
+                seFavResId = getResId(context,searchEngineItem.getSEItemTitle().toLowerCase(),"drawable",context.getPackageName());
+            }else {
+                seFavResId = R.drawable.round_search_24;
+            }
+        } catch (Exception e)
+        {
+            seFavResId = R.drawable.round_search_24;
+        }finally {
+            if(viewHolder != null)
+            {
+                viewHolder.emptyCV.callMiniSetNow();
+            }
+        }
+    }
+
+    void setSearchEngineURL(String searchEngineURL)
+    {
+        this.searchEngineURL = searchEngineURL;
+    }
+
+    void setSeFavResId(int seFavResId)
+    {
+        this.seFavResId = seFavResId;
+    }
+
+    String getSearchEngineURL()
+    {return searchEngineURL;}
+
+    int getSeFavResId()
+    {return seFavResId;}
 
     String getFileDirPath()
     {
@@ -609,10 +717,12 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
 
         private boolean isLayoutInvisible;
 
-        private final ImageView connectionInformationIB, connectionInformationIBInner;
+        private final ConstraintLayout tabFSControlsInner;
+        private final ImageView connectionInformationIB;
+        final ImageView connectionInformationIBInner;
 
         private final ConstraintLayout outerL;
-        private final CustomEditText searchEditText;
+        private final CustomEditText searchEditText, searchEditTextInner;
 
         private final ProgressBar progressBar;
 
@@ -649,6 +759,8 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
         private boolean requireScroll = false;
 
         private final ArrayMap<String, Float> scrollURLAM = new ArrayMap<>();
+
+        private AlertDialog confirmationDialog = null,innerConfirmationDialog = null, drmDialog = null;
 
         private void putScrollPosition()
         {
@@ -1009,8 +1121,11 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
             dividerView = outerL.findViewById(R.id.dividerView);
             tabFSControlsRL = outerL.findViewById(R.id.tabFSControlsRL);
 
+            ImageButton voiceLauncherIBTab = tabFSControlsRL.findViewById(R.id.voiceLauncherIBTab);
+            voiceLauncherIBTab.setOnClickListener(ViewHolder.this);
             connectionInformationIB = tabFSControlsRL.findViewById(R.id.connectionInformationIB);
             searchEditText = tabFSControlsRL.findViewById(R.id.searchEditText);
+            searchEditText.setMovementMethod(null);
 
             emptyFrameRL = itemView.findViewById(R.id.emptyFrameRL);
             emptyFrameLRL = emptyFrameRL.findViewById(R.id.emptyFrameLRL);
@@ -1036,7 +1151,66 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
             tabsCountChildTVHP = tabsCountChildTVHPRL.findViewById(R.id.tabsCountChildTVHP);
 
             homePageCL = itemView.findViewById(R.id.homePageCL);
-            connectionInformationIBInner = homePageCL.findViewById(R.id.connectionInformationIBInner);
+            tabFSControlsInner = homePageCL.findViewById(R.id.tabFSControlsInner);
+            connectionInformationIBInner = tabFSControlsInner.findViewById(R.id.connectionInformationIBInner);
+            ImageButton voiceLauncherIBTabInner = tabFSControlsInner.findViewById(R.id.voiceLauncherIBTabInner);
+            voiceLauncherIBTabInner.setOnClickListener(ViewHolder.this);
+            searchEditTextInner = tabFSControlsInner.findViewById(R.id.searchEditTextInner);
+            searchEditTextInner.setMovementMethod(null);
+
+            searchEditTextInner.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View view, boolean hasFocus) {
+                    if(hasFocus)
+                    {
+                     searchEditTextInner.clearFocus();
+                     try {
+                         if(isHPCVisible)
+                         {
+                             holderUtility.openSearchPopup("");
+                         }else {
+                             if(!TextUtils.isEmpty(webViewURLString))
+                             {
+                                 holderUtility.openSearchPopup(webViewURLString);
+                             } else {
+                                 holderUtility.openSearchPopup("");
+                             }
+                         }
+                     } catch (Exception e)
+                     {
+                         holderUtility.openSearchPopup("");
+                     }
+                    }
+                }
+            });
+
+            searchEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View view, boolean hasFocus) {
+                    if(hasFocus)
+                    {
+                        searchEditText.clearFocus();
+                        try {
+                            if(isHPCVisible)
+                            {
+                                holderUtility.openSearchPopup("");
+                            }else {
+                                if(!TextUtils.isEmpty(webViewURLString))
+                                {
+                                    holderUtility.openSearchPopup(webViewURLString);
+                                } else {
+                                    holderUtility.openSearchPopup("");
+                                }
+                            }
+                        } catch (Exception e)
+                        {
+                            holderUtility.openSearchPopup("");
+                        }
+                    }
+                }
+            });
+
+
             quickLinksRV = homePageCL.findViewById(R.id.quickLinksRV);
             quickLinksRVHomePageAdapter = new QuickLinksRVHomePageAdapter(db,context,NormalTabsRVAdapter.this,
                     ViewHolder.this,mainActivity,inflater);
@@ -1059,6 +1233,8 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
             emptyCV.setListener(new CustomMCV.SetterListener() {
                 @Override
                 public void miniSetNow() {
+                    connectionInformationIBInner.setImageResource(0);
+                    connectionInformationIBInner.setImageResource(seFavResId);
                     setQL();
                 }
 
@@ -1095,6 +1271,169 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
             connectionInformationIB.setOnClickListener(ViewHolder.this);
 
             webChromeClient = new WebChromeClient(){
+
+                @Override
+                public void onPermissionRequest(PermissionRequest request) {
+                    try {
+                        String[] resources = request.getResources();
+                        for(String r : resources)
+                        {
+                            if(r.equals(PermissionRequest.RESOURCE_AUDIO_CAPTURE))
+                            {
+                                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+                                View layout = inflater.inflate(R.layout.popup_web_microphone_allow_or_not, recyclerViewContainer, false);
+                                TextView domainTV = layout.findViewById(R.id.domainTV);
+                                try {
+                                    URL aURL = new URL(webViewURLString);
+                                    String finalString = aURL.getHost() + context.getString(R.string.want_to_use_your_microphone);
+                                    domainTV.setText(finalString);
+                                }catch (Exception ignored){}
+
+                                dialogBuilder.setView(layout);
+                                confirmationDialog = dialogBuilder.create();
+                                confirmationDialog.setCanceledOnTouchOutside(false);
+                                confirmationDialog.setCancelable(false);
+
+                                final MaterialButton blockBtn, allowBtn;
+                                blockBtn = layout.findViewById(R.id.blockBtn);
+                                allowBtn = layout.findViewById(R.id.allowBtn);
+
+                                mPermissionRequest = request;
+                                confirmationDialog.setOnDismissListener(dialogInterface -> confirmationDialog = null);
+
+                                blockBtn.setOnClickListener(view -> {
+                                    denyWebVoicePermissionRequest();
+                                    confirmationDialog.dismiss();
+                                });
+
+                                allowBtn.setOnClickListener(view1 -> {
+                                    confirmationDialog.dismiss();
+
+                                    if(ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED)
+                                    {
+                                        grantWebVoicePermissionRequest();
+                                    } else {
+                                        if(ActivityCompat.shouldShowRequestPermissionRationale(mainActivity,Manifest.permission.RECORD_AUDIO))
+                                        {
+                                            //Explain to the user why we needed this permission
+                                            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                                            View view = inflater.inflate(R.layout.popup_permission_needed,
+                                                    recyclerViewContainer,false);
+
+                                            TextView whyNeededTV = view.findViewById(R.id.whyNeededTV);
+                                            whyNeededTV.setText(R.string.why_need_microphone_permission);
+
+                                            builder.setView(view);
+                                            innerConfirmationDialog = builder.create();
+
+                                            MaterialButton grantPermissionDialogBtn,closePermissionDialogBtn;
+                                            grantPermissionDialogBtn = view.findViewById(R.id.grantPermissionDialogBtn);
+                                            closePermissionDialogBtn = view.findViewById(R.id.closePermissionDialogBtn);
+
+                                            grantPermissionDialogBtn.setOnClickListener(view11 -> {
+                                                innerConfirmationDialog.dismiss();
+                                                ActivityCompat.requestPermissions(mainActivity,
+                                                        new String[]{Manifest.permission.RECORD_AUDIO},WEB_REQUEST_RECORD_AUDIO);
+                                            });
+
+                                            closePermissionDialogBtn.setOnClickListener(view12 -> innerConfirmationDialog.dismiss());
+
+                                            innerConfirmationDialog.setOnDismissListener(dialogInterface -> innerConfirmationDialog = null);
+
+                                            innerConfirmationDialog.setCancelable(true);
+                                            innerConfirmationDialog.setCanceledOnTouchOutside(true);
+                                            innerConfirmationDialog.show();
+                                        } else {
+                                            ActivityCompat.requestPermissions(mainActivity,new String[]{Manifest.permission.RECORD_AUDIO},
+                                                    WEB_REQUEST_RECORD_AUDIO);
+                                        }
+                                    }
+                                });
+
+                                if(isLayoutInvisible)
+                                {
+                                    confirmationDialog.show();
+                                }
+
+                            } else if(r.equals(PermissionRequest.RESOURCE_PROTECTED_MEDIA_ID))
+                            {
+                                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                                View layout = inflater.inflate(R.layout.popup_location_allow_or_not, recyclerViewContainer, false);
+                                TextView domainTV = layout.findViewById(R.id.domainTV);
+
+                                domainTV.setCompoundDrawablesWithIntrinsicBounds(R.drawable.round_info_24,0,0,0);
+
+                                try {
+                                    URL aURL = new URL(webViewURLString);
+                                    String finalString = aURL.getHost() + context.getString(R.string.wants_to_play_drm_protected_content);
+                                    domainTV.setText(finalString);
+                                }catch (Exception ignored){}
+
+                                builder.setView(layout);
+                                drmDialog = builder.create();
+                                drmDialog.setCanceledOnTouchOutside(false);
+                                drmDialog.setCancelable(false);
+
+                                final MaterialButton blockBtn, allowBtn;
+                                blockBtn = layout.findViewById(R.id.blockBtn);
+                                allowBtn = layout.findViewById(R.id.allowBtn);
+
+                                mPermissionRequest = request;
+                                drmDialog.setOnDismissListener(dialogInterface -> drmDialog = null);
+
+                                blockBtn.setOnClickListener(view -> {
+                                    request.deny();
+                                    drmDialog.dismiss();
+                                });
+
+                                allowBtn.setOnClickListener(view -> {
+                                    request.grant(resources);
+                                    drmDialog.dismiss();
+
+                                });
+
+                                if(isLayoutInvisible)
+                                {
+                                    drmDialog.show();
+                                }
+
+                            } else {
+                                showToastFromMainActivity(R.string.unable_to_grant_permission);
+                            }
+                        }
+                    } catch (ActivityNotFoundException e)
+                    {
+                        showToastFromMainActivity(R.string.activity_for_handling_voice_search_is_not_found);
+                    } catch (Exception e)
+                    {
+                        showToastFromMainActivity(R.string.oops_general_message);
+                    }
+
+
+                }
+
+                @Override
+                public void onPermissionRequestCanceled(PermissionRequest request) {
+
+                    //We dismiss the prompt UI here as the request is no longer valid
+                    try {
+                        mPermissionRequest = null;
+                        if(confirmationDialog != null)
+                        {
+                            confirmationDialog.dismiss();
+                        }
+
+                        if(innerConfirmationDialog != null)
+                        {
+                            innerConfirmationDialog.dismiss();
+                        }
+
+                        if(drmDialog != null)
+                        {
+                            drmDialog.dismiss();
+                        }
+                    } catch (Exception ignored) {}
+                }
 
                 private String titleURL = " ";
                 @Override
@@ -1500,6 +1839,19 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
 
         }
 
+        void denyWebVoicePermissionRequest()
+        {
+            mPermissionRequest.deny();
+            mPermissionRequest = null;
+        }
+
+        void grantWebVoicePermissionRequest()
+        {
+            mPermissionRequest.grant(mPermissionRequest.getResources());
+            mPermissionRequest = null;
+        }
+
+
         private class DrawBitmap extends Thread{
             public DrawBitmap()
             {}
@@ -1619,6 +1971,16 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
 
             setQL();
             setTabCountTVText(getItemCount(), tabsCountChildTVHP);
+
+            if(confirmationDialog != null)
+            {
+                confirmationDialog.show();
+            }
+
+            if(drmDialog != null)
+            {
+                drmDialog.show();
+            }
         }
 
         private void stopService()
@@ -1713,7 +2075,22 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
                 }catch (Exception ignored){}
             }else if(id == R.id.searchIB)
             {
-
+                try {
+                    if(isHPCVisible)
+                    {
+                        holderUtility.openSearchPopup("");
+                    }else {
+                        if(!TextUtils.isEmpty(webViewURLString))
+                        {
+                            holderUtility.openSearchPopup(webViewURLString);
+                        } else {
+                            holderUtility.openSearchPopup("");
+                        }
+                    }
+                } catch (Exception e)
+                {
+                    holderUtility.openSearchPopup("");
+                }
             }else if(id == R.id.showMoreIB)
             {
                 try{
@@ -1772,7 +2149,10 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
 
             }else if(id == R.id.connectionInformationIBInner)
             {
-
+                holderUtility.showSearchEnginesPopup(connectionInformationIBInner,null);
+            } else if(id == R.id.voiceLauncherIBTab || id == R.id.voiceLauncherIBTabInner)
+            {
+                holderUtility.checkAndLaunchVoiceLauncher();
             }
         }
 

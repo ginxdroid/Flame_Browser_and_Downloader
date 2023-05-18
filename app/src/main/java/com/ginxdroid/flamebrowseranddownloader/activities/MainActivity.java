@@ -1,19 +1,34 @@
 package com.ginxdroid.flamebrowseranddownloader.activities;
 
+import android.Manifest;
+import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
+import android.provider.Settings;
+import android.speech.RecognizerIntent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -44,6 +59,163 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
     private RecyclerView normalTabsRV;
     private NormalTabsRVAdapter normalTabsRVAdapter;
     private CustomHorizontalManager customHorizontalManager;
+
+    final ActivityResultLauncher<Intent> voiceLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    try {
+                        if(result.getResultCode() == Activity.RESULT_OK)
+                        {
+                            Intent data = result.getData();
+                            if(data != null)
+                            {
+                                ArrayList<String> strings = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                                if(strings != null)
+                                {
+                                    String keyword = strings.get(0);
+                                    normalTabsRVAdapter.loadVoiceSearchQuery(keyword);
+                                }
+                            }
+                        }
+                    } catch (Exception e)
+                    {
+                        showToast(R.string.oops_general_message);
+                    }
+                }
+            });
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        try {
+            final int VOICE_RECORD_REQUEST_PERMISSION_CODE = 2;
+            final int WEB_REQUEST_RECORD_AUDIO = 11;
+            switch (requestCode)
+            {
+                case VOICE_RECORD_REQUEST_PERMISSION_CODE:
+                    if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.RECORD_AUDIO) ==
+                            PackageManager.PERMISSION_GRANTED)
+                    {
+                        try {
+                            Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,"en-US");
+                            voiceLauncher.launch(intent);
+                        } catch (ActivityNotFoundException e)
+                        {
+                            showToast(R.string.activity_for_handling_voice_search_is_not_found);
+                        } catch (Exception e1)
+                        {
+                            showToast(R.string.oops_general_message);
+                        }
+                    } else if(!ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
+                            Manifest.permission.RECORD_AUDIO))
+                    {
+                        // User selects NEVER ASK AGAIN option
+
+                        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                        View view = normalTabsRVAdapter.getLayoutInflater().inflate(R.layout.popup_now_goto_settings,
+                                recyclerViewContainer,false);
+
+                        TextView goWhereAndWhatTV = view.findViewById(R.id.goWhereAndWhatTV);
+                        goWhereAndWhatTV.setText(R.string.goto_settings_microphone);
+
+                        builder.setView(view);
+                        final AlertDialog dialog = builder.create();
+
+                        MaterialButton nowGotoSettingsBtn,closeGotoSettingsDialogBtn;
+                        nowGotoSettingsBtn = view.findViewById(R.id.nowGotoSettingsBtn);
+                        closeGotoSettingsDialogBtn = view.findViewById(R.id.closeGotoSettingsDialogBtn);
+
+                        nowGotoSettingsBtn.setOnClickListener(view1 -> {
+                            dialog.dismiss();
+                            Intent intent = new Intent();
+                            intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                            intent.addCategory(Intent.CATEGORY_DEFAULT);
+                            intent.setData(Uri.parse("package:"+MainActivity.this.getPackageName()));
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                            startActivity(intent);
+                        });
+
+                        closeGotoSettingsDialogBtn.setOnClickListener(view12 -> dialog.dismiss());
+
+                        dialog.setCancelable(true);
+                        dialog.setCanceledOnTouchOutside(true);
+                        dialog.show();
+
+                    } else {
+                        showToast(R.string.permission_denied);
+                    }
+                    break;
+                case WEB_REQUEST_RECORD_AUDIO:
+                    if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.RECORD_AUDIO) ==
+                            PackageManager.PERMISSION_GRANTED)
+                    {
+                        try {
+                            normalTabsRVAdapter.getViewHolder().grantWebVoicePermissionRequest();
+                        } catch (ActivityNotFoundException e)
+                        {
+                            showToast(R.string.activity_for_handling_voice_search_is_not_found);
+                        } catch (Exception e1)
+                        {
+                            showToast(R.string.oops_general_message);
+                        }
+                    } else if(!ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
+                            Manifest.permission.RECORD_AUDIO))
+                    {
+                        // User selects NEVER ASK AGAIN option
+
+                        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                        View view = normalTabsRVAdapter.getLayoutInflater().inflate(R.layout.popup_now_goto_settings,
+                                recyclerViewContainer,false);
+
+                        TextView goWhereAndWhatTV = view.findViewById(R.id.goWhereAndWhatTV);
+                        goWhereAndWhatTV.setText(R.string.goto_settings_microphone);
+
+                        builder.setView(view);
+                        final AlertDialog dialog = builder.create();
+
+                        MaterialButton nowGotoSettingsBtn,closeGotoSettingsDialogBtn;
+                        nowGotoSettingsBtn = view.findViewById(R.id.nowGotoSettingsBtn);
+                        closeGotoSettingsDialogBtn = view.findViewById(R.id.closeGotoSettingsDialogBtn);
+
+                        nowGotoSettingsBtn.setOnClickListener(view1 -> {
+                            dialog.dismiss();
+                            Intent intent = new Intent();
+                            intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                            intent.addCategory(Intent.CATEGORY_DEFAULT);
+                            intent.setData(Uri.parse("package:"+MainActivity.this.getPackageName()));
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                            startActivity(intent);
+                        });
+
+                        closeGotoSettingsDialogBtn.setOnClickListener(view12 -> dialog.dismiss());
+
+                        dialog.setCancelable(true);
+                        dialog.setCanceledOnTouchOutside(true);
+                        dialog.show();
+
+                        normalTabsRVAdapter.getViewHolder().denyWebVoicePermissionRequest();
+
+
+                    } else {
+                        showToast(R.string.permission_denied);
+
+                        normalTabsRVAdapter.getViewHolder().denyWebVoicePermissionRequest();
+                    }
+
+                    break;
+
+                }
+
+            } catch (Exception e)
+            {
+                showToast(R.string.oops_general_message);
+            }
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,6 +283,7 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
 
 
             userPreferences.setHomePageURL("NewTab");
+            userPreferences.setSearchEngineURL("https://www.google.com/search?q=");
             db.addUserPreferences(userPreferences);
 
             HomePageItem homePageItem = new HomePageItem();
@@ -176,6 +349,14 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
         }finally {
             initCommon();
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        try {
+            normalTabsRVAdapter.setSearchFaviconOnResume();
+        } catch (Exception ignored) {}
     }
 
     private void initCommon()

@@ -53,37 +53,12 @@
                 android:padding="4dp"
                 android:textAppearance="?textAppearanceSubtitle1" />
 
-            <LinearLayout
+            <com.google.android.material.button.MaterialButton
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/searchEngineLL"
-                android:orientation="vertical"
-                android:clickable="true"
-                android:focusable="true"
-                style="@style/CustomMenuButtonStyle"
-                >
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/search_engine"
-                    android:layout_gravity="start"
-                    android:textAppearance="?textAppearanceButton"
-                    android:clickable="false"
-                    android:focusable="false" />
-
-                <com.google.android.material.textview.MaterialTextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/searchEngineTVSettings"
-                    android:text="@string/value"
-                    android:clickable="false"
-                    android:focusable="false"
-                    android:textAppearance="?textAppearanceCaption"
-                    android:layout_gravity="start"
-                    android:textColor="?attr/secondaryText" />
-
-            </LinearLayout>
+                android:id="@+id/searchEngineTV"
+                android:text="@string/search_engine"
+                style="@style/CustomMenuButtonStyle" />
 
             <View
                 android:layout_width="match_parent"

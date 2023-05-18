@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="?attr/actionBarSize"
+    android:id="@+id/searchItemRL"
+    android:clickable="true"
+    android:focusable="true">
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:id="@+id/enterSearchItemIB"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:background="@drawable/unbounded_light_ripple"
+        android:src="@drawable/round_keyboard_return_24"
+        android:contentDescription="@string/enter" />
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:id="@+id/faviconIB"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:background="@drawable/unbounded_light_ripple"
+        android:src="@drawable/round_search_24"
+        android:contentDescription="@string/enter" />
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fillViewport="true"
+        android:scrollbars="none"
+        android:layout_toStartOf="@id/enterSearchItemIB"
+        android:layout_toEndOf="@id/faviconIB"
+        android:layout_centerVertical="true">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/searchItemTitle"
+            android:maxLines="1"
+            android:gravity="center_vertical"
+            android:textColor="?attr/primaryText"
+            android:textAppearance="?textAppearanceHeadline7"
+            android:clickable="true"
+            android:focusable="true"
+            android:text="@string/value" />
+
+    </HorizontalScrollView>
+
+</RelativeLayout>

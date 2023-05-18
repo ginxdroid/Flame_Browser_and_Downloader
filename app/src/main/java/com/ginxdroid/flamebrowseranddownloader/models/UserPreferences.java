@@ -9,6 +9,7 @@ public class UserPreferences {
     private Integer darkTheme;
 
     private String homePageURL;
+    private String searchEngineURL;
 
 
     public UserPreferences() {
@@ -52,5 +53,13 @@ public class UserPreferences {
 
     public void setHomePageURL(String homePageURL) {
         this.homePageURL = homePageURL;
+    }
+
+    public String getSearchEngineURL() {
+        return searchEngineURL;
+    }
+
+    public void setSearchEngineURL(String searchEngineURL) {
+        this.searchEngineURL = searchEngineURL;
     }
 }
