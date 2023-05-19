@@ -42,6 +42,7 @@ import android.view.ViewStub;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.CookieManager;
+import android.webkit.GeolocationPermissions;
 import android.webkit.PermissionRequest;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
@@ -72,6 +73,7 @@ import com.ginxdroid.flamebrowseranddownloader.classes.CustomEditText;
 import com.ginxdroid.flamebrowseranddownloader.classes.HelperTextUtility;
 import com.ginxdroid.flamebrowseranddownloader.models.HistoryItem;
 import com.ginxdroid.flamebrowseranddownloader.models.SearchEngineItem;
+import com.ginxdroid.flamebrowseranddownloader.models.SiteSettingsModel;
 import com.ginxdroid.flamebrowseranddownloader.sheets.MainMenuSheet;
 import com.google.android.material.bottomappbar.BottomAppBar;
 import com.google.android.material.button.MaterialButton;
@@ -124,6 +126,9 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
     private final int WEB_REQUEST_RECORD_AUDIO = 11;
 
     private PermissionRequest mPermissionRequest = null;
+    private final SiteSettingsModel siteSettingsModel;
+    private String callbackOrigin = null;
+    private GeolocationPermissions.Callback geoLocationCallback = null;
 
     public NormalTabsRVAdapter(Context context, MainActivity mainActivity,
                                CustomHorizontalManager customHorizontalManager, CoordinatorLayout recyclerViewContainer,
@@ -151,10 +156,9 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
 
         viewPool = new RecyclerView.RecycledViewPool();
 
-        cookieManager = CookieManager.getInstance();
-        cookieManager.setAcceptCookie(true);
-        enableThirdPartyCookies = true;
-        saveHistory = true;
+
+
+
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -166,6 +170,7 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
         });
 
         db = DatabaseHandler.getInstance(context);
+        siteSettingsModel = db.getSiteSettings();
         SearchEngineItem searchEngineItem = db.getCurrentSearchEngineItem();
         this.searchEngineURL = searchEngineItem.getSEItemURL();
         try {
@@ -183,8 +188,29 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
 
 
         isDarkWebUI = db.getDarkWebUI() == 1;
-        javaScriptEnabled = true;
-        askLocation = true;
+
+        saveHistory = siteSettingsModel.getSsSaveSitesInHistory() == 1;
+        javaScriptEnabled = siteSettingsModel.getSsJavaScript() == 1;
+
+        cookieManager = CookieManager.getInstance();
+
+        switch (siteSettingsModel.getSsCookies())
+        {
+            case 0:
+                cookieManager.setAcceptCookie(true);
+                enableThirdPartyCookies = true;
+                break;
+            case 1:
+                cookieManager.setAcceptCookie(true);
+                enableThirdPartyCookies = false;
+                break;
+            case 2:
+                cookieManager.setAcceptCookie(false);
+                enableThirdPartyCookies = false;
+                break;
+        }
+
+        askLocation = siteSettingsModel.getSsLocation() == 1;
 
         inflater = LayoutInflater.from(context);
         customHorizontalManager.setNormalTabsRVAdapter(NormalTabsRVAdapter.this);
@@ -211,6 +237,25 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
             setSpecs(width,height);
         });
 
+    }
+
+
+    void invokeGeolocationCallback(boolean invoke)
+    {
+        geoLocationCallback.invoke(callbackOrigin,invoke,false);
+        geoLocationCallback = null;
+        callbackOrigin = null;
+    }
+
+    void setIncognitoMode(boolean incognitoMode)
+    {
+        this.incognitoMode = incognitoMode;
+        if(incognitoMode)
+        {
+            saveHistory = false;
+        } else {
+            saveHistory = siteSettingsModel.getSsSaveSitesInHistory() == 1;
+        }
     }
 
     void loadVoiceSearchQuery(String keyWord)
@@ -760,7 +805,8 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
 
         private final ArrayMap<String, Float> scrollURLAM = new ArrayMap<>();
 
-        private AlertDialog confirmationDialog = null,innerConfirmationDialog = null, drmDialog = null;
+        private AlertDialog confirmationDialog = null,innerConfirmationDialog = null, drmDialog = null,
+                    locationDialog = null;
 
         private void putScrollPosition()
         {
@@ -1271,6 +1317,105 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
             connectionInformationIB.setOnClickListener(ViewHolder.this);
 
             webChromeClient = new WebChromeClient(){
+
+                @Override
+                public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
+                    if(askLocation && !isHPCVisible)
+                    {
+                        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+                        View layout = inflater.inflate(R.layout.popup_location_allow_or_not,recyclerViewContainer,false);
+                        TextView domainTV = layout.findViewById(R.id.domainTV);
+                        domainTV.setCompoundDrawablesWithIntrinsicBounds(R.drawable.round_info_24,0,0,0);
+
+                        try {
+                            URL aURL = new URL(webViewURLString);
+                            String finalString = aURL.getHost() + context.getString(R.string.wants_to_use_your_device_location);
+                            domainTV.setText(finalString);
+                        }catch (Exception e){
+                            domainTV.setText(R.string.this_site_wants_to_use_device_location);
+                        }
+
+                        dialogBuilder.setView(layout);
+                        locationDialog = dialogBuilder.create();
+
+                        locationDialog.setCanceledOnTouchOutside(false);
+                        locationDialog.setCancelable(false);
+
+                        final MaterialButton blockBtn, allowBtn;
+                        blockBtn = layout.findViewById(R.id.blockBtn);
+                        allowBtn = layout.findViewById(R.id.allowBtn);
+
+                        callbackOrigin = origin;
+                        geoLocationCallback = callback;
+
+                        locationDialog.setOnDismissListener(dialogInterface -> locationDialog = null);
+
+                        blockBtn.setOnClickListener(view13 -> {
+                            geoLocationCallback.invoke(callbackOrigin,false,false);
+                            geoLocationCallback = null;
+                            callbackOrigin = null;
+                            locationDialog.dismiss();
+                        });
+
+                        allowBtn.setOnClickListener(view14 -> {
+                            locationDialog.dismiss();
+                            if(ContextCompat.checkSelfPermission(context,Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                            || ContextCompat.checkSelfPermission(context,Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+                            {
+                                geoLocationCallback.invoke(callbackOrigin,true,false);
+                                geoLocationCallback = null;
+                                callbackOrigin = null;
+                            } else {
+                                if(ActivityCompat.shouldShowRequestPermissionRationale(mainActivity,Manifest.permission.ACCESS_FINE_LOCATION) ||
+                                        ActivityCompat.shouldShowRequestPermissionRationale(mainActivity,Manifest.permission.ACCESS_COARSE_LOCATION))
+                                {
+                                    //Explain to the user why we needed this permission
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                                    View view = inflater.inflate(R.layout.popup_permission_needed,
+                                            recyclerViewContainer,false);
+
+                                    TextView whyNeededTV = view.findViewById(R.id.whyNeededTV);
+                                    whyNeededTV.setText(R.string.why_need_location_permission);
+
+                                    builder.setView(view);
+                                    final AlertDialog dialog = builder.create();
+
+                                    MaterialButton grantPermissionDialogBtn,closePermissionDialogBtn;
+                                    grantPermissionDialogBtn = view.findViewById(R.id.grantPermissionDialogBtn);
+                                    closePermissionDialogBtn = view.findViewById(R.id.closePermissionDialogBtn);
+
+                                    grantPermissionDialogBtn.setOnClickListener(view11 -> {
+                                        dialog.dismiss();
+                                        mainActivity.locationPermissionRequest.launch(new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
+                                                Manifest.permission.ACCESS_COARSE_LOCATION});
+
+                                    });
+
+                                    closePermissionDialogBtn.setOnClickListener(view12 -> dialog.dismiss());
+
+                                    dialog.setCancelable(true);
+                                    dialog.setCanceledOnTouchOutside(true);
+                                    dialog.show();
+                                }
+                                else {
+                                    mainActivity.locationPermissionRequest.launch(new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
+                                            Manifest.permission.ACCESS_COARSE_LOCATION});
+                                }
+
+                            }
+                        });
+
+
+                        if(isLayoutInvisible)
+                        {
+                            locationDialog.show();
+                        }
+
+                    } else {
+                        callback.invoke(callbackOrigin,false,false);
+                    }
+                    super.onGeolocationPermissionsShowPrompt(origin, callback);
+                }
 
                 @Override
                 public void onPermissionRequest(PermissionRequest request) {
@@ -1980,6 +2125,11 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
             if(drmDialog != null)
             {
                 drmDialog.show();
+            }
+
+            if(locationDialog != null)
+            {
+                locationDialog.show();
             }
         }
 

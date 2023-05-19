@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:clickable="true"
+    android:focusable="true"
+    android:padding="10dp"
+    >
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/note"
+        android:textAppearance="?textAppearanceHeadline6"
+        android:layout_gravity="center_horizontal"
+        android:textColor="?attr/primaryText"/>
+
+
+
+
+
+
+    <TextView
+        android:id="@+id/messageTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/cookie_message"
+        android:textAppearance="?textAppearanceSubtitle1"
+        android:textColor="?attr/primaryText"
+        android:layout_marginTop="10dp"
+        />
+
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/closeButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/ok"
+        android:layout_marginTop="10dp"
+        style="@style/CustomFilledButton"
+        />
+
+</LinearLayout>

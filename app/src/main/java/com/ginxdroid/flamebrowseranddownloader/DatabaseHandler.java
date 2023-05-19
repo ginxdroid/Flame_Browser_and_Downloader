@@ -12,6 +12,7 @@ import com.ginxdroid.flamebrowseranddownloader.models.HomePageItem;
 import com.ginxdroid.flamebrowseranddownloader.models.QuickLinkModel;
 import com.ginxdroid.flamebrowseranddownloader.models.SearchEngineItem;
 import com.ginxdroid.flamebrowseranddownloader.models.SearchItem;
+import com.ginxdroid.flamebrowseranddownloader.models.SiteSettingsModel;
 import com.ginxdroid.flamebrowseranddownloader.models.ThemeModel;
 import com.ginxdroid.flamebrowseranddownloader.models.UserPreferences;
 
@@ -20,6 +21,17 @@ import java.util.ArrayList;
 public class DatabaseHandler extends SQLiteOpenHelper {
     private static DatabaseHandler instance = null;
     private static SQLiteDatabase readableDB, writableDB;
+
+    private final String siteSettingsTBL = "siteSettingsTBL";
+    //Site settings table columns
+
+    private final String SS_ID = "sId";
+    private final String SS_JAVA_SCRIPT = "sJavaScript";
+    private final String SS_LOCATION = "sLocation";
+    private final String SS_COOKIES = "sCookies";
+    private final String SS_SAVE_SITES_IN_HISTORY = "sSaveSitesInHistory";
+    private final String SS_SAVE_SEARCH_HISTORY = "sSaveSearchHistory";
+    private final String SS_IS_CHANGED = "sIsChanged";
 
     private final String userPreferencesTBL="userPreferencesTBL";
 
@@ -109,7 +121,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     }
 
-
+    public void deleteSearchHistory()
+    {
+        writableDB.delete(searchItemTBL,null,null);
+    }
     private void createQuickLinkTBL(SQLiteDatabase db)
     {
         String CREATE_QUICK_LINKS_TABLE = "CREATE TABLE IF NOT EXISTS "+quickLinksTBL+"("
@@ -241,11 +256,19 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         createBookmarksTbl(db);
         createSearchEnginesTbl(db);
         createSearchItemsTbl(db);
+        createSiteSettingsTbl(db);
     }
 
 
 
     //CRUD: CREATE, READ, UPDATE and DELETE operations
+
+    private void createSiteSettingsTbl(SQLiteDatabase db) {
+        String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS " + siteSettingsTBL + "(" + SS_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                SS_JAVA_SCRIPT + " INTEGER,"+SS_COOKIES+" INTEGER,"+SS_LOCATION+" INTEGER,"+SS_SAVE_SITES_IN_HISTORY+" INTEGER,"+
+                SS_SAVE_SEARCH_HISTORY+" INTEGER,"+SS_IS_CHANGED+" INTEGER);";
+        db.execSQL(CREATE_TABLE);
+    }
 
     private void createSearchItemsTbl(SQLiteDatabase db) {
         String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS " + searchItemTBL + "(" + S_KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -1170,23 +1193,16 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public Integer getIsSaveSearchHistory()
     {
 
-//  todo      Cursor cursor = readableDB.query(siteSettingsTBL, new String[]{SS_SAVE_SEARCH_HISTORY}
-//                , SS_ID + "=?",
-//                new String[]{String.valueOf(1)}, null, null, null
-//        );
-//
-//
-//        cursor.moveToFirst();
-//
-//        Integer isSave = cursor.getInt(cursor.getColumnIndexOrThrow(SS_SAVE_SEARCH_HISTORY));
-//
-//
-//
-//        cursor.close();
-//
-//        return isSave;
+        Cursor cursor = readableDB.query(siteSettingsTBL, new String[]{SS_SAVE_SEARCH_HISTORY}
+                , SS_ID + "=?",
+                new String[]{String.valueOf(1)}, null, null, null
+        );
 
-        return 1;
+
+        cursor.moveToFirst();
+        Integer isSave = cursor.getInt(cursor.getColumnIndexOrThrow(SS_SAVE_SEARCH_HISTORY));
+        cursor.close();
+        return isSave;
     }
 
     public ArrayList<Integer> getAllSearchHistoryItemsIDs()
@@ -1235,6 +1251,96 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public void deleteSearchItem(int id)
     {
         writableDB.delete(searchItemTBL,S_KEY_ID + "=?",new String[]{String.valueOf(id)});
+    }
+
+    public SiteSettingsModel getSiteSettings()
+    {
+        Cursor cursor = readableDB.query(siteSettingsTBL,new String[]{SS_LOCATION,SS_COOKIES,SS_JAVA_SCRIPT,SS_SAVE_SITES_IN_HISTORY,SS_SAVE_SEARCH_HISTORY,
+        SS_IS_CHANGED},SS_ID+"=?",new String[]{String.valueOf(1)},null,null,null,null);
+
+        SiteSettingsModel siteSettingsModel = new SiteSettingsModel();
+
+        cursor.moveToFirst();
+        siteSettingsModel.setSsLocation(cursor.getInt(cursor.getColumnIndexOrThrow(SS_LOCATION)));
+        siteSettingsModel.setSsCookies(cursor.getInt(cursor.getColumnIndexOrThrow(SS_COOKIES)));
+        siteSettingsModel.setSsJavaScript(cursor.getInt(cursor.getColumnIndexOrThrow(SS_JAVA_SCRIPT)));
+        siteSettingsModel.setSsSaveSitesInHistory(cursor.getInt(cursor.getColumnIndexOrThrow(SS_SAVE_SITES_IN_HISTORY)));
+        siteSettingsModel.setSsSaveSearchHistory(cursor.getInt(cursor.getColumnIndexOrThrow(SS_SAVE_SEARCH_HISTORY)));
+        siteSettingsModel.setSsIsChanged(cursor.getInt(cursor.getColumnIndexOrThrow(SS_IS_CHANGED)));
+        cursor.close();
+
+        return siteSettingsModel;
+    }
+
+    public void updateSaveSearchHistoryStatus(Integer status)
+    {
+        ContentValues values = new ContentValues();
+        values.put(SS_SAVE_SEARCH_HISTORY,status);
+        writableDB.update(siteSettingsTBL,values,SS_ID+"=?",new String[]{String.valueOf(1)});
+    }
+
+    public void updateSaveSitesInHistoryStatus(Integer status)
+    {
+        ContentValues values = new ContentValues();
+        values.put(SS_SAVE_SITES_IN_HISTORY,status);
+        writableDB.update(siteSettingsTBL,values,SS_ID+"=?",new String[]{String.valueOf(1)});
+    }
+
+    public void updateJavaScriptStatus(Integer status)
+    {
+        ContentValues values = new ContentValues();
+        values.put(SS_JAVA_SCRIPT,status);
+        writableDB.update(siteSettingsTBL,values,SS_ID+"=?",new String[]{String.valueOf(1)});
+    }
+
+    public void updateCookieStatus(Integer status)
+    {
+        ContentValues values = new ContentValues();
+        values.put(SS_COOKIES,status);
+        writableDB.update(siteSettingsTBL,values,SS_ID+"=?",new String[]{String.valueOf(1)});
+    }
+
+    public void updateLocationStatus(Integer status)
+    {
+        ContentValues values = new ContentValues();
+        values.put(SS_LOCATION,status);
+        writableDB.update(siteSettingsTBL,values,SS_ID+"=?",new String[]{String.valueOf(1)});
+    }
+
+    public void updateSiteSettingsChanged(Integer status)
+    {
+        ContentValues values = new ContentValues();
+        values.put(SS_IS_CHANGED,status);
+        writableDB.update(siteSettingsTBL,values,SS_ID+"=?",new String[]{String.valueOf(1)});
+    }
+
+    public void addSiteSettings(SiteSettingsModel siteSettingsModel)
+    {
+        //truncating old table
+        writableDB.delete(siteSettingsTBL,null,null);
+
+        ContentValues values = new ContentValues();
+        values.put(SS_ID, siteSettingsModel.getSsId());
+        values.put(SS_LOCATION, siteSettingsModel.getSsLocation());
+        values.put(SS_COOKIES, siteSettingsModel.getSsCookies());
+        values.put(SS_JAVA_SCRIPT, siteSettingsModel.getSsJavaScript());
+        values.put(SS_SAVE_SITES_IN_HISTORY, siteSettingsModel.getSsSaveSitesInHistory());
+        values.put(SS_SAVE_SEARCH_HISTORY, siteSettingsModel.getSsSaveSearchHistory());
+        values.put(SS_IS_CHANGED, siteSettingsModel.getSsIsChanged());
+
+        writableDB.insert(siteSettingsTBL,null,values);
+    }
+
+    public Integer getIsSiteSettingsChanged()
+    {
+        Cursor cursor = readableDB.query(siteSettingsTBL, new String[]{SS_IS_CHANGED}
+                , SS_ID + "=?",
+                new String[]{String.valueOf(1)}, null, null, null
+        );
+        cursor.moveToFirst();
+        Integer isChanged = cursor.getInt(cursor.getColumnIndexOrThrow(SS_IS_CHANGED));
+        cursor.close();
+        return isChanged;
     }
 }
 

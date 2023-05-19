@@ -328,7 +328,7 @@ public class MenuPagerRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 }else if(id == R.id.siteSettingsBtn)
                 {
                     mainMenuSheet.dismiss();
-                    activity.startActivity(new Intent(context, SiteSettingsActivity.class));
+                    activity.startActivity(new Intent(context, SiteSettings.class));
                 }else if(id == R.id.upgradeBtn)
                 {
                     mainMenuSheet.dismiss();

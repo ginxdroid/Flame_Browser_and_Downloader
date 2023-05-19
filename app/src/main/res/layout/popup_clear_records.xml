@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:overScrollMode="never">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:id="@+id/checkTVLL">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/your_records"
+                android:textColor="?attr/primaryText"
+                android:gravity="center_horizontal"
+                android:layout_marginBottom="8dp"
+                android:textAppearance="?textAppearanceHeadline6" />
+
+
+            <CheckedTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/clearHistoryCB"
+                android:text="@string/history"
+                android:checkMark="@drawable/unchecked_background"
+                android:textColor="?attr/primaryText"
+                android:layout_margin="10dp"
+                android:drawableStart="@drawable/round_history_24"
+                android:drawablePadding="10dp"
+                android:gravity="center_vertical"
+                android:clickable="true"
+                android:focusable="true"
+                android:textAppearance="?textAppearanceSubtitle1" />
+
+            <CheckedTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/clearSearchHistoryCB"
+                android:text="@string/search_history"
+                android:checkMark="@drawable/unchecked_background"
+                android:textColor="?attr/primaryText"
+                android:layout_margin="10dp"
+                android:drawableStart="@drawable/round_search_24"
+                android:drawablePadding="10dp"
+                android:gravity="center_vertical"
+                android:clickable="true"
+                android:focusable="true"
+                android:textAppearance="?textAppearanceSubtitle1" />
+
+            <CheckedTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/clearCookiesCB"
+                android:text="@string/cookies"
+                android:checkMark="@drawable/unchecked_background"
+                android:textColor="?attr/primaryText"
+                android:layout_margin="10dp"
+                android:drawableStart="@drawable/round_cookie_24"
+                android:drawablePadding="10dp"
+                android:gravity="center_vertical"
+                android:clickable="true"
+                android:focusable="true"
+                android:textAppearance="?textAppearanceSubtitle1" />
+
+            <CheckedTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/clearCacheCB"
+                android:text="@string/cache"
+                android:checkMark="@drawable/unchecked_background"
+                android:textColor="?attr/primaryText"
+                android:layout_margin="10dp"
+                android:drawableStart="@drawable/round_cached_24"
+                android:drawablePadding="10dp"
+                android:gravity="center_vertical"
+                android:clickable="true"
+                android:focusable="true"
+                android:textAppearance="?textAppearanceSubtitle1" />
+
+            <CheckedTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/clearWebViewDatabaseCB"
+                android:text="@string/form_data_e_g_autocomplete_suggestions"
+                android:checkMark="@drawable/unchecked_background"
+                android:textColor="?attr/primaryText"
+                android:layout_margin="10dp"
+                android:drawableStart="@drawable/round_data_array_24"
+                android:drawablePadding="10dp"
+                android:gravity="center_vertical"
+                android:clickable="true"
+                android:focusable="true"
+                android:textAppearance="?textAppearanceSubtitle1" />
+
+            <CheckedTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/clearUnusedFaviconsCB"
+                android:text="@string/unused_favicons"
+                android:checkMark="@drawable/unchecked_background"
+                android:textColor="?attr/primaryText"
+                android:layout_margin="10dp"
+                android:drawableStart="@drawable/round_miscellaneous_services_24"
+                android:drawablePadding="10dp"
+                android:gravity="center_vertical"
+                android:clickable="true"
+                android:focusable="true"
+                android:textAppearance="?textAppearanceSubtitle1" />
+
+            <CheckedTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/clearWebStorageCB"
+                android:text="@string/javascript_storage"
+                android:checkMark="@drawable/unchecked_background"
+                android:textColor="?attr/primaryText"
+                android:layout_margin="10dp"
+                android:drawableStart="@drawable/round_storage_24"
+                android:drawablePadding="10dp"
+                android:gravity="center_vertical"
+                android:clickable="true"
+                android:focusable="true"
+                android:textAppearance="?textAppearanceSubtitle1" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/clearButton"
+                android:text="@string/clear"
+                style="@style/CustomFilledButton"
+                android:textColor="?attr/dialogButtonTextColor" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/clearingLL"
+            android:orientation="vertical"
+            android:visibility="gone"
+            >
+
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/deletingProgressBarH"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/deletedIVH"
+                android:background="@drawable/check_background"
+                android:layout_gravity="center"
+                android:contentDescription="@string/done"
+                android:visibility="gone" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/doneTVH"
+                android:text="@string/cleared"
+                android:textColor="?attr/primaryText"
+                android:textAppearance="?textAppearanceSubtitle1"
+                android:layout_gravity="center_horizontal"
+                android:visibility="gone" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/closeButtonH"
+                android:text="@string/close"
+                style="@style/CancelButtonStyle"
+                android:visibility="invisible" />
+
+        </LinearLayout>
+
+
+    </FrameLayout>
+
+</androidx.core.widget.NestedScrollView>

@@ -14,12 +14,19 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.Toast;
 
 import com.ginxdroid.flamebrowseranddownloader.DatabaseHandler;
 import com.ginxdroid.flamebrowseranddownloader.R;
+import com.ginxdroid.flamebrowseranddownloader.models.SiteSettingsModel;
+import com.ginxdroid.flamebrowseranddownloader.models.UserPreferences;
+import com.ginxdroid.flamebrowseranddownloader.sheets.ClearRecordsSheet;
+import com.ginxdroid.flamebrowseranddownloader.sheets.MessageSheet;
+import com.ginxdroid.flamebrowseranddownloader.sheets.ResetSettingsSheet;
+import com.ginxdroid.flamebrowseranddownloader.sheets.TipsSheet;
 import com.google.android.material.button.MaterialButton;
 
-public class SettingsActivity extends AppCompatActivity implements View.OnClickListener {
+public class SettingsActivity extends AppCompatActivity implements View.OnClickListener, ResetSettingsSheet.BottomSheetListener {
     private DatabaseHandler db;
     private LinearLayout container;
 
@@ -40,7 +47,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         ImageButton backIB = findViewById(R.id.backIB);
         backIB.setOnClickListener(SettingsActivity.this);
 
-        MaterialButton manageBTV,manageHPTV,manageHTV,manageSHTV;
+        MaterialButton manageBTV,manageHPTV,manageHTV,manageSHTV,securityTV,tipsTV,clearRecordsTV,resetToDefaultTV,shareLinkBtn,aboutBtn;
 
         manageHPTV = findViewById(R.id.manageHPTV);
         manageHPTV.setOnClickListener(SettingsActivity.this);
@@ -53,6 +60,24 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
 
         manageSHTV = findViewById(R.id.manageSHTV);
         manageSHTV.setOnClickListener(SettingsActivity.this);
+
+        securityTV = findViewById(R.id.securityTV);
+        securityTV.setOnClickListener(SettingsActivity.this);
+
+        tipsTV = findViewById(R.id.tipsTV);
+        tipsTV.setOnClickListener(SettingsActivity.this);
+
+        clearRecordsTV = findViewById(R.id.clearRecordsTV);
+        clearRecordsTV.setOnClickListener(SettingsActivity.this);
+
+        resetToDefaultTV = findViewById(R.id.resetToDefaultTV);
+        resetToDefaultTV.setOnClickListener(SettingsActivity.this);
+
+        shareLinkBtn = findViewById(R.id.shareLinkBtn);
+        shareLinkBtn.setOnClickListener(SettingsActivity.this);
+
+        aboutBtn = findViewById(R.id.aboutBtn);
+        aboutBtn.setOnClickListener(SettingsActivity.this);
     }
 
     @Override
@@ -77,6 +102,35 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         }else if(id == R.id.manageSHTV)
         {
             SettingsActivity.this.startActivity(new Intent(SettingsActivity.this, ManageSearchHistory.class));
+        } else if(id == R.id.securityTV)
+        {
+            SettingsActivity.this.startActivity(new Intent(SettingsActivity.this, SiteSettings.class));
+        } else if(id == R.id.tipsTV)
+        {
+            new TipsSheet().show(SettingsActivity.this.getSupportFragmentManager(),"tipsSheet");
+        } else if(id == R.id.clearRecordsTV)
+        {
+            try {
+                new ClearRecordsSheet().show(SettingsActivity.this.getSupportFragmentManager(),"clearRecordsSheet");
+            } catch (Exception ignored) {}
+        }else if(id == R.id.resetToDefaultTV)
+        {
+            try {
+                new ResetSettingsSheet().show(SettingsActivity.this.getSupportFragmentManager(),"resetSettingsSheet");
+            } catch (Exception ignored) {}
+        } else if(id == R.id.shareLinkBtn)
+        {
+            try {
+                Intent share = new Intent(Intent.ACTION_SEND);
+                share.setTypeAndNormalize("text/plain");
+                share.putExtra(Intent.EXTRA_TEXT,"https://play.google.com/store/apps/details?id=com.ginxdroid.flamebrowseranddownloader");
+                startActivity(Intent.createChooser(share,"Share via"));
+            } catch (Exception e){
+                Toast.makeText(this, SettingsActivity.this.getString(R.string.no_app_found), Toast.LENGTH_SHORT).show();
+            }
+        } else if(id == R.id.aboutBtn)
+        {
+            startActivity(new Intent(SettingsActivity.this,AboutActivity.class));
         }
     }
 
@@ -119,5 +173,56 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         }
     }
 
+
+    @Override
+    public void onShowResetToDefaultsSheet(View popupView, ResetSettingsSheet sheet) {
+        try {
+            MaterialButton cancelBtn,resetBtn;
+            cancelBtn = popupView.findViewById(R.id.cancelBtn);
+            resetBtn = popupView.findViewById(R.id.resetBtn);
+
+            cancelBtn.setOnClickListener(view -> sheet.dismiss());
+
+            resetBtn.setOnClickListener(view -> {
+                UserPreferences userPreferences = new UserPreferences();
+                userPreferences.setUpKeyId(1);
+                userPreferences.setDarkTheme(db.getCurrentThemeType());
+                userPreferences.setCurrentThemeID(db.getCurrentThemeId());
+                userPreferences.setIsDarkWebUI(db.getDarkWebUI());
+                userPreferences.setHomePageURL("NewTab");
+                userPreferences.setSearchEngineURL("https://www.google.com/search?q=");
+                db.addUserPreferences(userPreferences);
+
+                SiteSettingsModel siteSettingsModel = new SiteSettingsModel();
+                siteSettingsModel.setSsId(1);
+                siteSettingsModel.setSsLocation(1);
+                siteSettingsModel.setSsCookies(1);
+                siteSettingsModel.setSsJavaScript(1);
+                siteSettingsModel.setSsSaveSitesInHistory(1);
+                siteSettingsModel.setSsSaveSearchHistory(1);
+                db.addSiteSettings(siteSettingsModel);
+
+                sheet.dismiss();
+                showMessageDialog();
+
+
+            });
+
+        } catch (Exception ignored){}
+    }
+
+    private void showMessageDialog()
+    {
+        db.updateSiteSettingsChanged(1);
+        try{
+            MessageSheet messageSheet = new MessageSheet();
+            Bundle bundle = new Bundle();
+            bundle.putInt("message",R.string.restart_flame_browser_only);
+            messageSheet.setArguments(bundle);
+            messageSheet.show(SettingsActivity.this
+                    .getSupportFragmentManager(), "messageSheet");
+        }catch(Exception ignored)
+        {}
+    }
 
 }

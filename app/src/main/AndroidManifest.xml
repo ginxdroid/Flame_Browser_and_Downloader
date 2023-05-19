@@ -3,8 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
+    <uses-feature
+        android:name="android.hardware.location"
+        android:required="false" />
     <uses-feature
         android:name="android.hardware.microphone"
         android:required="false" />
@@ -23,6 +28,18 @@
         android:theme="@style/AppTheme"
         tools:targetApi="31">
         <activity
+            android:name=".activities.CreditsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.LegalInformation"
+            android:exported="false" />
+        <activity
+            android:name=".activities.AboutActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.SiteSettings"
+            android:exported="false" />
+        <activity
             android:name=".activities.ManageSearchHistory"
             android:exported="false" />
         <activity
@@ -33,9 +50,6 @@
             android:exported="false" />
         <activity
             android:name=".activities.ManageHomePages"
-            android:exported="false" />
-        <activity
-            android:name=".activities.SiteSettingsActivity"
             android:exported="false" />
         <activity
             android:name=".activities.DownloadsActivity"

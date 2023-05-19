@@ -36,9 +36,12 @@ import com.ginxdroid.flamebrowseranddownloader.DatabaseHandler;
 import com.ginxdroid.flamebrowseranddownloader.R;
 import com.ginxdroid.flamebrowseranddownloader.models.HomePageItem;
 import com.ginxdroid.flamebrowseranddownloader.models.QuickLinkModel;
+import com.ginxdroid.flamebrowseranddownloader.models.SiteSettingsModel;
 import com.ginxdroid.flamebrowseranddownloader.models.UserPreferences;
+import com.ginxdroid.flamebrowseranddownloader.sheets.ClearRecordsSheet;
 import com.ginxdroid.flamebrowseranddownloader.sheets.EditQLNameSheet;
 import com.ginxdroid.flamebrowseranddownloader.sheets.MainMenuSheet;
+import com.ginxdroid.flamebrowseranddownloader.sheets.RelaunchSheet;
 import com.ginxdroid.flamebrowseranddownloader.sheets.TextScalingSheet;
 import com.ginxdroid.flamebrowseranddownloader.sheets.ThemesSheet;
 import com.google.android.material.bottomappbar.BottomAppBar;
@@ -48,9 +51,11 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 
 public class MainActivity extends BaseActivity implements ThemesSheet.BottomSheetListener, View.OnClickListener,
-    MainMenuSheet.BottomSheetListener, TextScalingSheet.BottomSheetListener, EditQLNameSheet.BottomSheetListener {
+    MainMenuSheet.BottomSheetListener, TextScalingSheet.BottomSheetListener, EditQLNameSheet.BottomSheetListener,
+        RelaunchSheet.BottomSheetListener {
 
     private DatabaseHandler db;
     private Toast toast = null;
@@ -59,6 +64,7 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
     private RecyclerView normalTabsRV;
     private NormalTabsRVAdapter normalTabsRVAdapter;
     private CustomHorizontalManager customHorizontalManager;
+    private boolean recreating = false;
 
     final ActivityResultLauncher<Intent> voiceLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             new ActivityResultCallback<ActivityResult>() {
@@ -81,6 +87,69 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
                     } catch (Exception e)
                     {
                         showToast(R.string.oops_general_message);
+                    }
+                }
+            });
+
+    final ActivityResultLauncher<String[]> locationPermissionRequest = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(),
+            new ActivityResultCallback<Map<String, Boolean>>() {
+                @Override
+                public void onActivityResult(Map<String, Boolean> result) {
+                    Boolean fineLocationGranted = result.getOrDefault(
+                            Manifest.permission.ACCESS_FINE_LOCATION, false);
+                    Boolean coarseLocationGranted = result.getOrDefault(
+                            Manifest.permission.ACCESS_COARSE_LOCATION,false);
+
+                    if (fineLocationGranted != null && fineLocationGranted) {
+                        // Precise location access granted.
+                        showToast(R.string.permission_granted);
+                        normalTabsRVAdapter.invokeGeolocationCallback(true);
+                    } else if (coarseLocationGranted != null && coarseLocationGranted) {
+                        // Only approximate location access granted.
+                        showToast(R.string.permission_granted);
+
+                        normalTabsRVAdapter.invokeGeolocationCallback(true);
+                    } else {
+                        // No location access granted.
+                        if(!ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,Manifest.permission.ACCESS_FINE_LOCATION) ||
+                                !ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,Manifest.permission.ACCESS_COARSE_LOCATION))
+                        {
+                            // User selected the Never Ask Again Option
+                            android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(MainActivity.this);
+                            View view = MainActivity.this.getLayoutInflater().inflate(R.layout.popup_now_goto_settings,
+                                    recyclerViewContainer,false);
+
+                            TextView goWhereAndWhatTV = view.findViewById(R.id.goWhereAndWhatTV);
+                            goWhereAndWhatTV.setText(R.string.goto_settings_location);
+
+                            builder.setView(view);
+                            final android.app.AlertDialog dialog = builder.create();
+
+                            MaterialButton nowGotoSettingsBtn,closeGotoSettingsDialogBtn;
+                            nowGotoSettingsBtn = view.findViewById(R.id.nowGotoSettingsBtn);
+                            closeGotoSettingsDialogBtn = view.findViewById(R.id.closeGotoSettingsDialogBtn);
+
+                            nowGotoSettingsBtn.setOnClickListener(view1 -> {
+                                dialog.dismiss();
+                                Intent intent = new Intent();
+                                intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                intent.addCategory(Intent.CATEGORY_DEFAULT);
+                                intent.setData(Uri.parse("package:"+MainActivity.this.getPackageName()));
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                                startActivity(intent);
+                            });
+
+                            closeGotoSettingsDialogBtn.setOnClickListener(view12 -> dialog.dismiss());
+
+                            dialog.setCancelable(true);
+                            dialog.setCanceledOnTouchOutside(true);
+                            dialog.show();
+                        } else {
+                            showToast(R.string.permission_denied);
+                        }
+
+                        normalTabsRVAdapter.invokeGeolocationCallback(false);
                     }
                 }
             });
@@ -245,6 +314,16 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
     private void firstInitialization()
     {
         try{
+            SiteSettingsModel siteSettingsModel = new SiteSettingsModel();
+            siteSettingsModel.setSsId(1);
+            siteSettingsModel.setSsLocation(1);
+            siteSettingsModel.setSsCookies(1);
+            siteSettingsModel.setSsJavaScript(1);
+            siteSettingsModel.setSsSaveSitesInHistory(1);
+            siteSettingsModel.setSsSaveSearchHistory(1);
+            siteSettingsModel.setSsIsChanged(0);
+            db.addSiteSettings(siteSettingsModel);
+
             UserPreferences userPreferences = new UserPreferences();
             userPreferences.setUpKeyId(1);
             userPreferences.setDarkTheme(2);
@@ -357,6 +436,19 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
         try {
             normalTabsRVAdapter.setSearchFaviconOnResume();
         } catch (Exception ignored) {}
+
+        showRestartPopup();
+    }
+
+    void showRestartPopup()
+    {
+        try {
+            if(db.getIsSiteSettingsChanged() == 1)
+            {
+                db.updateSiteSettingsChanged(0);
+                new RelaunchSheet().show(MainActivity.this.getSupportFragmentManager(),"relaunchSheet");
+            }
+        }catch (Exception ignored) {}
     }
 
     private void initCommon()
@@ -368,6 +460,8 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
         final FloatingActionButton fabAdd = findViewById(R.id.fabAdd);
         fabAdd.setOnClickListener(MainActivity.this);
 
+        ImageButton clearRecordsIB = bottomAppBar.findViewById(R.id.clearRecordsIB);
+        clearRecordsIB.setOnClickListener(MainActivity.this);
         ImageButton themesIB = bottomAppBar.findViewById(R.id.themesIB);
         themesIB.setOnClickListener(MainActivity.this);
         final ImageButton mainMenuIB = bottomAppBar.findViewById(R.id.mainMenuIB);
@@ -632,6 +726,11 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
                 try{
                     new MainMenuSheet().show(MainActivity.this.getSupportFragmentManager(), "mainMenuBottomSheet");
                 }catch (Exception ignored){}
+            } else if(id == R.id.clearRecordsIB)
+            {
+                try {
+                    new ClearRecordsSheet().show(MainActivity.this.getSupportFragmentManager(),"clearRecordsSheet");
+                } catch (Exception ignored) {}
             }
 
         }catch (Exception ignored){}
@@ -672,6 +771,14 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
     public void changeQLNameSetQLNow(int bindingAdapterPosition) {
         try {
             normalTabsRVAdapter.getViewHolder().quickLinksRVHomePageAdapter.onItemTitleChanged(bindingAdapterPosition);
+        } catch (Exception ignored) {}
+    }
+
+    @Override
+    public void relaunchNow() {
+        try {
+            recreating = true;
+            MainActivity.this.recreate();
         } catch (Exception ignored) {}
     }
 }

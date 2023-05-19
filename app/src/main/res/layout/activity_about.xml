@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.AboutActivity"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize">
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:id="@+id/backIB"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/unbounded_light_ripple"
+            android:src="@drawable/round_arrow_back_ios_new_24"
+            android:contentDescription="@string/back" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/about_flame_browser_and_downloader"
+            android:textAppearance="?textAppearanceHeadline6"
+            android:textColor="?attr/primaryText"
+            android:layout_gravity="center_vertical" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="8dp"
+            android:background="@drawable/card_ripple_effect_light">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/version"
+                android:textAppearance="?textAppearanceSubtitle1"
+                android:textColor="?attr/primaryText" />
+
+            <TextView
+                android:id="@+id/versionCodeTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:text="@string/value"
+                android:textAppearance="?textAppearanceSubtitle1"
+                android:textColor="?attr/secondaryText" />
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="?attr/dividerAndProgressColor" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="8dp"
+            android:background="@drawable/card_ripple_effect_light">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/made_in"
+                android:textAppearance="?textAppearanceSubtitle1"
+                android:textColor="?attr/primaryText" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:text="@string/country_name"
+                android:textAppearance="?textAppearanceSubtitle1"
+                android:textColor="?attr/secondaryText" />
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="?attr/dividerAndProgressColor" />
+
+        <LinearLayout
+            android:id="@+id/legalInformationLL"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="8dp"
+            android:background="@drawable/card_ripple_effect_light">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/legal_information"
+                android:textAppearance="?textAppearanceSubtitle1"
+                android:textColor="?attr/primaryText" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:text="@string/copyright"
+                android:textAppearance="?textAppearanceSubtitle1"
+                android:textColor="?attr/secondaryText" />
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+</LinearLayout>

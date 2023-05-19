@@ -1,8 +1,514 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activities.SiteSettingsActivity">
+    tools:context=".activities.SiteSettings">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        >
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:id="@+id/backIB"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:layout_alignParentStart="true"
+            android:background="@drawable/unbounded_light_ripple"
+            android:src="@drawable/round_arrow_back_ios_new_24"
+            android:contentDescription="@string/back" />
+
+        <com.google.android.material.button.MaterialButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/resetSiteSettingsBtn"
+            android:text="@string/reset"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:gravity="center"
+            style="@style/CustomMenuButtonStyle" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:textAppearance="?textAppearanceHeadline6"
+            android:text="@string/site_settings_2"
+            android:textColor="?attr/primaryText"
+            android:layout_toEndOf="@id/backIB"
+            android:layout_toStartOf="@id/resetSiteSettingsBtn" />
+
+    </RelativeLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:overScrollMode="never">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:clickable="true"
+                android:focusable="true"
+                style="@style/CustomMenuButtonStyle">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_gravity="start">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/cookies"
+                        android:layout_gravity="center_vertical"
+                        android:textAppearance="?textAppearanceButton"
+                        android:clickable="false"
+                        android:focusable="false" />
+
+                    <ImageButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/cookiesInfoIB"
+                        android:src="@drawable/round_info_24"
+                        android:background="@drawable/unbounded_light_ripple"
+                        android:padding="10dp"
+                        android:layout_gravity="center_vertical"
+                        android:contentDescription="@string/view_cookies_info" />
+
+                </LinearLayout>
+
+                <RadioGroup
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <RadioButton
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/allowAllCookiesRB"
+                        android:text="@string/allow_first_party_and_third_party_cookies" />
+
+                    <RadioButton
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/blockThirdPartyCookiesRB"
+                        android:text="@string/allow_first_party_but_block_third_party_cookies_default" />
+
+                    <RadioButton
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/blockAllCookiesRB"
+                        android:text="@string/block_all_cookies_not_recommended" />
+
+                </RadioGroup>
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="?attr/dividerAndProgressColor" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:clickable="true"
+                android:focusable="true"
+                style="@style/CustomMenuButtonStyle">
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/location"
+                    android:layout_gravity="center_vertical"
+                    android:textAppearance="?textAppearanceButton"
+                    android:clickable="false"
+                    android:focusable="false" />
+
+
+
+                <RadioGroup
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <RadioButton
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/askBeforeLocationRB"
+                        android:text="@string/ask_before_allowing_sites_to_know_your_location" />
+
+                    <RadioButton
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/neverAskBeforeLocationRB"
+                        android:text="@string/never_ask_location_always_block" />
+
+                </RadioGroup>
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="?attr/dividerAndProgressColor" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:clickable="true"
+                android:focusable="true"
+                style="@style/CustomMenuButtonStyle">
+
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/javaScriptSwitch"
+                    android:text="@string/javascript_default_on"
+                    style="@style/CustomSwitchStyle"
+                    android:padding="0dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/note_if_you_turn_this_off_some_sites_may_not_work_properly"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:textAppearance="?textAppearanceCaption"
+                    android:layout_gravity="start"
+                    android:textColor="?attr/secondaryText" />
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="?attr/dividerAndProgressColor" />
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/saveSitesSwitch"
+                android:text="@string/save_sites_in_history_default_on"
+                style="@style/CustomSwitchStyle" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="?attr/dividerAndProgressColor" />
+
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/saveSearchHistorySwitch"
+                android:text="@string/save_search_history_default_on"
+                style="@style/CustomSwitchStyle" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="?attr/dividerAndProgressColor" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:clickable="true"
+                android:focusable="true"
+                style="@style/CustomMenuButtonStyle">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/popup_blocker"
+                    android:layout_gravity="start"
+                    android:textAppearance="?textAppearanceButton"
+                    android:textColor="?attr/primaryText"
+                    android:clickable="false"
+                    android:focusable="false" />
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/always_on"
+                    android:layout_gravity="start"
+                    android:textAppearance="?textAppearanceCaption"
+                    android:textColor="?attr/secondaryText"
+                    android:clickable="false"
+                    android:focusable="false" />
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="?attr/dividerAndProgressColor" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:clickable="true"
+                android:focusable="true"
+                style="@style/CustomMenuButtonStyle">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/passwords"
+                    android:layout_gravity="start"
+                    android:textAppearance="?textAppearanceButton"
+                    android:textColor="?attr/primaryText"
+                    android:clickable="false"
+                    android:focusable="false" />
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/never_ever_save"
+                    android:layout_gravity="start"
+                    android:textAppearance="?textAppearanceCaption"
+                    android:textColor="?attr/secondaryText"
+                    android:clickable="false"
+                    android:focusable="false" />
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="?attr/dividerAndProgressColor" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:clickable="true"
+                android:focusable="true"
+                style="@style/CustomMenuButtonStyle">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/payment_methods"
+                    android:layout_gravity="start"
+                    android:textAppearance="?textAppearanceButton"
+                    android:textColor="?attr/primaryText"
+                    android:clickable="false"
+                    android:focusable="false" />
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/never_ever_save"
+                    android:layout_gravity="start"
+                    android:textAppearance="?textAppearanceCaption"
+                    android:textColor="?attr/secondaryText"
+                    android:clickable="false"
+                    android:focusable="false" />
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="?attr/dividerAndProgressColor" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:clickable="true"
+                android:focusable="true"
+                style="@style/CustomMenuButtonStyle">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/addresses"
+                    android:layout_gravity="start"
+                    android:textAppearance="?textAppearanceButton"
+                    android:textColor="?attr/primaryText"
+                    android:clickable="false"
+                    android:focusable="false" />
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/never_ever_save"
+                    android:layout_gravity="start"
+                    android:textAppearance="?textAppearanceCaption"
+                    android:textColor="?attr/secondaryText"
+                    android:clickable="false"
+                    android:focusable="false" />
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="?attr/dividerAndProgressColor" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:clickable="true"
+                android:focusable="true"
+                style="@style/CustomMenuButtonStyle">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/drm_protected_content"
+                    android:layout_gravity="start"
+                    android:textAppearance="?textAppearanceButton"
+                    android:textColor="?attr/primaryText"
+                    android:clickable="false"
+                    android:focusable="false" />
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/ask_before_playing_drm_protected_content"
+                    android:layout_gravity="start"
+                    android:textAppearance="?textAppearanceCaption"
+                    android:textColor="?attr/secondaryText"
+                    android:clickable="false"
+                    android:focusable="false" />
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="?attr/dividerAndProgressColor" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:clickable="true"
+                android:focusable="true"
+                style="@style/CustomMenuButtonStyle">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/camera"
+                    android:layout_gravity="start"
+                    android:textAppearance="?textAppearanceButton"
+                    android:textColor="?attr/primaryText"
+                    android:clickable="false"
+                    android:focusable="false" />
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/never_ever_use"
+                    android:layout_gravity="start"
+                    android:textAppearance="?textAppearanceCaption"
+                    android:textColor="?attr/secondaryText"
+                    android:clickable="false"
+                    android:focusable="false" />
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="?attr/dividerAndProgressColor" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:clickable="true"
+                android:focusable="true"
+                style="@style/CustomMenuButtonStyle">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/microphone"
+                    android:layout_gravity="start"
+                    android:textAppearance="?textAppearanceButton"
+                    android:textColor="?attr/primaryText"
+                    android:clickable="false"
+                    android:focusable="false" />
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/note_1"
+                    android:layout_gravity="start"
+                    android:textAppearance="?textAppearanceCaption"
+                    android:textColor="?attr/secondaryText"
+                    android:clickable="false"
+                    android:focusable="false" />
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="?attr/dividerAndProgressColor" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:clickable="true"
+                android:focusable="true"
+                style="@style/CustomMenuButtonStyle">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/sites_and_their_notifications"
+                    android:layout_gravity="start"
+                    android:textAppearance="?textAppearanceButton"
+                    android:textColor="?attr/primaryText"
+                    android:clickable="false"
+                    android:focusable="false" />
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/never_ever_save_any_site_never_ever_show_any_site_notification"
+                    android:layout_gravity="start"
+                    android:textAppearance="?textAppearanceCaption"
+                    android:textColor="?attr/secondaryText"
+                    android:clickable="false"
+                    android:focusable="false" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</LinearLayout>
