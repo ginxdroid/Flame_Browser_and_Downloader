@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <!--         Set the splash screen background, animatedIcon and animation duration-->
+        <item name="windowSplashScreenBackground">@color/darkSurfaceColor</item>
+
+        <!--        Use windowSplashScreenAnimatedIcon to add either a drawable or an animated drawable. One of them is required-->
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_icon_dark</item>
+        <item name="android:statusBarColor">@color/darkSurfaceColor</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
+</resources>

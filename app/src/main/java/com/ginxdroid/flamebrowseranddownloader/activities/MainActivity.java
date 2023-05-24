@@ -2,6 +2,7 @@ package com.ginxdroid.flamebrowseranddownloader.activities;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -13,9 +14,17 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings;
 import android.speech.RecognizerIntent;
+import android.text.TextUtils;
 import android.view.View;
+import android.view.ViewTreeObserver;
+import android.view.Window;
+import android.webkit.CookieManager;
+import android.webkit.URLUtil;
+import android.webkit.WebStorage;
+import android.webkit.WebViewDatabase;
 import android.widget.ImageButton;
 import android.widget.RadioButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,17 +38,23 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.splashscreen.SplashScreen;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.ginxdroid.flamebrowseranddownloader.DatabaseHandler;
 import com.ginxdroid.flamebrowseranddownloader.R;
+import com.ginxdroid.flamebrowseranddownloader.classes.HelperTextUtility;
 import com.ginxdroid.flamebrowseranddownloader.models.HomePageItem;
 import com.ginxdroid.flamebrowseranddownloader.models.QuickLinkModel;
 import com.ginxdroid.flamebrowseranddownloader.models.SiteSettingsModel;
 import com.ginxdroid.flamebrowseranddownloader.models.UserPreferences;
 import com.ginxdroid.flamebrowseranddownloader.sheets.ClearRecordsSheet;
 import com.ginxdroid.flamebrowseranddownloader.sheets.EditQLNameSheet;
+import com.ginxdroid.flamebrowseranddownloader.sheets.IncognitoInformationSheet;
 import com.ginxdroid.flamebrowseranddownloader.sheets.MainMenuSheet;
 import com.ginxdroid.flamebrowseranddownloader.sheets.RelaunchSheet;
 import com.ginxdroid.flamebrowseranddownloader.sheets.TextScalingSheet;
@@ -48,7 +63,10 @@ import com.google.android.material.bottomappbar.BottomAppBar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.common.net.InternetDomainName;
 
+import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
@@ -65,6 +83,10 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
     private NormalTabsRVAdapter normalTabsRVAdapter;
     private CustomHorizontalManager customHorizontalManager;
     private boolean recreating = false;
+    private boolean incognitoMode = false;
+
+    private RelativeLayout customViewContainer;
+
 
     final ActivityResultLauncher<Intent> voiceLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             new ActivityResultCallback<ActivityResult>() {
@@ -287,14 +309,257 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        try {
+            if(customHorizontalManager != null && normalTabsRVAdapter != null)
+            {
+                try {
+                    setIntent(intent);
+                } catch (Exception e)
+                {
+                    showToast(R.string.oops_general_message);
+                } finally {
+                    try {
+                        Bundle bundle = intent.getExtras();
+                        if(bundle != null)
+                        {
+                            final String urlString = getTabOpenerLink();
+                            if(urlString.equals("0"))
+                            {
+                                showToast(R.string.malformed_url);
+                            } else if(!urlString.equals("1"))
+                            {
+                                NormalTabsRVAdapter.ViewHolder viewHolder = normalTabsRVAdapter.getViewHolder();
+
+                                if(viewHolder == null)
+                                {
+                                    normalTabsRVAdapter.addNewTab(checkAndGet(urlString),4);
+                                } else {
+                                    if(customViewContainer.getVisibility() == View.VISIBLE)
+                                    {
+                                        normalTabsRVAdapter.set();
+                                        normalTabsRVAdapter.addNewTab(checkAndGet(urlString),8);
+                                        showToast(R.string.opened_in_background);
+                                    } else {
+                                        normalTabsRVAdapter.addNewTab(checkAndGet(urlString),4);
+                                        viewHolder.veryCommonAddWork();
+                                    }
+                                }
+                            }
+                        }
+                    } catch (Exception e)
+                    {
+                        showToast(R.string.oops_general_message);
+                    }
+                }
+            }
+        } catch (Exception f)
+        {
+            showToast(R.string.oops_general_message);
+        }
+    }
+
+    private String getTabOpenerLink()
+    {
+        try {
+            Intent intent = getIntent();
+            String receivedAction = intent.getAction();
+
+            if(!TextUtils.isEmpty(receivedAction))
+            {
+                switch (receivedAction)
+                {
+                    case Intent.ACTION_SEND:
+                    {
+                        String type = intent.getType();
+                        if(type != null)
+                        {
+                            if("text/plain".equals(type))
+                            {
+                                String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
+                                if(!TextUtils.isEmpty(sharedText))
+                                {
+                                    return sharedText;
+                                } else {
+                                    return "0";
+                                }
+                            } else {
+                                return "0";
+                            }
+                        } else {
+                            return "0";
+                        }
+                    }
+                    case Intent.ACTION_WEB_SEARCH:
+                    {
+                        String sharedText = intent.getStringExtra(SearchManager.QUERY);
+                        if(!TextUtils.isEmpty(sharedText))
+                        {
+                            return sharedText;
+                        } else {
+                            return "0";
+                        }
+                    }
+                    case Intent.ACTION_VIEW:
+                    {
+                        Uri uri = intent.getData();
+                        if(uri != null)
+                        {
+                            return uri.toString();
+                        } else {
+                            return "0";
+                        }
+                    }
+                    default:
+                    {
+                        return "1";
+                    }
+                }
+            } else {
+                return "1";
+            }
+        } catch (Exception e)
+        {
+            return "1";
+        }
+    }
+
+    private String checkAndGet(String value)
+    {
+        try {
+            new URL(value);
+
+            if(normalTabsRVAdapter.isNetworkUrl(value))
+            {
+                return value;
+            }
+            else {
+                return normalTabsRVAdapter.getSearchEngineURL() + value;
+            }
+        } catch (Exception e)
+        {
+            try {
+                @SuppressWarnings("UnstableApiUsage") InternetDomainName internetDomainName = InternetDomainName.from(value);
+                //noinspection UnstableApiUsage
+                if(internetDomainName.hasPublicSuffix() && internetDomainName.hasParent())
+                {
+                    return URLUtil.guessUrl(value);
+                } else //noinspection UnstableApiUsage
+                    if(internetDomainName.isTopPrivateDomain())
+                {
+                    return URLUtil.guessUrl(value);
+                } else {
+                    return normalTabsRVAdapter.getSearchEngineURL() + value;
+                }
+            } catch (Exception f)
+            {
+                return normalTabsRVAdapter.getSearchEngineURL() + value;
+            }
+        }
+    }
+
+    void addNow()
+    {
+        final String urlString = getTabOpenerLink();
+        switch (urlString)
+        {
+            case "0":
+            {
+                showToast(R.string.malformed_url);
+                normalCheckAndProceed();
+                break;
+            }
+            case "1":
+            {
+                normalCheckAndProceed();
+                break;
+            }
+            default:
+            {
+                try {
+                    normalTabsRVAdapter.addNewTab(checkAndGet(urlString),4);
+                    try {
+                        db.truncateRecentSitesTable();
+                    } catch (Exception ignored) {}
+                } catch (Exception e)
+                {
+                     try {
+                        db.truncateRecentSitesTable();
+                    } catch (Exception ignored) {}
+                }
+                break;
+            }
+        }
+    }
+
+    private void normalCheckAndProceed()
+    {
+        try {
+            if(db.isSaveRecentTabs() == 1)
+            {
+                ArrayList<String> recentURLs = db.getAllRecentSitesURLs();
+                int size = recentURLs.size();
+
+                if(size > 0)
+                {
+                    normalTabsRVAdapter.setURLS(recentURLs);
+                    try {
+                        db.truncateRecentSitesTable();
+                    } catch (Exception ignored) {}
+                }
+                } else
+                {
+                    normalTabsRVAdapter.addNewTab(db.getHomePageURL(),4);
+                }
+        } catch (Exception e)
+        {
+            normalTabsRVAdapter.addNewTab(db.getHomePageURL(),4);
+
+            try{
+                db.truncateRecentSitesTable();
+            } catch (Exception ignored) {}
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        try {
+            outState.putString("incognito_state",String.valueOf(incognitoMode));
+            outState.putStringArrayList("list_state",normalTabsRVAdapter.getCurrentURLs());
+        }catch (Exception ignored){}
+        finally {
+            super.onSaveInstanceState(outState);
+        }
+    }
+
+    public void setRecreating()
+    {
+        this.recreating = true;
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //Handle the splash screen transition
+        SplashScreen.installSplashScreen(this);
+
         setContentView(R.layout.activity_main);
+        db = DatabaseHandler.getInstance(MainActivity.this);
+
         recyclerViewContainer = findViewById(R.id.recyclerViewContainer);
 
         try {
-            db = DatabaseHandler.getInstance(MainActivity.this);
-        }finally {
+            if(savedInstanceState != null)
+            {
+                initCommon(true,savedInstanceState);
+                recreating = false;
+            } else {
+                set();
+            }
+
+        }catch (Exception e){
             set();
         }
     }
@@ -307,7 +572,7 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
         {
             firstInitialization();
         }else {
-            initCommon();
+            initCommon(false,null);
         }
     }
 
@@ -363,6 +628,7 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
 
             userPreferences.setHomePageURL("NewTab");
             userPreferences.setSearchEngineURL("https://www.google.com/search?q=");
+            userPreferences.setIsSaveRecentTabs(1);
             db.addUserPreferences(userPreferences);
 
             HomePageItem homePageItem = new HomePageItem();
@@ -426,7 +692,7 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
             }
 
         }finally {
-            initCommon();
+            initCommon(false,null);
         }
     }
 
@@ -451,14 +717,15 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
         }catch (Exception ignored) {}
     }
 
-    private void initCommon()
+    private void initCommon(boolean isNightModeChanged, Bundle savedInstanceState)
     {
-
+        customViewContainer = recyclerViewContainer.findViewById(R.id.customViewContainer);
 
         final BottomAppBar bottomAppBar = findViewById(R.id.bottomAppBar);
 
         final FloatingActionButton fabAdd = findViewById(R.id.fabAdd);
         fabAdd.setOnClickListener(MainActivity.this);
+
 
         ImageButton clearRecordsIB = bottomAppBar.findViewById(R.id.clearRecordsIB);
         clearRecordsIB.setOnClickListener(MainActivity.this);
@@ -467,6 +734,29 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
         final ImageButton mainMenuIB = bottomAppBar.findViewById(R.id.mainMenuIB);
         mainMenuIB.setOnClickListener(MainActivity.this);
 
+        final ImageButton incognitoIB = bottomAppBar.findViewById(R.id.incognitoIB);
+        incognitoIB.setOnClickListener(view -> {
+            if(incognitoMode)
+            {
+                //switch back to normal mode
+                incognitoMode = false;
+                normalTabsRVAdapter.setIncognitoMode(false);
+                incognitoIB.setImageDrawable(ContextCompat.getDrawable(MainActivity.this,R.drawable.incognito_connectivity));
+
+                //delete metadata
+                new IncognitoClearRecords().start();
+                showToast(R.string.incognito_mode_off_logged_out_from_all_sites_cleared_cookies);
+            } else {
+                //switch to incognito mode
+                incognitoMode = true;
+                normalTabsRVAdapter.setIncognitoMode(true);
+                incognitoIB.setImageDrawable(ContextCompat.getDrawable(MainActivity.this,R.drawable.incognito_connectivity_selected));
+
+                showIncognitoInfo();
+            }
+        });
+
+
         normalTabsRV = findViewById(R.id.normalTabsRV);
         customHorizontalManager = new CustomHorizontalManager(recyclerViewContainer,MainActivity.this,bottomAppBar,fabAdd);
         customHorizontalManager.setItemPrefetchEnabled(false);
@@ -474,12 +764,171 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
         normalTabsRV.setLayoutManager(customHorizontalManager);
 
         normalTabsRVAdapter = new NormalTabsRVAdapter(MainActivity.this,MainActivity.this,customHorizontalManager,
-                recyclerViewContainer,normalTabsRV, bottomAppBar);
+                recyclerViewContainer,normalTabsRV, bottomAppBar,isNightModeChanged,savedInstanceState,customViewContainer);
         normalTabsRVAdapter.setHasStableIds(false);
 
         normalTabsRV.setAdapter(normalTabsRVAdapter);
 
+        try {
+            if(isNightModeChanged)
+            {
+                if(savedInstanceState != null)
+                {
+                    final String incognitoString = savedInstanceState.getString("incognito_state");
+                    if(HelperTextUtility.isNotEmpty(incognitoString))
+                    {
+                        if(incognitoString.equals("true"))
+                        {
+                            //switch to incognito mode
+                            incognitoMode = true;
+                            normalTabsRVAdapter.setIncognitoMode(true);
+                            incognitoIB.setImageDrawable(ContextCompat.getDrawable(MainActivity.this,R.drawable.incognito_connectivity_selected));
+                            showIncognitoInfo();
+                        }
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+
     }
+
+    private void showIncognitoInfo()
+    {
+        try {
+            new IncognitoInformationSheet().show(MainActivity.this.getSupportFragmentManager(),"incognitoInformationSheet");
+        } catch (Exception ignored) {}
+    }
+
+    private class IncognitoClearRecords extends Thread
+    {
+        IncognitoClearRecords()
+        {}
+
+        private void clearApplicationData()
+        {
+            File cache = MainActivity.this.getCacheDir();
+
+            String parentFile = cache.getParent();
+            if(parentFile != null)
+            {
+                File appDir = new File(parentFile);
+                if(appDir.exists())
+                {
+                    String[] children = appDir.list();
+
+                    String databasePath = MainActivity.this.getDatabasePath("flameDatabase").getAbsolutePath();
+
+                    if(children != null)
+                    {
+                        for(String s : children)
+                        {
+                            if(!s.equals("favicon") && !s.equals("databases"))
+                            {
+                                File file = new File(appDir,s);
+                                if(!file.getAbsolutePath().equals(databasePath))
+                                {
+                                    deleteDir(file);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+
+        private void deleteDir(File dir)
+        {
+            if(dir != null && dir.isDirectory())
+            {
+                String[] children = dir.list();
+                if(children != null)
+                {
+                    for(String child : children)
+                    {
+                        if(!child.equals("favicon") && !child.equals("databases"))
+                        {
+                            deleteDir(new File(dir,child));
+                        }
+                    }
+                }
+            }
+
+            if(dir != null)
+            {
+                //noinspection ResultOfMethodCallIgnored
+                dir.delete();
+            }
+        }
+
+        @Override
+        public void run() {
+            super.run();
+
+            try {
+                try {
+                    CookieManager cookieManager = CookieManager.getInstance();
+                    cookieManager.removeAllCookies(null);
+                } catch (Exception ignored) {}
+
+                try {
+                    try {
+                        clearApplicationData();
+                    } catch (Exception ignored) {}
+                } catch (Exception ignored) {}
+
+                try {
+
+                    File root = new File(MainActivity.this.getFilesDir(),"favicon");
+                    if(root.exists())
+                    {
+                        String[] children = root.list();
+                        if(children != null)
+                        {
+                            for(String s : children)
+                            {
+                                File file = new File(root,s);
+                                if(file.exists())
+                                {
+                                    final String faviconPath = file.getPath();
+
+                                    if(db.checkNotContainsFaviconInBookmarks(faviconPath) &&
+                                            db.checkNotContainsFaviconInQuickLinks(faviconPath) && db.checkNotContainsFaviconInHomePages(faviconPath)
+                                            && db.checkNotContainsFaviconInHistory(faviconPath))
+                                    {
+                                        File faviconFile = new File(faviconPath);
+                                        if(faviconFile.exists())
+                                        {
+                                            //noinspection ResultOfMethodCallIgnored
+                                            faviconFile.delete();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } catch (Exception ignored) {}
+
+                try {
+
+                    WebViewDatabase webViewDatabase = WebViewDatabase.getInstance(MainActivity.this);
+                    webViewDatabase.clearHttpAuthUsernamePassword();
+
+                    if(Build.VERSION.SDK_INT < 26)
+                    {
+                        webViewDatabase.clearFormData();
+                    }
+                } catch (Exception ignored) {}
+
+                try {
+                    WebStorage webStorage = WebStorage.getInstance();
+                    webStorage.deleteAllData();
+                } catch (Exception ignored) {}
+
+            } catch (Exception ignored){}
+        }
+    }
+
 
     @Override
     public void showThemesSheet(View popupView, ThemesSheet sheet) {
@@ -522,6 +971,7 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
                     sheet.dismiss();
                     if(db.isDarkTheme())
                     {
+                        setRecreating();
                         db.updateIsDarkWebUI(1);
                         MainActivity.this.recreate();
                     }else {
@@ -538,6 +988,7 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
                     {
                         showLightThemeChooserPrompt();
                     }else {
+                        setRecreating();
                         db.updateIsDarkWebUI(0);
                         MainActivity.this.recreate();
                     }
@@ -578,6 +1029,7 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
                 if(id == R.id.mcvNight)
                 {
                     sheet.dismiss();
+                    setRecreating();
                     db.updateIsDarkWebUI(1);
                     db.changeTheme(1);
                     db.updateCurrentThemeID(2);
@@ -586,6 +1038,7 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
                 } else if (id == R.id.mcvDay)
                 {
                     sheet.dismiss();
+                    setRecreating();
                     db.updateIsDarkWebUI(0);
                     db.changeTheme(0);
                     db.updateCurrentThemeID(1);
@@ -594,6 +1047,7 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
                 } else if(id == R.id.mcvFollowSystem)
                 {
                     sheet.dismiss();
+                    setRecreating();
                     db.changeTheme(2);
                     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
                     {
@@ -638,12 +1092,14 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
 
             noBtn.setOnClickListener(view1 -> {
                 dialog.dismiss();
+                setRecreating();
                 db.updateIsDarkWebUI(0);
                 MainActivity.this.recreate();
             });
 
             yesBtn.setOnClickListener(view12 -> {
                 dialog.dismiss();
+                setRecreating();
                 db.updateIsDarkWebUI(0);
                 db.changeTheme(0);
                 db.updateCurrentThemeID(1);
@@ -677,12 +1133,14 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
 
             noBtn.setOnClickListener(view1 -> {
                 dialog.dismiss();
+                setRecreating();
                 db.updateIsDarkWebUI(1);
                 MainActivity.this.recreate();
             });
 
             yesBtn.setOnClickListener(view12 -> {
                 dialog.dismiss();
+                setRecreating();
                 db.updateIsDarkWebUI(1);
                 db.changeTheme(1);
                 db.updateCurrentThemeID(2);
@@ -779,6 +1237,130 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
         try {
             recreating = true;
             MainActivity.this.recreate();
+        } catch (Exception ignored) {}
+    }
+
+    @Override
+    protected void onStop() {
+
+        try {
+            db.truncateRecentSitesTable();
+            if(!incognitoMode && db.isSaveRecentTabs() != 0)
+            {
+               ArrayList<String> currentURLs = normalTabsRVAdapter.getCurrentURLs();
+
+               if(currentURLs != null && currentURLs.size() > 0)
+               {
+                   for(String url: currentURLs)
+                   {
+                       db.addRecentSiteURL(url);
+                   }
+               }
+            }
+        } catch (Exception ignored){}
+
+        NormalTabsRVAdapter.ViewHolder viewHolder;
+        try {
+            viewHolder = normalTabsRVAdapter.getViewHolder();
+        } catch (Exception e)
+        {
+            viewHolder = null;
+        }
+
+//   todo     try {
+//            //Pause webview
+//            if(viewHolder != null)
+//            {
+//                viewHolder.webView.onPause();
+//            }
+//        } catch (Exception ignored) {}
+
+
+        super.onStop();
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        try {
+            if(!recreating)
+            {
+                if(incognitoMode)
+                {
+                    new IncognitoClearRecords().start();
+                }
+            }
+        } catch (Exception ignored){}
+        finally {
+            super.onDestroy();
+        }
+    }
+
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        reEnter();
+        super.onConfigurationChanged(newConfig);
+    }
+
+    private ViewTreeObserver.OnGlobalLayoutListener listener = null;
+    private void reEnter()
+    {
+        try {
+            if(customHorizontalManager != null && normalTabsRVAdapter != null && customViewContainer != null)
+            {
+                final int oldWidth = recyclerViewContainer.getWidth();
+                final int oldHeight = recyclerViewContainer.getHeight();
+                final int customViewContainerVisibility = customViewContainer.getVisibility();
+
+                if(listener != null)
+                {
+                    recyclerViewContainer.getViewTreeObserver().removeOnGlobalLayoutListener(listener);
+                    listener = null;
+                }
+
+                listener = new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        final int recyclerViewContainerWidth = recyclerViewContainer.getWidth();
+                        final int recyclerViewContainerHeight = recyclerViewContainer.getHeight();
+
+                        if(recyclerViewContainerWidth != oldWidth || recyclerViewContainerHeight != oldHeight)
+                        {
+                            if(customViewContainerVisibility != View.VISIBLE)
+                            {
+                                customHorizontalManager.setRecyclerViewContainerHeight();
+                                normalTabsRVAdapter.setSpecs(recyclerViewContainerWidth,recyclerViewContainerHeight);
+                                NormalTabsRVAdapter.ViewHolder viewHolder = normalTabsRVAdapter.getViewHolder();
+                                if(viewHolder != null)
+                                {
+                                    viewHolder.setQL();
+                                    customHorizontalManager.setLayDownType(5);
+                                } else {
+                                    customHorizontalManager.setLayDownType(3);
+                                }
+                                normalTabsRV.requestLayout();
+                            } else {
+                                try {
+                                    if(normalTabsRVAdapter.mCustomView != null)
+                                    {
+                                        final Window window = MainActivity.this.getWindow();
+                                        WindowCompat.setDecorFitsSystemWindows(window,false);
+                                        WindowInsetsControllerCompat windowInsetsControllerCompat = new WindowInsetsControllerCompat(window,recyclerViewContainer);
+                                        windowInsetsControllerCompat.hide(WindowInsetsCompat.Type.systemBars());
+                                        windowInsetsControllerCompat.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+                                        customViewContainer.setKeepScreenOn(true);
+                                    }
+                                } catch (Exception ignored) {}
+                            }
+
+                            recyclerViewContainer.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                            listener = null;
+                        }
+                    }
+                };
+
+                recyclerViewContainer.getViewTreeObserver().addOnGlobalLayoutListener(listener);
+            }
         } catch (Exception ignored) {}
     }
 }

@@ -201,7 +201,7 @@ public class MenuPagerRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                                 } else {
                                     String defaultUA = webSettings.getUserAgentString();
                                     String androidOSString = defaultUA.substring(defaultUA.indexOf("("),defaultUA.indexOf(")")+1);
-                                    String newUserAgentString = defaultUA.replace(androidOSString,"(X11; LinuxX86_64)")
+                                    String newUserAgentString = defaultUA.replace(androidOSString,"(X11; Linux x86_64)")
                                             .replace("Mobile ","");
 
                                     webSettings.setUserAgentString(newUserAgentString);
@@ -267,7 +267,7 @@ public class MenuPagerRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                                 } else {
                                     String defaultUA = webSettings.getUserAgentString();
                                     String androidOSString = defaultUA.substring(defaultUA.indexOf("("),defaultUA.indexOf(")")+1);
-                                    String newUserAgentString = defaultUA.replace(androidOSString,"(X11; LinuxX86_64)")
+                                    String newUserAgentString = defaultUA.replace(androidOSString,"(X11; Linux x86_64)")
                                             .replace("Mobile ","");
 
                                     webSettings.setUserAgentString(newUserAgentString);

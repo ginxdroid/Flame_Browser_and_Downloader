@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
+    android:overScrollMode="never">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:clickable="true"
+        android:focusable="true">
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/incognito_connectivity_selected"
+            android:layout_gravity="center_horizontal"
+            android:contentDescription="@string/incognito_logo"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginTop="10dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/incognito_mode_on"
+            android:textAppearance="?textAppearanceHeadline6"
+            android:layout_gravity="center_horizontal"
+            android:textColor="?attr/primaryText" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/you_can_browse_privately"
+            android:textAppearance="?textAppearanceHeadline7"
+            android:layout_gravity="center_horizontal"
+            android:textColor="?attr/primaryText" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/flame_browser_will_not_save"
+                android:textAppearance="?textAppearanceHeadline7"
+                android:textStyle="bold"
+                android:layout_marginTop="10dp"
+                android:layout_gravity="center_horizontal"
+                android:textColor="?attr/primaryText" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/your_recent_tabs"
+                android:textAppearance="?textAppearanceSubtitle1"
+                android:textColor="?attr/primaryText" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/your_browsing_and_search_history"
+                android:textAppearance="?textAppearanceSubtitle1"
+                android:textColor="?attr/primaryText" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/your_activity_might_still_be_visible_to"
+                android:textAppearance="?textAppearanceHeadline7"
+                android:textStyle="bold"
+                android:layout_marginTop="10dp"
+                android:layout_gravity="center_horizontal"
+                android:textColor="?attr/primaryText" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/might_still_visible_to"
+                android:textAppearance="?textAppearanceSubtitle1"
+                android:textColor="?attr/primaryText" />
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/when_you_turn_off_incognito_mode_or_exit_app_with_incognito_mode_on"
+                android:textAppearance="?textAppearanceHeadline7"
+                android:textStyle="bold"
+                android:layout_marginTop="10dp"
+                android:layout_gravity="center_horizontal"
+                android:textColor="?attr/primaryText" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/your_cookies_and_site_data_will_be_cleared_and_you_will_be_get_logged_out_from_all_websites"
+                android:textAppearance="?textAppearanceSubtitle1"
+                android:textColor="?attr/primaryText" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/close"
+                android:id="@+id/closeBtn"
+                style="@style/CancelButtonStyle" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.core.widget.NestedScrollView>

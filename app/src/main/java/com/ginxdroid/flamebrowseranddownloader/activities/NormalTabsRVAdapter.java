@@ -14,6 +14,7 @@ import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
@@ -24,6 +25,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -39,6 +41,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
+import android.view.Window;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.CookieManager;
@@ -61,6 +64,9 @@ import androidx.constraintlayout.widget.Guideline;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.webkit.WebSettingsCompat;
@@ -129,16 +135,22 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
     private final SiteSettingsModel siteSettingsModel;
     private String callbackOrigin = null;
     private GeolocationPermissions.Callback geoLocationCallback = null;
+    private final RelativeLayout customViewContainer;
+
+    private WebChromeClient.CustomViewCallback mCustomViewCallback = null;
+    View mCustomView = null;
 
     public NormalTabsRVAdapter(Context context, MainActivity mainActivity,
                                CustomHorizontalManager customHorizontalManager, CoordinatorLayout recyclerViewContainer,
-                               RecyclerView recyclerView, BottomAppBar bottomAppBar) {
+                               RecyclerView recyclerView, BottomAppBar bottomAppBar,
+                               boolean isNightModeChanged, Bundle savedInstanceState, RelativeLayout customViewContainer) {
         this.context = context;
         this.mainActivity = mainActivity;
         this.customHorizontalManager = customHorizontalManager;
         this.recyclerViewContainer = recyclerViewContainer;
         this.recyclerView = recyclerView;
         this.bottomAppBar = bottomAppBar;
+        this.customViewContainer = customViewContainer;
 
         incognitoMode = false;
 
@@ -153,12 +165,7 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
         viewHolders = new ArrayList<>();
 
         paint = new Paint(Paint.FILTER_BITMAP_FLAG);
-
         viewPool = new RecyclerView.RecycledViewPool();
-
-
-
-
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -235,10 +242,55 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
             int height = recyclerViewContainer.getHeight();
 
             setSpecs(width,height);
+
+            if(isNightModeChanged)
+            {
+                if(savedInstanceState != null)
+                {
+                    final ArrayList<String> savedURLs = savedInstanceState.getStringArrayList("list_state");
+                    if(savedURLs != null && savedURLs.size() > 0)
+                    {
+                        setURLS(savedURLs);
+                    }
+                }
+            } else {
+                mainActivity.addNow();
+            }
         });
 
     }
 
+    @SuppressLint("NotifyDataSetChanged")
+    void setURLS(ArrayList<String> urls) {
+        this.urlsAL.addAll(urls);
+        customHorizontalManager.setLayDownType(7);
+        recyclerView.setItemViewCacheSize(urlsAL.size());
+        notifyDataSetChanged();
+    }
+
+    ArrayList<String> getCurrentURLs()
+    {
+        ArrayList<String> urlsAL = new ArrayList<>();
+        for(ViewHolder holder: viewHolders)
+        {
+            try {
+                if(!TextUtils.isEmpty(holder.webViewURLString) &&
+                !holder.webViewURLString.equals("about:blank"))
+                {
+                    urlsAL.add(holder.webViewURLString);
+                } else {
+                    urlsAL.add(db.getHomePageURL());
+                }
+            } catch (Exception e)
+            {
+                try {
+                    urlsAL.add(db.getHomePageURL());
+                } catch (Exception ignored) {}
+            }
+        }
+
+        return urlsAL;
+    }
 
     void invokeGeolocationCallback(boolean invoke)
     {
@@ -593,7 +645,7 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
 
-        String newUserAgent = WebSettings.getDefaultUserAgent(context)+"Flame/"+ BuildConfig.VERSION_NAME;
+        String newUserAgent = WebSettings.getDefaultUserAgent(context)+" Flame/"+ BuildConfig.VERSION_NAME;
         newUserAgent = newUserAgent.replace("; wv","");
         webSettings.setUserAgentString(newUserAgent);
 
@@ -734,7 +786,7 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
         private final RelativeLayout emptyFrameRL;
         private final ImageButton tabPreviewIB;
 
-        private final CustomMCV emptyCV;
+        final CustomMCV emptyCV;
         private boolean isEmptyFrameLRLVisible = true;
 
         private final RelativeLayout emptyFrameLRL;
@@ -1317,6 +1369,84 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
             connectionInformationIB.setOnClickListener(ViewHolder.this);
 
             webChromeClient = new WebChromeClient(){
+
+                @Override
+                public void onShowCustomView(View view, CustomViewCallback callback) {
+                    if(mCustomView != null)
+                    {
+                        mCustomViewCallback.onCustomViewHidden();
+                        return;
+                    }
+
+                    if(itemView.getScaleX() == 1.0f)
+                    {
+                        mainActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+
+                        //stash the current state
+                        mCustomView = view;
+
+                        //stash the custom view callback
+                        mCustomViewCallback = callback;
+
+                        final Window window = mainActivity.getWindow();
+                        WindowCompat.setDecorFitsSystemWindows(window,false);
+                        WindowInsetsControllerCompat windowInsetsControllerCompat = new WindowInsetsControllerCompat(window,recyclerViewContainer);
+                        windowInsetsControllerCompat.hide(WindowInsetsCompat.Type.systemBars());
+                        windowInsetsControllerCompat.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+
+                        customViewContainer.addView(mCustomView,0,new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
+                                RelativeLayout.LayoutParams.MATCH_PARENT));
+
+                        window.getDecorView().post(() -> {
+                            customViewContainer.setVisibility(VISIBLE);
+                            customViewContainer.setKeepScreenOn(true);
+                        });
+                    }
+
+                }
+
+                @Override
+                public void onHideCustomView() {
+                    final Window window = mainActivity.getWindow();
+                    final View decorView = window.getDecorView();
+
+                    try {
+                        mCustomViewCallback.onCustomViewHidden();
+
+                        customViewContainer.removeView(mCustomView);
+
+                        WindowCompat.setDecorFitsSystemWindows(window,true);
+                        WindowInsetsControllerCompat windowInsetsControllerCompat = new WindowInsetsControllerCompat(window,recyclerViewContainer);
+                        windowInsetsControllerCompat.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_DEFAULT);
+                        windowInsetsControllerCompat.show(WindowInsetsCompat.Type.systemBars());
+                        customViewContainer.setKeepScreenOn(false);
+
+                        mCustomViewCallback = null;
+                        mCustomView = null;
+
+                        try {
+                            mainActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+                        } catch (Exception ignored) {}
+
+                        webView.clearFocus();
+
+                    } catch (Exception ignored){}
+                    finally {
+                        decorView.post(() -> {
+                            try {
+                                customHorizontalManager.setRecyclerViewContainerHeight();
+                                setSpecs(recyclerViewContainer.getWidth(),recyclerViewContainer.getHeight());
+                                setQL();
+                                customHorizontalManager.setLayDownType(5);
+                                recyclerView.requestLayout();
+                            } catch (Exception ignored) {}
+                            finally {
+                                customViewContainer.setVisibility(View.GONE);
+                            }
+                        });
+                    }
+
+                }
 
                 @Override
                 public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
@@ -2046,7 +2176,7 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
             }
         }
 
-        private void setQL()
+        void setQL()
         {
             try{
                 gridLayoutManager.setSpanCount(Math.min(recyclerViewContainerWidth,recyclerViewContainerHeight) / eighty);

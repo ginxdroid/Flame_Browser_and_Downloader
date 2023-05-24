@@ -343,11 +343,13 @@ public class CustomHorizontalManager extends RecyclerView.LayoutManager {
 
                     openInNewTabHorizontal();
                     break;
-                case 2:
-
-                    break;
                 case 3:
+                    noMoreLeft = false;
+                    noMoreRight = false;
+                    layDownType = -1;
+                    scrolling = true;
 
+                    layDownOtherViews();
                     break;
                 case 4:
                     //It will be new tab case
@@ -358,7 +360,29 @@ public class CustomHorizontalManager extends RecyclerView.LayoutManager {
                     openBlockedPopupHorizontal();
                     break;
                 case 5:
+                    noMoreLeft = false;
+                    noMoreRight = false;
+                    layDownType = -1;
+                    scrolling = true;
 
+                    try {
+                        detachAndScrapAttachedViews(hereRecycler);
+                        currentFSView = hereRecycler.getViewForPosition(currentActivePos);
+                        currentFSView.setTranslationX(0f);
+                        NormalTabsRVAdapter.ViewHolder viewHolder = normalTabsRVAdapter.getViewHolder();
+
+                        viewHolder.emptyCV.setCardElevation(maxElevation);
+                        viewHolder.emptyCV.setRadius(zero);
+                        addView(currentFSView);
+
+                        measureChild(currentFSView,0,0);
+                        layoutDecorated(currentFSView,0,0,width,height);
+
+                        currentFSView.post(() -> scrolling = false);
+                    } catch (Exception e)
+                    {
+                        scrolling = false;
+                    }
                     break;
                 case 6:
                     noMoreLeft = false;
@@ -366,6 +390,23 @@ public class CustomHorizontalManager extends RecyclerView.LayoutManager {
                     layDownType = -1;
                     scrolling = true;
                     openInNewTabHorizontalNoPeek();
+                    break;
+                case 7:
+                    noMoreLeft = false;
+                    noMoreRight = false;
+                    layDownType = -1;
+                    scrolling = true;
+
+                    currentActivePos = lastPos;
+                    openBlockedPopupHorizontalSpecial();
+                    break;
+                case 8:
+                    noMoreLeft = false;
+                    noMoreRight = false;
+                    layDownType = -1;
+                    scrolling = true;
+
+                    openInNewTabHorizontalNoPeekWithReLayout();
                     break;
                 case 9:
                     noMoreLeft = false;
@@ -389,6 +430,91 @@ public class CustomHorizontalManager extends RecyclerView.LayoutManager {
         } catch (Exception e)
         {
             layDownType = -1;
+            scrolling = false;
+        }
+    }
+
+    private void layDownOtherViews()
+    {
+        try {
+            if(itemCount > 0)
+            {
+                detachAndScrapAttachedViews(hereRecycler);
+                final int currentVisiblePos = itemCount / 2;
+
+                int previousPos = currentVisiblePos - 1;
+                int nextPos = currentVisiblePos + 1;
+
+                try {
+                    {
+                        final View view = hereRecycler.getViewForPosition(currentVisiblePos);
+                        view.setScaleX(minimizeScale);
+                        view.setScaleY(minimizeScale);
+                        view.setTranslationX(0f);
+                        addView(view);
+                        measureChild(view,0,0);
+                        layoutDecorated(view,0,0,width,height);
+                    }
+
+                    //next view
+                    if(nextPos < itemCount)
+                    {
+                        final View view = hereRecycler.getViewForPosition(nextPos);
+                        view.setScaleX(minimizeScale);
+                        view.setScaleY(minimizeScale);
+                        view.setTranslationX(nextTrans);
+                        addView(view);
+                        measureChild(view,0,0);
+                        layoutDecorated(view,0,0,width,height);
+                    }
+
+                    //run next loop
+                    for(int i = nextPos + 1,cnt = 2;i < itemCount;i++, cnt++)
+                    {
+                        final View view = hereRecycler.getViewForPosition(i);
+                        view.setScaleX(minimizeScale);
+                        view.setScaleY(minimizeScale);
+                        view.setTranslationX(getViewTranslation(cnt));
+                        addView(view);
+                        measureChild(view,0,0);
+                        layoutDecorated(view,0,0,width,height);
+                        detachAndScrapView(view,hereRecycler);
+                    }
+
+                    if(previousPos > 0)
+                    { final View view = hereRecycler.getViewForPosition(previousPos);
+                        view.setScaleX(minimizeScale);
+                        view.setScaleY(minimizeScale);
+                        view.setTranslationX(nextTrans);
+                        addView(view);
+                        measureChild(view,0,0);
+                        layoutDecorated(view,0,0,width,height);
+                    }
+
+                    //run previous loop
+                    for(int i = previousPos - 1,cnt = -2;i >= 0;i--,cnt--)
+                    {
+                        final View view = hereRecycler.getViewForPosition(i);
+                        view.setScaleX(minimizeScale);
+                        view.setScaleY(minimizeScale);
+                        view.setTranslationX(getViewTranslation(cnt));
+                        addView(view);
+                        measureChild(view,0,0);
+                        layoutDecorated(view,0,0,width,height);
+                        detachAndScrapView(view,hereRecycler);
+                    }
+
+
+
+                } finally {
+                    scrolling = false;
+                }
+
+            } else {
+                scrolling = false;
+            }
+        } catch (Exception e)
+        {
             scrolling = false;
         }
     }
@@ -531,6 +657,60 @@ public class CustomHorizontalManager extends RecyclerView.LayoutManager {
             currentFSView = hereRecycler.getViewForPosition(lastPos);
             setFSViewPropertiesHorizontal(currentFSView);
         }
+    }
+
+    private void openBlockedPopupHorizontalSpecial()
+    {
+        try {
+            isScrollUnlocked = false;
+            detachAndScrapAttachedViews(hereRecycler);
+
+            for(int i = 0; i <lastPos;i++)
+            {
+                final View view = hereRecycler.getViewForPosition(i);
+                setCVElevation(view);
+
+                view.setTranslationX(-width);
+                view.setScaleX(minimizeScale);
+                view.setScaleY(minimizeScale);
+
+                addView(view);
+                measureChild(view,0,0);
+                layoutDecorated(view,0,0,width,height);
+                detachAndScrapView(view,hereRecycler);
+            }
+        } finally {
+            currentFSView = hereRecycler.getViewForPosition(lastPos);
+            setFSViewPropertiesHorizontal(currentFSView);
+        }
+    }
+
+    void setRecyclerViewContainerHeight()
+    {
+        this.height = 0;
+    }
+
+    private void openInNewTabHorizontalNoPeekWithReLayout()
+    {
+        isScrollUnlocked = false;
+        measureChild(currentFSView,0,0);
+        layoutDecorated(currentFSView,0,0,width,height);
+
+        final View lastView = hereRecycler.getViewForPosition(lastPos);
+        lastView.setScaleX(minimizeScale);
+        lastView.setScaleY(minimizeScale);
+
+        final CustomMCV materialCardView = lastView.findViewById(R.id.emptyCV);
+        materialCardView.setCardElevation(two);
+        materialCardView.setRadius(six);
+        addView(lastView);
+        measureChild(lastView,0,0);
+        layoutDecorated(lastView,0,0,width,height);
+
+        lastView.setTranslationX(width);
+
+        detachAndScrapView(lastView,hereRecycler);
+        scrolling = false;
     }
 
     private void animateCurrentAndAddNew()

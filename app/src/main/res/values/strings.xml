@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">Flame Browser and Downloader</string>
+    <string name="browser_label">Flame Browser</string>
     <string name="themes">Themes</string>
     <string name="clear_records">Clear Records</string>
     <string name="go_incognito">Go Incognito</string>
@@ -27,7 +28,6 @@
     <string name="new_tab">New Tab</string>
     <string name="close_tab">Close tab</string>
     <string name="tab_preview">Tab Preview</string>
-    <string name="minimize">Minimize</string>
     <string name="refresh_web_page">Refresh web page</string>
     <string name="search">Search</string>
     <string name="view_tabs">View tabs</string>
@@ -61,7 +61,6 @@
     <string name="fullscreen_mode_is_only_for_web_pages">Fullscreen mode is only for webpages</string>
     <string name="exit_fullscreen_mode_message">To exit fullscreen mode press back</string>
     <string name="desktop_mode">Desktop mode</string>
-    <string name="upgrade_to_pro_version">Upgrade to pro version</string>
     <string name="upgrade_to_pro_version_at_discounted_rates_and_support_development_of_this_app">Upgrade to Pro Version at discounted rates and support development of this app!</string>
     <string name="close_all_tabs">Close all tabs</string>
     <string name="close_find_box">Close find box</string>
@@ -125,7 +124,6 @@
     <string name="done">done!</string>
     <string name="close">Close</string>
     <string name="search_engine_favicon">Search engine favicon</string>
-    <string name="voice_launcher_or_clear_text_button">Voice launcher or clear text button</string>
     <string name="clear_text">Clear text</string>
     <string name="load_now">Load now</string>
     <string name="edit">Edit</string>
@@ -219,9 +217,25 @@
     <string name="app_not_found_for_opening_privacy_policy">App not found for opening privacy policy</string>
     <string name="credits">Credits</string>
     <string name="material_design_icons">Material Design Icons</string>
-    <string name="view_their_homepage">View their homepage</string>
     <string name="visit_homepage">Visit homepage</string>
     <string name="view_license">View License</string>
+    <string name="malformed_url">Malformed URL</string>
+    <string name="startup_and_exit_features">Startup and Exit Features</string>
+    <string name="on_startup">On startup:</string>
+    <string name="do_not_open_recent_tabs_open_a_new_tab_with_home_page">Do not open recent tabs open a new tab with home page</string>
+    <string name="directly_open_recent_tabs_without_prompting">Directly open recent tabs without prompting</string>
+    <string name="settings_saved_will_take_effect_when_you_revisit_tab_manager">Settings saved, will take effect when you revisit tab manager</string>
+    <string name="incognito_logo">Incognito logo</string>
+    <string name="incognito_mode_on">Incognito Mode : On</string>
+    <string name="you_can_browse_privately">You can browse privately</string>
+    <string name="flame_browser_will_not_save">Flame Browser will not save</string>
+    <string name="your_recent_tabs">- Your recent tabs</string>
+    <string name="your_activity_might_still_be_visible_to">Your activity might still be visible to</string>
+    <string name="might_still_visible_to">- Websites you visit \n- Your employer or school \n- Your internet service provider</string>
+    <string name="your_browsing_and_search_history">- Your browsing and search history</string>
+    <string name="when_you_turn_off_incognito_mode_or_exit_app_with_incognito_mode_on">When you turn off incognito mode or exit app with incognito mode on</string>
+    <string name="your_cookies_and_site_data_will_be_cleared_and_you_will_be_get_logged_out_from_all_websites">Your cookies and site data will be cleared and you will be get logged out from all websites</string>
+    <string name="incognito_mode_off_logged_out_from_all_sites_cleared_cookies">Incognito mode off. Logged out from all sites. Cleared cookies.</string>
 
 
 </resources>

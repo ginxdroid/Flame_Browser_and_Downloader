@@ -91,7 +91,13 @@
         android:contentDescription="@string/add_new_tab"
         />
 
-
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/customViewContainer"
+        android:background="#000000"
+        android:elevation="10dp"
+        android:visibility="gone" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

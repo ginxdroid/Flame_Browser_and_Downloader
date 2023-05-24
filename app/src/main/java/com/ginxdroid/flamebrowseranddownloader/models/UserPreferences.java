@@ -11,6 +11,8 @@ public class UserPreferences {
     private String homePageURL;
     private String searchEngineURL;
 
+    private Integer isSaveRecentTabs;
+
 
     public UserPreferences() {
     }
@@ -61,5 +63,13 @@ public class UserPreferences {
 
     public void setSearchEngineURL(String searchEngineURL) {
         this.searchEngineURL = searchEngineURL;
+    }
+
+    public Integer getIsSaveRecentTabs() {
+        return isSaveRecentTabs;
+    }
+
+    public void setIsSaveRecentTabs(Integer isSaveRecentTabs) {
+        this.isSaveRecentTabs = isSaveRecentTabs;
     }
 }

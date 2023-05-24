@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.AboutActivity"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize">
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:id="@+id/backIB"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/unbounded_light_ripple"
+            android:src="@drawable/round_arrow_back_ios_new_24"
+            android:contentDescription="@string/back" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/startup_and_exit_features"
+            android:textAppearance="?textAppearanceHeadline6"
+            android:textColor="?attr/primaryText"
+            android:layout_gravity="center_vertical" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:clickable="true"
+        android:focusable="true"
+        style="@style/CustomMenuButtonStyle">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/on_startup"
+            android:layout_gravity="center_vertical"
+            android:textAppearance="?textAppearanceButton"
+            android:clickable="false"
+            android:focusable="false" />
+
+        <RadioGroup
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+
+            <RadioButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/doNotOpenRB"
+                android:text="@string/do_not_open_recent_tabs_open_a_new_tab_with_home_page" />
+
+            <RadioButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/directlyOpenRB"
+                android:text="@string/directly_open_recent_tabs_without_prompting" />
+
+        </RadioGroup>
+    </LinearLayout>
+
+
+</LinearLayout>

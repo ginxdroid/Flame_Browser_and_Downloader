@@ -259,14 +259,12 @@
                 <com.google.android.material.appbar.CollapsingToolbarLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:id="@+id/collapsingToolbarLayout"
                     app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
                     app:contentScrim="?attr/colorSurface">
 
                     <ImageButton
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/splashLogoIB"
                         android:src="@drawable/splash_logo_light"
                         android:background="@drawable/unbounded_light_ripple"
                         android:layout_gravity="center"
@@ -276,7 +274,6 @@
                         android:layout_gravity="top|end"
                         android:layout_width="wrap_content"
                         android:layout_height="?attr/actionBarSize"
-                        android:id="@+id/qrCodeScannerIB"
                         android:paddingStart="10dp"
                         android:paddingEnd="10dp"
                         android:background="@drawable/unbounded_light_ripple"
@@ -459,7 +456,6 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:id="@+id/titleRL"
                 android:background="?attr/tabBackgroundColor"
                 android:clickable="false"
                 android:focusable="false"

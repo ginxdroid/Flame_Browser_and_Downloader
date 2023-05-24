@@ -103,6 +103,7 @@ public class ThemesRVAdapter extends RecyclerView.Adapter<ThemesRVAdapter.ViewHo
                 int itemId = themeIDs.get(getBindingAdapterPosition());
                 db.changeTheme(isDarkRV);
                 db.updateCurrentThemeID(itemId);
+                mainActivity.setRecreating();
 
                 if(isDarkRV == 1)
                 {

@@ -47,7 +47,8 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         ImageButton backIB = findViewById(R.id.backIB);
         backIB.setOnClickListener(SettingsActivity.this);
 
-        MaterialButton manageBTV,manageHPTV,manageHTV,manageSHTV,securityTV,tipsTV,clearRecordsTV,resetToDefaultTV,shareLinkBtn,aboutBtn;
+        MaterialButton manageBTV,manageHPTV,manageHTV,manageSHTV,securityTV,tipsTV,clearRecordsTV,
+                resetToDefaultTV,shareLinkBtn,aboutBtn,startupAndExitFeaturesTV;
 
         manageHPTV = findViewById(R.id.manageHPTV);
         manageHPTV.setOnClickListener(SettingsActivity.this);
@@ -78,6 +79,9 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
 
         aboutBtn = findViewById(R.id.aboutBtn);
         aboutBtn.setOnClickListener(SettingsActivity.this);
+
+        startupAndExitFeaturesTV = findViewById(R.id.startupAndExitFeaturesTV);
+        startupAndExitFeaturesTV.setOnClickListener(SettingsActivity.this);
     }
 
     @Override
@@ -131,6 +135,9 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         } else if(id == R.id.aboutBtn)
         {
             startActivity(new Intent(SettingsActivity.this,AboutActivity.class));
+        } else if(id == R.id.startupAndExitFeaturesTV)
+        {
+            startActivity(new Intent(SettingsActivity.this, StartupAndExitFeatures.class));
         }
     }
 
@@ -191,6 +198,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                 userPreferences.setIsDarkWebUI(db.getDarkWebUI());
                 userPreferences.setHomePageURL("NewTab");
                 userPreferences.setSearchEngineURL("https://www.google.com/search?q=");
+                userPreferences.setIsSaveRecentTabs(1);
                 db.addUserPreferences(userPreferences);
 
                 SiteSettingsModel siteSettingsModel = new SiteSettingsModel();

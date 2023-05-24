@@ -22,6 +22,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static DatabaseHandler instance = null;
     private static SQLiteDatabase readableDB, writableDB;
 
+    private final String recentSitesTBL = "recentSitesTBL";
+    //Recent sites columns
+
+    private final String RCT_KEY_ID = "rCTKeyId";
+    private final String RCT_SITE_URL = "rCTSiteURL";
+
     private final String siteSettingsTBL = "siteSettingsTBL";
     //Site settings table columns
 
@@ -42,6 +48,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private final String DARK_THEME = "tHDarkTheme";
     private final String HOME_PAGE_URL = "uHomePageURL";
     private final String SEARCH_ENGINE_URL = "uSearchEngineURL";
+    private final String IS_SAVE_RECENT_TABS = "uIsSaveRecentTabs";
 
 
     private final String differentThemesTBL="differentThemesTBL";
@@ -257,11 +264,18 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         createSearchEnginesTbl(db);
         createSearchItemsTbl(db);
         createSiteSettingsTbl(db);
+        createRecentSitesTbl(db);
     }
 
 
 
     //CRUD: CREATE, READ, UPDATE and DELETE operations
+
+    private void createRecentSitesTbl(SQLiteDatabase db) {
+        String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS " + recentSitesTBL + "(" + RCT_KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                RCT_SITE_URL + " Text);";
+        db.execSQL(CREATE_TABLE);
+    }
 
     private void createSiteSettingsTbl(SQLiteDatabase db) {
         String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS " + siteSettingsTBL + "(" + SS_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -345,7 +359,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     {
         String CREATE_USER_PREFERENCES_TABLE = "CREATE TABLE IF NOT EXISTS "+ userPreferencesTBL +"("+UP_KEY_ID+" INTEGER PRIMARY KEY,"+
                 CURRENT_THEME_ID+" INTEGER,"+IS_DARK_WEB_UI+" INTEGER,"+DARK_THEME+" INTEGER,"+HOME_PAGE_URL+" TEXT,"+SEARCH_ENGINE_URL+
-                " TEXT);";
+                " TEXT,"+IS_SAVE_RECENT_TABS+" INTEGER);";
 
         db.execSQL(CREATE_USER_PREFERENCES_TABLE);
     }
@@ -1342,6 +1356,49 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         cursor.close();
         return isChanged;
     }
+
+    public ArrayList<String> getAllRecentSitesURLs()
+    {
+        ArrayList<String> list = new ArrayList<>();
+        Cursor cursor = readableDB.query(recentSitesTBL,new String[]{RCT_SITE_URL},null,null,null,null,null);
+        while (cursor.moveToNext())
+        {
+            list.add(cursor.getString(cursor.getColumnIndexOrThrow(RCT_SITE_URL)));
+        }
+        cursor.close();
+        return list;
+    }
+
+    public void addRecentSiteURL(String siteURL)
+    {
+        ContentValues values = new ContentValues();
+        values.put(RCT_SITE_URL,siteURL);
+        writableDB.insert(recentSitesTBL,null,values);
+    }
+
+    public void truncateRecentSitesTable()
+    {
+        writableDB.delete(recentSitesTBL,null,null);
+    }
+
+    public void updateIsSaveRecentTabs(int saveVal)
+    {
+        ContentValues values = new ContentValues();
+        values.put(IS_SAVE_RECENT_TABS,saveVal);
+        writableDB.update(userPreferencesTBL,values,UP_KEY_ID + "=?",new String[]{String.valueOf(1)});
+    }
+
+    public int isSaveRecentTabs()
+    {
+        Cursor cursor = readableDB.query(userPreferencesTBL,new String[]{IS_SAVE_RECENT_TABS},UP_KEY_ID + "=?",
+                new String[]{String.valueOf(1)},null,null,null);
+        cursor.moveToFirst();
+        int result = cursor.getInt(cursor.getColumnIndexOrThrow(IS_SAVE_RECENT_TABS));
+        cursor.close();
+        return result;
+    }
+
+
 }
 
 
