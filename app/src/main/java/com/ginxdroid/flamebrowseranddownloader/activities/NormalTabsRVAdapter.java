@@ -12,6 +12,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ActivityNotFoundException;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -37,6 +39,7 @@ import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
 import android.util.ArrayMap;
 import android.util.TypedValue;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,6 +50,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.webkit.CookieManager;
 import android.webkit.GeolocationPermissions;
 import android.webkit.PermissionRequest;
+import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
@@ -58,6 +62,8 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.activity.OnBackPressedCallback;
+import androidx.activity.OnBackPressedDispatcher;
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.Guideline;
@@ -80,9 +86,14 @@ import com.ginxdroid.flamebrowseranddownloader.classes.HelperTextUtility;
 import com.ginxdroid.flamebrowseranddownloader.models.HistoryItem;
 import com.ginxdroid.flamebrowseranddownloader.models.SearchEngineItem;
 import com.ginxdroid.flamebrowseranddownloader.models.SiteSettingsModel;
+import com.ginxdroid.flamebrowseranddownloader.sheets.ConnectionInformationSheet;
+import com.ginxdroid.flamebrowseranddownloader.sheets.FileChooserSheet;
 import com.ginxdroid.flamebrowseranddownloader.sheets.MainMenuSheet;
+import com.ginxdroid.flamebrowseranddownloader.sheets.PopupBlockedSheet;
 import com.google.android.material.bottomappbar.BottomAppBar;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textview.MaterialTextView;
+import com.journeyapps.barcodescanner.ScanOptions;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -96,6 +107,9 @@ import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
+import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence;
+import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
 
 public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapter.ViewHolder>{
     private final ArrayList<String> urlsAL;
@@ -139,6 +153,15 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
 
     private WebChromeClient.CustomViewCallback mCustomViewCallback = null;
     View mCustomView = null;
+    private final OnBackPressedDispatcher dispatcher;
+    private OnBackPressedCallback currentActiveCallback = null;
+
+    ValueCallback<Uri[]> uploadMessage = null;
+    boolean fileChooserOpened = false;
+    private boolean isShowing = false;
+    private boolean isWindowOpened = false;
+    private Message storeMsg = null;
+
 
     public NormalTabsRVAdapter(Context context, MainActivity mainActivity,
                                CustomHorizontalManager customHorizontalManager, CoordinatorLayout recyclerViewContainer,
@@ -152,6 +175,7 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
         this.bottomAppBar = bottomAppBar;
         this.customViewContainer = customViewContainer;
 
+        dispatcher = mainActivity.getOnBackPressedDispatcher();
         incognitoMode = false;
 
         fileDirPath = context.getFilesDir().getAbsolutePath()+ File.separator+ "favicon" + File.separator;
@@ -260,6 +284,32 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
 
     }
 
+
+    void setUploadMessage(Uri[] uploadMessage)
+    {
+        //chooser
+        try {
+            fileChooserOpened = false;
+            this.uploadMessage.onReceiveValue(uploadMessage);
+        } catch (Exception e)
+        {
+            mainActivity.showToast(R.string.oops_general_message);
+        } finally {
+            this.uploadMessage = null;
+        }
+    }
+
+    void nullifyFileChooserUpload()
+    {
+        try {
+            fileChooserOpened = false;
+            this.uploadMessage.onReceiveValue(null);
+        } catch (Exception ignored) {}
+        finally {
+            this.uploadMessage = null;
+        }
+    }
+
     @SuppressLint("NotifyDataSetChanged")
     void setURLS(ArrayList<String> urls) {
         this.urlsAL.addAll(urls);
@@ -310,6 +360,30 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
         }
     }
 
+    void loadQRSearchQuery(String content)
+    {
+
+
+        viewHolder.setClearHistory();
+        viewHolder.homePageCL.setVisibility(View.INVISIBLE);
+        viewHolder.isHPCVisible = false;
+
+        viewHolder.webViewContainer.setVisibility(VISIBLE);
+
+
+        String url = viewHolder.holderUtility.checkAndGet(content);
+
+        viewHolder.webView.evaluateJavascript("javascript:document.open();document.close();",null);
+        viewHolder.webView.loadUrl(url);
+
+        if(!viewHolder.isProgressBarVisible)
+        {
+            viewHolder.makeProgressBarVisible();
+        }
+
+        setDecorations(url, viewHolder);
+    }
+
     void loadVoiceSearchQuery(String keyWord)
     {
 
@@ -341,11 +415,7 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
         setDecorations(url, viewHolder);
     }
 
-    void setSearchFaviconResId(int seFavResId, String searchEngineURL)
-    {
-        this.seFavResId = seFavResId;
-        this.searchEngineURL = searchEngineURL;
-    }
+
 
     void setSearchFaviconOnResume()
     {
@@ -518,6 +588,34 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
         String urlString = urlsAL.get(position);
         switch (urlString)
         {
+            case "ST":
+            {
+                try {
+                    Message resultMessage = null;
+                    try {
+                        resultMessage = webViews.get(position);
+                    } finally {
+                        if(resultMessage != null)
+                        {
+                            WebView.WebViewTransport transport = (WebView.WebViewTransport) resultMessage.obj;
+                            transport.setWebView(holder.webView);
+                            resultMessage.sendToTarget();
+                            holder.webViewContainer.setVisibility(VISIBLE);
+
+                            if(!holder.isProgressBarVisible){
+                                holder.makeProgressBarVisible();
+                            }
+
+                            if(HelperTextUtility.isNotEmpty(holder.webViewURLString))
+                            {
+                                setDecorInner(holder.webViewURLString,holder);
+                            }
+                        }
+                    }
+                } catch (Exception ignored) {}
+
+                break;
+            }
             case "NewTab":
             {
                 holder.homePageCL.setVisibility(VISIBLE);
@@ -555,23 +653,24 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
 
             viewHolder = holder;
 
-//        todo    if (currentActiveCallBack!=null)
-//            {
-//                currentActiveCallBack.remove();
-//            }
+            if (currentActiveCallback!=null)
+            {
+                currentActiveCallback.remove();
+            }
 
-//     todo       currentActiveCallBack = holder.onBackPressedCallback;
-//            dispatcher.addCallback(activity,currentActiveCallBack);
-//            holder.onBackPressedCallback.setEnabled(true);
+            currentActiveCallback = holder.onBackPressedCallback;
+            dispatcher.addCallback(mainActivity,currentActiveCallback);
+            holder.onBackPressedCallback.setEnabled(true);
 
         } else {
             holder.isLayoutInvisible = false;
-       //todo     holder.webView.onPause();
+            holder.webView.onPause();
             holder.webView.setVisibility(View.GONE);
             holder.isWebViewGone = true;
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void initializeWebView(final WebView webView, final ViewHolder viewHolder)
     {
         //tweak settings for our webview
@@ -658,6 +757,8 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
 
         webView.setWebChromeClient(viewHolder.webChromeClient);
         webView.setWebViewClient(viewHolder.webViewClient);
+
+        webView.setOnTouchListener(viewHolder.onTouchListener);
 
     }
 
@@ -791,7 +892,8 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
 
         private final RelativeLayout emptyFrameLRL;
         final ConstraintLayout bottomToolbarCL;
-        private final ImageButton reloadIB,searchIB,showMoreIB,homePageIB;
+        private final ImageButton reloadIB;
+        private final ImageButton showMoreIB;
         private final RelativeLayout tabsCountChildTVHPRL;
         private final TextView tabsCountChildTVHP;
 
@@ -814,7 +916,6 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
 
         private boolean isLayoutInvisible;
 
-        private final ConstraintLayout tabFSControlsInner;
         private final ImageView connectionInformationIB;
         final ImageView connectionInformationIBInner;
 
@@ -860,6 +961,222 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
         private AlertDialog confirmationDialog = null,innerConfirmationDialog = null, drmDialog = null,
                     locationDialog = null;
 
+        private final OnBackPressedCallback onBackPressedCallback;
+        private final View.OnTouchListener onTouchListener;
+        private final GestureDetector gestureDetector;
+
+
+        void showConnectionInformationDialog(View popupView)
+        {
+            try {
+                if(HelperTextUtility.isNotEmpty(webViewURLString))
+                {
+                    final MaterialTextView urlTV, secureOrNotTV,informationTV;
+                    final ImageButton infoIB,shareIB,copyIB;
+
+                    urlTV = popupView.findViewById(R.id.urlTV);
+                    secureOrNotTV = popupView.findViewById(R.id.secureOrNotTV);
+                    informationTV = popupView.findViewById(R.id.informationTV);
+                    infoIB = popupView.findViewById(R.id.infoIB);
+                    shareIB = popupView.findViewById(R.id.shareIB);
+                    copyIB = popupView.findViewById(R.id.copyIB);
+
+                    try {
+                        URL aURL = new URL(webViewURLString);
+                        String protocol = aURL.getProtocol();
+
+                        if(protocol.equals("https"))
+                        {
+                            secureOrNotTV.setText(context.getString(R.string.connection_is_secure));
+                            informationTV.setText(context.getString(R.string.connection_secure_info));
+                            infoIB.setImageResource(0);
+                            infoIB.setImageResource(R.drawable.round_lock_24);
+                        } else {
+                            secureOrNotTV.setText(context.getString(R.string.connection_is_not_secure));
+                            informationTV.setText(context.getString(R.string.connection_not_secure_info));
+                            infoIB.setImageResource(0);
+                            infoIB.setImageResource(R.drawable.round_info_24);
+                        }
+
+                        SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(webViewURLString);
+                        final ForegroundColorSpan span = new ForegroundColorSpan(colorPrimary);
+                        spannableStringBuilder.setSpan(span,0,protocol.length(),Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+
+                        urlTV.setText(spannableStringBuilder);
+                    } catch (Exception e)
+                    {
+                        try {
+                            secureOrNotTV.setText(context.getString(R.string.connection_is_not_secure));
+                            informationTV.setText(context.getString(R.string.connection_not_secure_info));
+                            infoIB.setImageResource(0);
+                            infoIB.setImageResource(R.drawable.round_info_24);
+
+                            String otherHost = webViewURLString.split(":")[0];
+
+                            SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(webViewURLString);
+                            final ForegroundColorSpan span = new ForegroundColorSpan(colorPrimary);
+                            spannableStringBuilder.setSpan(span,0,otherHost.length(),Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+
+                            urlTV.setText(spannableStringBuilder);
+                        } catch (Exception ignored) {}
+                    }
+
+                    View.OnClickListener onClickListener = view -> {
+                        int id = view.getId();
+                        if(id == R.id.shareIB)
+                        {
+                            try {
+                                Intent intent = new Intent(Intent.ACTION_SEND);
+                                intent.setTypeAndNormalize("text/plain");
+                                intent.putExtra(Intent.EXTRA_TEXT,webViewURLString);
+                                mainActivity.startActivity(Intent.createChooser(intent,mainActivity.getString(R.string.share_via)));
+                            } catch (Exception e) {mainActivity.showToast(R.string.unable_to_share_url);}
+                        } else if(id == R.id.copyIB)
+                        {
+                            ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+                            ClipData clipData = ClipData.newPlainText("page URL",webViewURLString);
+                            if(clipboardManager!= null)
+                            {
+                                clipboardManager.setPrimaryClip(clipData);
+                                showToastFromMainActivity(R.string.copied_to_clipboard);
+                            } else {
+                                showToastFromMainActivity(R.string.oops_general_message);
+                            }
+                        }
+                    };
+
+                    shareIB.setOnClickListener(onClickListener);
+                    copyIB.setOnClickListener(onClickListener);
+
+                }
+            } catch (Exception ignored) {}
+        }
+
+        private void showSequence() {
+            try {
+                if(db.isShowBrowserTutorial())
+                {
+                    MaterialShowcaseSequence sequence = new MaterialShowcaseSequence(mainActivity);
+                    sequence.addSequenceItem(new MaterialShowcaseView.Builder(mainActivity)
+                            .setTarget(showMoreIB).setTitleText(R.string.menu).setDismissText(R.string.got_it)
+                                    .setContentText(R.string.use_this_to_open_menu).setSequence(true).build()
+                                );
+
+                    sequence.addSequenceItem(new MaterialShowcaseView.Builder(mainActivity)
+                            .setTarget(tabsCountChildTVHPRL).setTitleText(R.string.minimize_tab).setDismissText(R.string.got_it)
+                            .setContentText(R.string.use_this_to_minimize_maximized_tab).setSequence(true).build()
+                    );
+                    sequence.start();
+                    db.updateBrowserTutorialStatus();
+                }
+            } catch (Exception e)
+            {
+                try {
+                    db.updateBrowserTutorialStatus();
+                } catch (Exception ignored) {}
+            }
+        }
+
+        void showBlockedDialog(View popupView, PopupBlockedSheet popupBlockedSheet)
+        {
+            final MaterialButton openBlockedPopup, openLink;
+            openBlockedPopup = popupView.findViewById(R.id.openBlockedPopup);
+
+            final RelativeLayout linkRL = popupView.findViewById(R.id.linkRL);
+            final TextView linkTV = linkRL.findViewById(R.id.linkTV);
+            openLink = linkRL.findViewById(R.id.openLink);
+
+            final IncomingHandler incomingHandler = new IncomingHandler(Looper.getMainLooper());
+            Message msg = incomingHandler.obtainMessage();
+            webView.requestFocusNodeHref(msg);
+            String linkURL = null;
+            try {
+                WebView.HitTestResult result = webView.getHitTestResult();
+                if(result.getType() == WebView.HitTestResult.SRC_ANCHOR_TYPE)
+                {
+                    linkURL = result.getExtra();
+                } else if(result.getType() == WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE)
+                {
+                    Bundle dataBundle = incomingHandler.getDataBundle();
+                    if(dataBundle != null)
+                    {
+                        linkURL = dataBundle.getString("url");
+                    }
+
+                }
+
+                if(!TextUtils.isEmpty(linkURL))
+                {
+                    linkTV.setText(linkURL);
+                    linkRL.setVisibility(VISIBLE);
+                }
+            } catch (Exception ignored) {}
+
+            isWindowOpened = true;
+
+            final String finalLinkURL = linkURL;
+
+            openLink.setOnClickListener(view -> {
+                isWindowOpened = true;
+                popupBlockedSheet.dismiss();
+                addNewTab(finalLinkURL,4);
+                veryCommonAddWork();
+            });
+
+            openBlockedPopup.setOnClickListener(view -> {
+                try {
+                    isWindowOpened = false;
+                    webViews.add(storeMsg);
+                    addNewTab("ST",4);
+                    veryCommonAddWork();
+                    popupBlockedSheet.dismiss();
+                } catch (Exception ignored) {}
+            });
+
+            isShowing = true;
+        }
+
+        void popupBlockedDismissed()
+        {
+            if(isWindowOpened)
+            {
+                try {
+                    isWindowOpened = false;
+
+                    final WebView n = new WebView(context);
+                    n.getSettings().setJavaScriptEnabled(javaScriptEnabled);
+                    n.setWebViewClient(new WebViewClient(){
+                        @Override
+                        public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                            super.onPageStarted(view, url, favicon);
+
+                            n.onPause();
+                            n.stopLoading();
+                            n.removeAllViews();
+                            n.destroy();
+                        }
+
+                        @Override
+                        public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                            return false;
+                        }
+                    });
+
+                    WebView.WebViewTransport transport = (WebView.WebViewTransport) storeMsg.obj;
+                    transport.setWebView(n);
+                    storeMsg.sendToTarget();
+                } finally {
+                    storeMsg = null;
+                    isShowing = false;
+                }
+            } else{
+                storeMsg = null;
+                isShowing = false;
+            }
+        }
+
+
+
         private void putScrollPosition()
         {
             try {
@@ -896,7 +1213,7 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
             } catch (Exception ignored) {
             }
 
-            //todo webView.onPause();
+            webView.onPause();
 
             if(isInFullScreenMode)
             {
@@ -1211,8 +1528,10 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
             }
         }
 
+        @SuppressLint("ClickableViewAccessibility")
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+            itemView.setLayerType(View.LAYER_TYPE_HARDWARE,null);
 
             outerL = itemView.findViewById(R.id.outerL);
             guideLine = outerL.findViewById(R.id.guideLine);
@@ -1242,14 +1561,16 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
             bottomToolbarCL = itemView.findViewById(R.id.bottomToolbarCL);
             findBoxVS = bottomToolbarCL.findViewById(R.id.findBoxVS);
             reloadIB = bottomToolbarCL.findViewById(R.id.reloadIB);
-            searchIB = bottomToolbarCL.findViewById(R.id.searchIB);
+            ImageButton searchIB = bottomToolbarCL.findViewById(R.id.searchIB);
             showMoreIB = bottomToolbarCL.findViewById(R.id.showMoreIB);
-            homePageIB = bottomToolbarCL.findViewById(R.id.homePageIB);
+            ImageButton homePageIB = bottomToolbarCL.findViewById(R.id.homePageIB);
             tabsCountChildTVHPRL = bottomToolbarCL.findViewById(R.id.tabsCountChildTVHPRL);
             tabsCountChildTVHP = tabsCountChildTVHPRL.findViewById(R.id.tabsCountChildTVHP);
 
             homePageCL = itemView.findViewById(R.id.homePageCL);
-            tabFSControlsInner = homePageCL.findViewById(R.id.tabFSControlsInner);
+            ConstraintLayout tabFSControlsInner = homePageCL.findViewById(R.id.tabFSControlsInner);
+            final ImageButton qrCodeScannerIB = homePageCL.findViewById(R.id.qrCodeScannerIB);
+            qrCodeScannerIB.setOnClickListener(ViewHolder.this);
             connectionInformationIBInner = tabFSControlsInner.findViewById(R.id.connectionInformationIBInner);
             ImageButton voiceLauncherIBTabInner = tabFSControlsInner.findViewById(R.id.voiceLauncherIBTabInner);
             voiceLauncherIBTabInner.setOnClickListener(ViewHolder.this);
@@ -1346,6 +1667,7 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
                 @Override
                 public void startSelect() {
                     emptyFrameLRL.setVisibility(View.INVISIBLE);
+                    webView.onResume();
                 }
 
                 @Override
@@ -1369,6 +1691,43 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
             connectionInformationIB.setOnClickListener(ViewHolder.this);
 
             webChromeClient = new WebChromeClient(){
+
+                @Override
+                public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, Message resultMsg) {
+                    if(!isShowing)
+                    {
+                        storeMsg = resultMsg;
+                        if(isLayoutInvisible)
+                        {
+                            //show popupBlockedSheet to user
+                            try {
+                                new PopupBlockedSheet().show(mainActivity.getSupportFragmentManager(), "popupBlockedSheet");
+                            } catch (Exception ignored) {
+                            }
+                        }
+
+                        return true;
+                    }else {
+                        return false;
+                    }
+                }
+
+                @Override
+                public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
+                    try {
+                        if(uploadMessage == null)
+                        {
+                            uploadMessage = filePathCallback;
+                            new FileChooserSheet().show(mainActivity.getSupportFragmentManager(),"fileChooserSheet");
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    } catch (Exception e)
+                    {
+                        return false;
+                    }
+                }
 
                 @Override
                 public void onShowCustomView(View view, CustomViewCallback callback) {
@@ -2108,9 +2467,147 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
             };
 
 
+            onBackPressedCallback = new OnBackPressedCallback(false) {
+                @Override
+                public void handleOnBackPressed() {
+                    if(customHorizontalManager.ifNotScrolling())
+                    {
+                        try {
+                            if(viewHolder != null && isLayoutInvisible)
+                            {
+                                String homePageURL = db.getHomePageURL();
+                                if(mCustomView != null)
+                                {
+                                    mCustomViewCallback.onCustomViewHidden();
+                                } else if (findBoxRL != null && findBoxRL.getVisibility() == VISIBLE)
+                                {
+                                    final CustomEditText findEditTextFBLL = findBoxRL.findViewById(R.id.findEditTextFBLL);
+                                    Editable editableHere = findEditTextFBLL.getText();
+
+                                    if(editableHere != null)
+                                    {
+                                        editableHere.clear();
+                                    }
+
+                                    findBoxRL.setVisibility(View.INVISIBLE);
+                                    webView.clearMatches();
+
+                                    try {
+                                        InputMethodManager imm = (InputMethodManager) context.getSystemService(Activity.INPUT_METHOD_SERVICE);
+                                        if(imm != null)
+                                        {
+                                            imm.hideSoftInputFromWindow(findEditTextFBLL.getWindowToken(),0);
+                                        }
+                                    } catch (Exception ignored) {}
+
+                                } else if(isInFullScreenMode)
+                                {
+                                    exitFullScreenMode();
+                                } else if(webView.canGoBack())
+                                {
+                                    requireScroll = true;
+                                    webView.goBack();
+                                } else if(homePageURL.equals("NewTab") && !isHPCVisible)
+                                {
+                                    faviconIV.setBackground(null);
+                                    faviconIV.setImageBitmap(null);
+                                    faviconIV.setBackgroundResource(R.drawable.public_earth_bg);
+
+                                    webView.stopLoading();
+                                    setClearHistory();
+                                    webViewContainer.setVisibility(View.INVISIBLE);
+
+                                    if(globalAnimation != null)
+                                    {
+                                        globalAnimation.cancel();
+                                    }
+
+                                    makeProgressBarInvisible();
+                                    homePageCL.setVisibility(VISIBLE);
+                                    makeHPVisible();
+                                    lastURL = webView.getUrl();
+                                    webView.loadUrl("about:blank");
+
+                                    showHPControls();
+                                    cardTitle.setText(R.string.new_tab);
+                                } else {
+                                    if(!homePageURL.equals("NewTab") && !TextUtils.isEmpty(webViewURLString)
+                                            && !webViewURLString.equals(homePageURL))
+                                    {
+                                        setDecorations(homePageURL,ViewHolder.this);
+                                        homePageCL.setVisibility(View.INVISIBLE);
+                                        isHPCVisible = false;
+                                        webViewContainer.setVisibility(VISIBLE);
+                                        setClearHistory();
+                                        webView.loadUrl(homePageURL);
+                                        if(!isProgressBarVisible)
+                                        {
+                                            makeProgressBarVisible();
+                                        }
+                                    } else if(!customHorizontalManager.isScrollUnlocked())
+                                    {
+                                        isLayoutInvisible = false;
+                                        viewHolder = null;
+
+                                        try {
+                                            InputMethodManager imm = (InputMethodManager) context.getSystemService(Activity.INPUT_METHOD_SERVICE);
+                                            if(imm != null)
+                                            {
+                                                imm.hideSoftInputFromWindow(itemView.getWindowToken(),0);
+                                            }
+                                        } catch (Exception ignored) {}
+
+                                        makeTitleVisible();
+                                        emptyFrameRL.setVisibility(VISIBLE);
+                                        webView.onPause();
+                                        customHorizontalManager.minimalDeselectItem(() -> {
+                                            try {
+                                                if(future == null)
+                                                {
+                                                    future = service.submit(new DrawBitmap());
+                                                }
+                                            } catch (Exception r)
+                                            {
+                                                tabPreviewIB.setBackgroundColor(colorSurface);
+                                            }
+                                        });
+
+                                    }
+                                }
+                            }else {
+                                mainActivity.finish();
+                            }
+                        } catch (Exception ignored) {}
+                    }
+                }
+            };
+
+
+
+            gestureDetector = new GestureDetector(context,
+                    new GestureListener(ViewHolder.this,mainActivity,NormalTabsRVAdapter.this,context));
+            onTouchListener = (view, motionEvent) -> {
+                gestureDetector.onTouchEvent(motionEvent);
+                return false;
+            };
+
+
             initializeWebView(webView,ViewHolder.this);
 
-            itemView.post(this::doGestureWork);
+
+            itemView.post(() -> {
+                if(!isLayoutInvisible)
+                {
+                    try { tabPreviewIB.setBackgroundColor(colorSurface); } catch (Exception ignored) {}
+                }
+                else
+                {
+                    showSequence();
+                }
+
+                doGestureWork();
+            });
+
 
         }
 
@@ -2205,7 +2702,13 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
                     itemView, new SwipeDismissTouchListener.DismissCallbacks() {
                 @Override
                 public void onDismiss() {
-                    mainActivity.runOnUiThread(() -> removeTab(getBindingAdapterPosition(), itemView));
+                    mainActivity.runOnUiThread(() -> {
+                        webViewContainer.removeView(webView);
+                        webView.removeAllViews();
+                        webView.destroy();
+                        stopService();
+                        removeTab(getBindingAdapterPosition(), itemView);
+                    });
                 }
 
 
@@ -2215,6 +2718,8 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
                     {
                         stopFetcher();
                         makeTitleInvisible();
+
+                        webView.onResume();
 
                         customHorizontalManager.minimalSelect(getBindingAdapterPosition(), itemView, emptyCV, () -> selectThisTab(true));
                     }
@@ -2229,38 +2734,79 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
 
         private void selectThisTab(boolean isRelayout)
         {
-            if (isWebViewGone) {
-                isWebViewGone = false;
-                webView.setVisibility(VISIBLE);
+            try {
+                if (isWebViewGone) {
+                    isWebViewGone = false;
+                    webView.setVisibility(VISIBLE);
+                    customHorizontalManager.remeasureCurrentView();
+                }
 
-           //todo     customHorizontalManager.remeasureCurrentView();
+                if(currentActiveCallback != null)
+                {
+                    currentActiveCallback.remove();
+                }
+
+                currentActiveCallback = onBackPressedCallback;
+                dispatcher.addCallback(mainActivity,currentActiveCallback);
+                onBackPressedCallback.setEnabled(true);
+
+
+                emptyFrameRL.setVisibility(View.INVISIBLE);
+                isLayoutInvisible = true;
+                viewHolder = ViewHolder.this;
+
+                tabPreviewIB.setImageBitmap(null);
+                tabPreviewIB.setBackgroundColor(Color.TRANSPARENT);
+
+                setQL();
+                setTabCountTVText(getItemCount(), tabsCountChildTVHP);
+
+                if(confirmationDialog != null)
+                {
+                    confirmationDialog.show();
+                }
+
+                if(drmDialog != null)
+                {
+                    drmDialog.show();
+                }
+
+                if(locationDialog != null)
+                {
+                    locationDialog.show();
+                }
+
+                setProgressBarProgressSpecial(historyProgress);
+                setDecorURL();
+                setStoreDialog();
+
+            }finally {
+                try {
+                    if (isRelayout) {
+                        customHorizontalManager.relayoutView(itemView);
+                    }
+                }catch (Exception ignored){}
             }
 
+        }
 
-            emptyFrameRL.setVisibility(View.INVISIBLE);
-            isLayoutInvisible = true;
-            viewHolder = ViewHolder.this;
-
-            tabPreviewIB.setImageBitmap(null);
-            tabPreviewIB.setBackgroundColor(Color.TRANSPARENT);
-
-            setQL();
-            setTabCountTVText(getItemCount(), tabsCountChildTVHP);
-
-            if(confirmationDialog != null)
-            {
-                confirmationDialog.show();
+        private void setStoreDialog()
+        {
+            try {
+                if(storeMsg != null) {
+                    new PopupBlockedSheet().show(mainActivity.getSupportFragmentManager(), "popupBlockedSheet");
+                }
+            } catch (Exception ignored) {
             }
+        }
 
-            if(drmDialog != null)
-            {
-                drmDialog.show();
-            }
-
-            if(locationDialog != null)
-            {
-                locationDialog.show();
-            }
+        private void setDecorURL()
+        {
+            try {
+                if (HelperTextUtility.isNotEmpty(webViewURLString)) {
+                    setDecorInner(webViewURLString, ViewHolder.this);
+                }
+            }catch (Exception ignored){}
         }
 
         private void stopService()
@@ -2307,6 +2853,7 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
                 }catch (Exception ignored){}
 
                 makeTitleVisible();
+                webView.onPause();
 
                 customHorizontalManager.minimalDeselectItem(() ->{
                     try {
@@ -2328,6 +2875,10 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
                     isSwiping = true;
                     itemView.animate().translationY(-recyclerViewContainerHeight)
                             .withEndAction(() -> mainActivity.runOnUiThread(() -> {
+                                webViewContainer.removeView(webView);
+                                webView.removeAllViews();
+                                webView.destroy();
+
                                 stopService();
                                 removeTab(getBindingAdapterPosition(), itemView);
                                 isSwiping = false;
@@ -2426,6 +2977,12 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
 
             }else if(id == R.id.connectionInformationIB)
             {
+                try {
+                    if(HelperTextUtility.isNotEmpty(webViewURLString))
+                    {
+                        new ConnectionInformationSheet().show(mainActivity.getSupportFragmentManager(),"connectionInformationSheet");
+                    }
+                } catch (Exception ignored) {}
 
             }else if(id == R.id.connectionInformationIBInner)
             {
@@ -2433,6 +2990,14 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
             } else if(id == R.id.voiceLauncherIBTab || id == R.id.voiceLauncherIBTabInner)
             {
                 holderUtility.checkAndLaunchVoiceLauncher();
+            } else if(id == R.id.qrCodeScannerIB)
+            {
+                try {
+                    mainActivity.qrLauncher.launch(new ScanOptions());
+                } catch (Exception e)
+                {
+                    mainActivity.showToast(R.string.unable_to_find_contents);
+                }
             }
         }
 
@@ -2444,6 +3009,24 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
                         recyclerViewContainer, NormalTabsRVAdapter.this,
                         customHorizontalManager,false,inflater);
             }catch (Exception ignored) {}
+        }
+    }
+
+    private static class IncomingHandler extends Handler {
+        Bundle dataBundle;
+
+        public IncomingHandler(@NonNull Looper looper) {
+            super(looper);
+        }
+
+        private Bundle getDataBundle()
+        {
+            return dataBundle;
+        }
+
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            dataBundle = msg.getData();
         }
     }
 }

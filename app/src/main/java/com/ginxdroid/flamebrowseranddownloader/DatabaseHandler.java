@@ -25,7 +25,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private final String recentSitesTBL = "recentSitesTBL";
     //Recent sites columns
 
-    private final String RCT_KEY_ID = "rCTKeyId";
     private final String RCT_SITE_URL = "rCTSiteURL";
 
     private final String siteSettingsTBL = "siteSettingsTBL";
@@ -49,6 +48,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private final String HOME_PAGE_URL = "uHomePageURL";
     private final String SEARCH_ENGINE_URL = "uSearchEngineURL";
     private final String IS_SAVE_RECENT_TABS = "uIsSaveRecentTabs";
+    private final String BROWSER_TUTORIAL_INFO = "uBrowserTutorialInfo";
 
 
     private final String differentThemesTBL="differentThemesTBL";
@@ -272,6 +272,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     //CRUD: CREATE, READ, UPDATE and DELETE operations
 
     private void createRecentSitesTbl(SQLiteDatabase db) {
+        String RCT_KEY_ID = "rCTKeyId";
         String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS " + recentSitesTBL + "(" + RCT_KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                 RCT_SITE_URL + " Text);";
         db.execSQL(CREATE_TABLE);
@@ -359,7 +360,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     {
         String CREATE_USER_PREFERENCES_TABLE = "CREATE TABLE IF NOT EXISTS "+ userPreferencesTBL +"("+UP_KEY_ID+" INTEGER PRIMARY KEY,"+
                 CURRENT_THEME_ID+" INTEGER,"+IS_DARK_WEB_UI+" INTEGER,"+DARK_THEME+" INTEGER,"+HOME_PAGE_URL+" TEXT,"+SEARCH_ENGINE_URL+
-                " TEXT,"+IS_SAVE_RECENT_TABS+" INTEGER);";
+                " TEXT,"+IS_SAVE_RECENT_TABS+" INTEGER,"+BROWSER_TUTORIAL_INFO+" INTEGER);";
 
         db.execSQL(CREATE_USER_PREFERENCES_TABLE);
     }
@@ -670,6 +671,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(DARK_THEME, userPreferences.getDarkTheme());
         values.put(HOME_PAGE_URL, userPreferences.getHomePageURL());
         values.put(SEARCH_ENGINE_URL, userPreferences.getSearchEngineURL());
+        values.put(BROWSER_TUTORIAL_INFO, userPreferences.getBrowserTutorialInfo());
+        values.put(IS_SAVE_RECENT_TABS,userPreferences.getIsSaveRecentTabs());
 
         writableDB.insert(userPreferencesTBL,null,values);
 
@@ -1124,14 +1127,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     public SearchEngineItem getSearchEngineItem(int id)
     {
-        Cursor cursor = readableDB.query(searchEnginesTBL,new String[]{SE_KEY_ID,SE_IS_DEFAULT,SE_ITEM_TITLE,SE_ITEM_URL,SE_ITEM_IS_CURRENT},
+        Cursor cursor = readableDB.query(searchEnginesTBL,new String[]{SE_IS_DEFAULT,SE_ITEM_TITLE,SE_ITEM_URL,SE_ITEM_IS_CURRENT},
                 SE_KEY_ID+"=?",
                 new String[]{String.valueOf(id)},null,null,null);
 
         SearchEngineItem searchEngineItem = new SearchEngineItem();
 
         cursor.moveToFirst();
-        searchEngineItem.setSEKeyId(cursor.getInt(cursor.getColumnIndexOrThrow(SE_KEY_ID)));
         searchEngineItem.setSEIsDefault(cursor.getInt(cursor.getColumnIndexOrThrow(SE_IS_DEFAULT)));
         searchEngineItem.setSEItemTitle(cursor.getString(cursor.getColumnIndexOrThrow(SE_ITEM_TITLE)));
         searchEngineItem.setSEItemURL(cursor.getString(cursor.getColumnIndexOrThrow(SE_ITEM_URL)));
@@ -1398,7 +1400,23 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return result;
     }
 
+    public boolean isShowBrowserTutorial()
+    {
+        Cursor cursor = readableDB.query(userPreferencesTBL,new String[]{BROWSER_TUTORIAL_INFO},UP_KEY_ID + "=?",
+                new String[]{String.valueOf(1)},null,null,null);
+        cursor.moveToFirst();
+        int result = cursor.getInt(cursor.getColumnIndexOrThrow(BROWSER_TUTORIAL_INFO));
+        cursor.close();
+        return result == 1;
+    }
 
+    public void updateBrowserTutorialStatus()
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(BROWSER_TUTORIAL_INFO,0);
+
+        writableDB.update(userPreferencesTBL,contentValues,UP_KEY_ID + "=?", new String[]{String.valueOf(1)});
+    }
 }
 
 

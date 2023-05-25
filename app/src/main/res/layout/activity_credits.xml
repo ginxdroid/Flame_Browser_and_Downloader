@@ -32,7 +32,7 @@
 
     </LinearLayout>
 
-<LinearLayout
+    <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -78,6 +78,157 @@
 
 </LinearLayout>
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="?attr/dividerAndProgressColor" />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="8dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="@drawable/card_ripple_effect_light">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/zxing_android_embedded"
+            android:textAppearance="?textAppearanceSubtitle1"
+            android:textColor="?attr/primaryText" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="3dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/homePageZxing"
+                android:text="@string/visit_homepage"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginEnd="20dp"
+                android:textColor="?attr/secondaryText" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/viewLicenseZxing"
+                android:text="@string/view_license"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginEnd="20dp"
+                android:textColor="?attr/secondaryText" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="?attr/dividerAndProgressColor" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="8dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="@drawable/card_ripple_effect_light">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/materialshowcaseview"
+            android:textAppearance="?textAppearanceSubtitle1"
+            android:textColor="?attr/primaryText" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="3dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/homePageMSV"
+                android:text="@string/visit_homepage"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginEnd="20dp"
+                android:textColor="?attr/secondaryText" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/viewLicenseMSV"
+                android:text="@string/view_license"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginEnd="20dp"
+                android:textColor="?attr/secondaryText" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="?attr/dividerAndProgressColor" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="8dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="@drawable/card_ripple_effect_light">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/guava_google_core_libraries_for_java"
+            android:textAppearance="?textAppearanceSubtitle1"
+            android:textColor="?attr/primaryText" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="3dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/homePageGuava"
+                android:text="@string/visit_homepage"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginEnd="20dp"
+                android:textColor="?attr/secondaryText" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/viewLicenseGuava"
+                android:text="@string/view_license"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginEnd="20dp"
+                android:textColor="?attr/secondaryText" />
+
+        </LinearLayout>
+
+    </LinearLayout>
 
 </LinearLayout>

@@ -16,7 +16,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.ginxdroid.flamebrowseranddownloader.DatabaseHandler;
@@ -30,13 +29,11 @@ public class ManageSHAdapter extends RecyclerView.Adapter<ManageSHAdapter.ViewHo
     private final ArrayList<Integer> searchItems;
     private final Context context;
     private final DatabaseHandler db;
-    private final AppCompatActivity activity;
     private final LayoutInflater inflater;
     private String title;
 
-    public ManageSHAdapter(Context context, AppCompatActivity activity) {
+    public ManageSHAdapter(Context context) {
         this.context = context;
-        this.activity = activity;
         searchItems = new ArrayList<>();
         db = DatabaseHandler.getInstance(context);
         inflater = LayoutInflater.from(context);

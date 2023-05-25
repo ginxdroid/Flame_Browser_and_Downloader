@@ -236,6 +236,45 @@
     <string name="when_you_turn_off_incognito_mode_or_exit_app_with_incognito_mode_on">When you turn off incognito mode or exit app with incognito mode on</string>
     <string name="your_cookies_and_site_data_will_be_cleared_and_you_will_be_get_logged_out_from_all_websites">Your cookies and site data will be cleared and you will be get logged out from all websites</string>
     <string name="incognito_mode_off_logged_out_from_all_sites_cleared_cookies">Incognito mode off. Logged out from all sites. Cleared cookies.</string>
-
+    <string name="file_selector">File Selector</string>
+    <string name="choose_file">Choose File</string>
+    <string name="open_image_in_new_tab">Open image in new tab</string>
+    <string name="open_image_in_new_tab_and_switch">Open image in new tab and switch</string>
+    <string name="save_image">Save image</string>
+    <string name="copy_link_text">Copy link text</string>
+    <string name="copy_image_url">Copy image URL</string>
+    <string name="share_link">Share link</string>
+    <string name="share_image_url">Share image URL</string>
+    <string name="link_copied_successfully">Link copied successfully!</string>
+    <string name="cannot_copy_empty_link_text">Cannot copy empty link text</string>
+    <string name="share_via">Share via</string>
+    <string name="unable_to_share_url">Unable to share URL</string>
+    <string name="cannot_copy_empty_link">Cannot copy empty link</string>
+    <string name="link_copied">Link copied</string>
+    <string name="cannot_share_empty_link">Cannot share empty link</string>
+    <string name="cannot_open_empty_url">Cannot open empty URL</string>
+    <string name="cannot_download_image_from_empty_url">Cannot download image from empty URL</string>
+    <string name="cannot_open_empty_image_url">Cannot open empty image URL</string>
+    <string name="popup_blocked">Popup Blocked</string>
+    <string name="open">Open</string>
+    <string name="tapped_link">Tapped link:</string>
+    <string name="open_blocked_popup">Open Blocked Popup</string>
+    <string name="zxing_android_embedded">ZXing Android Embedded</string>
+    <string name="unable_to_find_contents">Unable to find contents</string>
+    <string name="scanned_data">Scanned data:</string>
+    <string name="copy">Copy</string>
+    <string name="cannot_share_empty_content">Cannot share empty content</string>
+    <string name="cannot_load_empty_content">Cannot load empty content</string>
+    <string name="connection_information">Connection information</string>
+    <string name="connection_is_secure">Connection is secure</string>
+    <string name="connection_secure_info">Your information (for example passwords,credit/debit card information,etc.) is private when it is sent to this site</string>
+    <string name="connection_is_not_secure">Connection is not secure</string>
+    <string name="connection_not_secure_info">You should not enter any sensitive information on this site (for example passwords,credit/debit card information,etc.), because it could be stolen by attackers.</string>
+    <string name="materialshowcaseview">MaterialShowcaseView</string>
+    <string name="got_it">Got it</string>
+    <string name="use_this_to_open_menu">Use this to open menu</string>
+    <string name="minimize_tab">Minimize tab</string>
+    <string name="use_this_to_minimize_maximized_tab">Use this to minimize maximized tab</string>
+    <string name="guava_google_core_libraries_for_java">Guava: Google Core Libraries for Java</string>
 
 </resources>

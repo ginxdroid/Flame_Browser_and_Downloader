@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:overScrollMode="never">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize">
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:id="@+id/copyIB"
+                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:background="@drawable/unbounded_light_ripple"
+                android:src="@drawable/round_content_copy_24"
+                android:contentDescription="@string/copy_link" />
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:id="@+id/shareIB"
+                android:layout_centerVertical="true"
+                android:layout_toStartOf="@id/copyIB"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:background="@drawable/unbounded_light_ripple"
+                android:src="@drawable/round_share_24"
+                android:contentDescription="@string/share_link" />
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:id="@+id/infoIB"
+                android:layout_centerVertical="true"
+                android:layout_alignParentStart="true"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:background="@drawable/unbounded_light_ripple"
+                android:src="@drawable/round_info_24"
+                android:contentDescription="@string/connection_information" />
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fillViewport="true"
+                android:scrollbars="none"
+                android:layout_toEndOf="@id/infoIB"
+                android:layout_toStartOf="@id/shareIB"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="2dp"
+                android:layout_marginEnd="2dp">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/urlTV"
+                    android:maxLines="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:textAppearance="?textAppearanceHeadline7"
+                    android:textColor="?attr/primaryText"
+                    android:text="@string/url" />
+
+            </HorizontalScrollView>
+
+        </RelativeLayout>
+
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/secureOrNotTV"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:textColor="?attr/primaryText"
+            android:layout_gravity="center_horizontal"
+            android:textAppearance="?textAppearanceButton"
+            android:text="@string/value" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/informationTV"
+            android:textColor="?attr/secondaryText"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/value" />
+
+
+    </LinearLayout>
+
+</androidx.core.widget.NestedScrollView>

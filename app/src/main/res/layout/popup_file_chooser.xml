@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/file_selector"
+        android:textAppearance="?textAppearanceHeadline6"
+        android:textColor="?attr/colorPrimary"
+        android:gravity="center_horizontal"
+        android:layout_margin="10dp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/chooseFileButton"
+        android:text="@string/choose_file"
+        android:drawableStart="@drawable/round_file_upload_24"
+        android:drawablePadding="8dp"
+        style="@style/CustomMenuButtonStyle" />
+
+</LinearLayout>

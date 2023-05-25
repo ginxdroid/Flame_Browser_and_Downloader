@@ -47,7 +47,6 @@ public class BookmarksHelper {
                            Context context, ViewGroup container) {
         this.normalTabsRVAdapter = normalTabsRVAdapter;
         this.activity = activity;
-        String dumpPath = normalTabsRVAdapter.getDumpPath();
         showBookmarksDialog(context, container);
     }
 

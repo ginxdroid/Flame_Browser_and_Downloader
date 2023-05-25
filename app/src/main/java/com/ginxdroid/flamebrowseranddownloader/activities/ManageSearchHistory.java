@@ -27,7 +27,7 @@ public class ManageSearchHistory extends AppCompatActivity implements View.OnCli
         setContentView(R.layout.activity_manage_search_history);
 
         RecyclerView searchHistoryRV = findViewById(R.id.searchHistoryRV);
-        manageSHAdapter = new ManageSHAdapter(ManageSearchHistory.this,ManageSearchHistory.this);
+        manageSHAdapter = new ManageSHAdapter(ManageSearchHistory.this);
         manageSHAdapter.setHasStableIds(false);
         searchHistoryRV.setLayoutManager(new LinearLayoutManager(ManageSearchHistory.this));
         searchHistoryRV.setAdapter(manageSHAdapter);

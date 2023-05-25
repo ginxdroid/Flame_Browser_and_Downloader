@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardElevation="8dp"
+    app:cardCornerRadius="6dp">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:overScrollMode="never">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/menuLayoutLL"
+            android:orientation="vertical">
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/openInNewTab"
+                android:text="@string/open_in_background"
+                style="@style/CustomMenuButtonStyle" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/openInNewTabAndSwitch"
+                android:text="@string/open_in_new_tab_and_switch"
+                style="@style/CustomMenuButtonStyle" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/openImageInNewTab"
+                android:text="@string/open_image_in_new_tab"
+                style="@style/CustomMenuButtonStyle" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/openImageInNewTabAndSwitch"
+                android:text="@string/open_image_in_new_tab_and_switch"
+                style="@style/CustomMenuButtonStyle" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/saveImage"
+                android:text="@string/save_image"
+                style="@style/CustomMenuButtonStyle" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/copyLinkText"
+                android:text="@string/copy_link_text"
+                style="@style/CustomMenuButtonStyle" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/copyImageURL"
+                android:text="@string/copy_image_url"
+                style="@style/CustomMenuButtonStyle" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/copyLink"
+                android:text="@string/copy_link"
+                style="@style/CustomMenuButtonStyle" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/shareLink"
+                android:text="@string/share_link"
+                style="@style/CustomMenuButtonStyle" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/shareImageURL"
+                android:text="@string/share_image_url"
+                style="@style/CustomMenuButtonStyle" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</com.google.android.material.card.MaterialCardView>

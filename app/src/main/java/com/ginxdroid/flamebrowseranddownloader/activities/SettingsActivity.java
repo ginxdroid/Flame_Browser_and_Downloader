@@ -199,6 +199,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                 userPreferences.setHomePageURL("NewTab");
                 userPreferences.setSearchEngineURL("https://www.google.com/search?q=");
                 userPreferences.setIsSaveRecentTabs(1);
+                userPreferences.setBrowserTutorialInfo(1);
                 db.addUserPreferences(userPreferences);
 
                 SiteSettingsModel siteSettingsModel = new SiteSettingsModel();

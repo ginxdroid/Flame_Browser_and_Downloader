@@ -27,11 +27,24 @@ public class CreditsActivity extends AppCompatActivity implements View.OnClickLi
         final ImageButton backIB = findViewById(R.id.backIB);
         backIB.setOnClickListener(CreditsActivity.this);
 
-        final TextView homePageMDI,viewLicenseMDI;
+        final TextView homePageMDI,viewLicenseMDI,homePageZxing,viewLicenseZxing,homePageMSV,viewLicenseMSV,
+                homePageGuava,viewLicenseGuava;
         homePageMDI = findViewById(R.id.homePageMDI);
         viewLicenseMDI = findViewById(R.id.viewLicenseMDI);
+        homePageZxing = findViewById(R.id.homePageZxing);
+        viewLicenseZxing = findViewById(R.id.viewLicenseZxing);
+        homePageMSV = findViewById(R.id.homePageMSV);
+        viewLicenseMSV = findViewById(R.id.viewLicenseMSV);
+        homePageGuava = findViewById(R.id.homePageGuava);
+        viewLicenseGuava = findViewById(R.id.viewLicenseGuava);
         homePageMDI.setOnClickListener(CreditsActivity.this);
         viewLicenseMDI.setOnClickListener(CreditsActivity.this);
+        homePageZxing.setOnClickListener(CreditsActivity.this);
+        viewLicenseZxing.setOnClickListener(CreditsActivity.this);
+        homePageMSV.setOnClickListener(CreditsActivity.this);
+        viewLicenseMSV.setOnClickListener(CreditsActivity.this);
+        homePageGuava.setOnClickListener(CreditsActivity.this);
+        viewLicenseGuava.setOnClickListener(CreditsActivity.this);
 
     }
 
@@ -48,9 +61,38 @@ public class CreditsActivity extends AppCompatActivity implements View.OnClickLi
                         Uri.parse("https://github.com/google/material-design-icons")));
             } catch (Exception e)
             {
-                Toast.makeText(this, getString(R.string.app_not_found_for_opening_privacy_policy), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.app_not_found), Toast.LENGTH_SHORT).show();
             }
-        } else if(id == R.id.viewLicenseMDI)
+        } else if(id == R.id.homePageZxing)
+        {
+            try {
+                startActivity(new Intent(Intent.ACTION_VIEW,
+                        Uri.parse("https://github.com/journeyapps/zxing-android-embedded")));
+            } catch (Exception e)
+            {
+                Toast.makeText(this, getString(R.string.app_not_found), Toast.LENGTH_SHORT).show();
+            }
+        } else if(id == R.id.homePageMSV)
+        {
+            try {
+                startActivity(new Intent(Intent.ACTION_VIEW,
+                        Uri.parse("https://github.com/deano2390/MaterialShowcaseView")));
+            } catch (Exception e)
+            {
+                Toast.makeText(this, getString(R.string.app_not_found), Toast.LENGTH_SHORT).show();
+            }
+        }
+        else if(id == R.id.homePageGuava)
+        {
+            try {
+                startActivity(new Intent(Intent.ACTION_VIEW,
+                        Uri.parse("https://github.com/google/guava")));
+            } catch (Exception e)
+            {
+                Toast.makeText(this, getString(R.string.app_not_found), Toast.LENGTH_SHORT).show();
+            }
+        }
+        else if(id == R.id.viewLicenseMDI || id == R.id.viewLicenseZxing || id == R.id.viewLicenseMSV || id == R.id.viewLicenseGuava)
         {
             viewLicense();
         }

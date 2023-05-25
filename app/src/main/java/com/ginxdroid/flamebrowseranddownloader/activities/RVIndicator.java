@@ -573,10 +573,7 @@ public class RVIndicator extends View {
             return RecyclerView.NO_POSITION;
         }
 
-        private boolean isInIdleState()
-        {
-            return findCompletelyVisiblePosition() != RecyclerView.NO_POSITION;
-        }
+
 
         @Nullable
         private View findFirstVisibleView()

@@ -690,6 +690,11 @@ public class CustomHorizontalManager extends RecyclerView.LayoutManager {
         this.height = 0;
     }
 
+    boolean isScrollUnlocked()
+    {
+        return isScrollUnlocked;
+    }
+
     private void openInNewTabHorizontalNoPeekWithReLayout()
     {
         isScrollUnlocked = false;
@@ -873,6 +878,18 @@ public class CustomHorizontalManager extends RecyclerView.LayoutManager {
                     }).start();
 
         }
+    }
+
+    void remeasureCurrentView()
+    {
+        measureChild(currentFSView,0,0);
+        layoutDecorated(currentFSView,0,0,width,height);
+    }
+
+    void relayoutView(View view)
+    {
+        measureChild(view,0,0);
+        layoutDecorated(view,0,0,width,height);
     }
 
     interface OnMaximizedCallBack

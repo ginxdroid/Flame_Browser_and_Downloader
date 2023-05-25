@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -53,9 +54,13 @@ import com.ginxdroid.flamebrowseranddownloader.models.QuickLinkModel;
 import com.ginxdroid.flamebrowseranddownloader.models.SiteSettingsModel;
 import com.ginxdroid.flamebrowseranddownloader.models.UserPreferences;
 import com.ginxdroid.flamebrowseranddownloader.sheets.ClearRecordsSheet;
+import com.ginxdroid.flamebrowseranddownloader.sheets.ConnectionInformationSheet;
 import com.ginxdroid.flamebrowseranddownloader.sheets.EditQLNameSheet;
+import com.ginxdroid.flamebrowseranddownloader.sheets.FileChooserSheet;
 import com.ginxdroid.flamebrowseranddownloader.sheets.IncognitoInformationSheet;
 import com.ginxdroid.flamebrowseranddownloader.sheets.MainMenuSheet;
+import com.ginxdroid.flamebrowseranddownloader.sheets.PopupBlockedSheet;
+import com.ginxdroid.flamebrowseranddownloader.sheets.QRContentShowSheet;
 import com.ginxdroid.flamebrowseranddownloader.sheets.RelaunchSheet;
 import com.ginxdroid.flamebrowseranddownloader.sheets.TextScalingSheet;
 import com.ginxdroid.flamebrowseranddownloader.sheets.ThemesSheet;
@@ -64,6 +69,8 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.common.net.InternetDomainName;
+import com.journeyapps.barcodescanner.ScanContract;
+import com.journeyapps.barcodescanner.ScanOptions;
 
 import java.io.File;
 import java.net.URL;
@@ -73,7 +80,8 @@ import java.util.Map;
 
 public class MainActivity extends BaseActivity implements ThemesSheet.BottomSheetListener, View.OnClickListener,
     MainMenuSheet.BottomSheetListener, TextScalingSheet.BottomSheetListener, EditQLNameSheet.BottomSheetListener,
-        RelaunchSheet.BottomSheetListener {
+        RelaunchSheet.BottomSheetListener, FileChooserSheet.BottomSheetListener, PopupBlockedSheet.BottomSheetListener,
+    QRContentShowSheet.BottomSheetListener, ConnectionInformationSheet.BottomSheetListener {
 
     private DatabaseHandler db;
     private Toast toast = null;
@@ -629,6 +637,7 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
             userPreferences.setHomePageURL("NewTab");
             userPreferences.setSearchEngineURL("https://www.google.com/search?q=");
             userPreferences.setIsSaveRecentTabs(1);
+            userPreferences.setBrowserTutorialInfo(1);
             db.addUserPreferences(userPreferences);
 
             HomePageItem homePageItem = new HomePageItem();
@@ -699,6 +708,20 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
     @Override
     protected void onStart() {
         super.onStart();
+
+        NormalTabsRVAdapter.ViewHolder viewHolder;
+        try {
+            viewHolder = normalTabsRVAdapter.getViewHolder();
+        } catch (Exception e)
+        {viewHolder = null;}
+
+        try {
+            if(viewHolder != null)
+            {
+                viewHolder.webView.onResume();
+            }
+        } catch (Exception ignored) {}
+
         try {
             normalTabsRVAdapter.setSearchFaviconOnResume();
         } catch (Exception ignored) {}
@@ -798,6 +821,81 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
             new IncognitoInformationSheet().show(MainActivity.this.getSupportFragmentManager(),"incognitoInformationSheet");
         } catch (Exception ignored) {}
     }
+
+    @Override
+    public void showFileChooser(View popupView, FileChooserSheet fileChooserSheet) {
+        try {
+            final MaterialButton chooseFileButton = popupView.findViewById(R.id.chooseFileButton);
+            chooseFileButton.setOnClickListener(view -> {
+                normalTabsRVAdapter.fileChooserOpened = true;
+                Intent contentSelectionIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                contentSelectionIntent.addCategory(Intent.CATEGORY_OPENABLE);
+                contentSelectionIntent.setTypeAndNormalize("*/*");
+                contentSelectionIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE,true);
+                selectFileLauncher.launch(contentSelectionIntent);
+                fileChooserSheet.dismiss();
+            });
+        } catch (Exception ignored) {}
+    }
+
+
+    final ActivityResultLauncher<ScanOptions> qrLauncher = registerForActivityResult(new ScanContract(),
+            result -> {
+                if(result.getContents() == null) {
+                    showToast(R.string.unable_to_find_contents);
+                } else {
+                    //We will show QRContentShowSheet
+                    try {
+                        QRContentShowSheet sheet = new QRContentShowSheet();
+                        Bundle bundle = new Bundle();
+                        bundle.putString("content",result.getContents());
+                        sheet.setArguments(bundle);
+                        sheet.show(MainActivity.this.getSupportFragmentManager(),"qrContentShowSheet");
+                    } catch (Exception e) {
+                        showToast(R.string.oops_general_message);
+                    }
+                }
+            });
+
+    @Override
+    public void onDismissed() {
+        try {
+            if(!normalTabsRVAdapter.fileChooserOpened)
+            {
+                normalTabsRVAdapter.uploadMessage.onReceiveValue(null);
+                normalTabsRVAdapter.uploadMessage = null;
+            }
+        } catch (Exception ignored) {}
+    }
+
+    @Override
+    public void onShowPopupBlocked(View popupView, PopupBlockedSheet popupBlockedSheet) {
+        try {
+            normalTabsRVAdapter.getViewHolder().showBlockedDialog(popupView, popupBlockedSheet);
+        }catch (Exception ignored) {}
+    }
+
+    @Override
+    public void onPopupBlockedDismissed() {
+        try {
+            normalTabsRVAdapter.getViewHolder().popupBlockedDismissed();
+        }catch (Exception ignored) {}
+    }
+
+    @Override
+    public void loadQRData(String content) {
+        try {
+            normalTabsRVAdapter.loadQRSearchQuery(content);
+        }catch (Exception e) {showToast(R.string.oops_general_message);}
+    }
+
+    @Override
+    public void showConnectionInformationDialog(View popupView) {
+        try {
+            normalTabsRVAdapter.getViewHolder().showConnectionInformationDialog(popupView);
+        } catch (Exception ignored) {}
+    }
+
 
     private class IncognitoClearRecords extends Thread
     {
@@ -1267,13 +1365,13 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
             viewHolder = null;
         }
 
-//   todo     try {
-//            //Pause webview
-//            if(viewHolder != null)
-//            {
-//                viewHolder.webView.onPause();
-//            }
-//        } catch (Exception ignored) {}
+        try {
+            //Pause webview
+            if(viewHolder != null)
+            {
+                viewHolder.webView.onPause();
+            }
+        } catch (Exception ignored) {}
 
 
         super.onStop();
@@ -1283,18 +1381,80 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
     @Override
     protected void onDestroy() {
         try {
-            if(!recreating)
-            {
-                if(incognitoMode)
+
+            try {
+                NormalTabsRVAdapter.ViewHolder viewHolder = normalTabsRVAdapter.getViewHolder();
+                if(viewHolder != null)
                 {
-                    new IncognitoClearRecords().start();
+                    MainActivity.this.runOnUiThread(() -> {
+                        viewHolder.webView.onPause();
+                        viewHolder.webView.stopLoading();
+
+                        viewHolder.webViewContainer.removeView(viewHolder.webView);
+                        viewHolder.webView.removeAllViews();
+                        viewHolder.webView.destroy();
+                    });
                 }
+            } catch (Exception ignored) {}
+
+        }finally {
+            try {
+                if(!recreating)
+                {
+                    if(incognitoMode)
+                    {
+                        new IncognitoClearRecords().start();
+                    }
+                }
+            } catch (Exception ignored){}
+            finally {
+                super.onDestroy();
             }
-        } catch (Exception ignored){}
-        finally {
-            super.onDestroy();
         }
     }
+
+    final ActivityResultLauncher<Intent> selectFileLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    try {
+                        if(result.getResultCode() == Activity.RESULT_OK)
+                        {
+                            Intent data = result.getData();
+                            Uri[] results = null;
+
+                            if(data != null)
+                            {
+                                String dataString = data.getDataString();
+                                ClipData clipData = data.getClipData();
+                                if(clipData != null)
+                                {
+                                    results = new Uri[clipData.getItemCount()];
+                                    for(int i = 0;i<clipData.getItemCount();i++)
+                                    {
+                                        ClipData.Item item = clipData.getItemAt(i);
+                                        results[i] = item.getUri();
+                                    }
+
+                                }
+
+                                if(dataString != null)
+                                {
+                                    results = new Uri[]{Uri.parse(dataString)};
+                                }
+
+                                normalTabsRVAdapter.setUploadMessage(results);
+
+                            } else {
+                                normalTabsRVAdapter.nullifyFileChooserUpload();
+                            }
+                        }
+                    } catch (Exception e)
+                    {
+                        showToast(R.string.oops_general_message);
+                    }
+                }
+            });
 
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {

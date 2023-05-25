@@ -82,23 +82,6 @@ public class SearchRVHomePageAdapter extends RecyclerView.Adapter<SearchRVHomePa
         } catch (Exception ignored) {}
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    void setSearchResult(ArrayList<String> searchResults, String title)
-    {
-        try {
-            if(searchItems.size() > 0)
-            {
-                searchItems.clear();
-            }
-            this.title = title;
-            searchItems.addAll(db.getAllSearchItemsWithTitle(title));
-            searchItems.addAll(searchResults);
-            notifyDataSetChanged();
-        }catch (Exception ignored) {}
-    }
-
-
-
     @NonNull
     @Override
     public SearchRVHomePageAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

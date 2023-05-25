@@ -1,21 +1,12 @@
 package com.ginxdroid.flamebrowseranddownloader.models;
 
 public class SearchEngineItem {
-    private Integer SEKeyId;
     private String SEItemTitle;
     private String SEItemURL;
     private Integer SEIsDefault;
     private Integer SEItemIsCurrent;
 
     public SearchEngineItem() {
-    }
-
-    public Integer getSEKeyId() {
-        return SEKeyId;
-    }
-
-    public void setSEKeyId(Integer SEKeyId) {
-        this.SEKeyId = SEKeyId;
     }
 
     public String getSEItemTitle() {

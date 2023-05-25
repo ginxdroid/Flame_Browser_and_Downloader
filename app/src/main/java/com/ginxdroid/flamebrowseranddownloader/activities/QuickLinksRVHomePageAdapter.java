@@ -154,8 +154,6 @@ public class QuickLinksRVHomePageAdapter extends RecyclerView.Adapter<QuickLinks
         private final TextView qlTitle;
         private final ImageView qlFaviconIV;
 
-        private final MaterialCardView qlCV;
-
         private PopupWindow popupWindow = null;
 
 
@@ -163,7 +161,7 @@ public class QuickLinksRVHomePageAdapter extends RecyclerView.Adapter<QuickLinks
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            qlCV = itemView.findViewById(R.id.qlCV);
+            MaterialCardView qlCV = itemView.findViewById(R.id.qlCV);
             qlTitle = itemView.findViewById(R.id.qlTitle);
             qlFaviconIV = qlCV.findViewById(R.id.qlFaviconIV);
 

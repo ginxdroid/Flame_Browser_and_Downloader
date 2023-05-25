@@ -12,6 +12,7 @@ public class UserPreferences {
     private String searchEngineURL;
 
     private Integer isSaveRecentTabs;
+    private Integer browserTutorialInfo;
 
 
     public UserPreferences() {
@@ -65,11 +66,20 @@ public class UserPreferences {
         this.searchEngineURL = searchEngineURL;
     }
 
+
     public Integer getIsSaveRecentTabs() {
         return isSaveRecentTabs;
     }
 
     public void setIsSaveRecentTabs(Integer isSaveRecentTabs) {
         this.isSaveRecentTabs = isSaveRecentTabs;
+    }
+
+    public Integer getBrowserTutorialInfo() {
+        return browserTutorialInfo;
+    }
+
+    public void setBrowserTutorialInfo(Integer browserTutorialInfo) {
+        this.browserTutorialInfo = browserTutorialInfo;
     }
 }
