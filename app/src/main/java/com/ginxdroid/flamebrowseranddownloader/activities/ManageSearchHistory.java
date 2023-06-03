@@ -15,7 +15,7 @@ import com.ginxdroid.flamebrowseranddownloader.R;
 import com.ginxdroid.flamebrowseranddownloader.classes.CustomEditText;
 import com.ginxdroid.flamebrowseranddownloader.classes.HelperTextUtility;
 
-public class ManageSearchHistory extends AppCompatActivity implements View.OnClickListener {
+public class ManageSearchHistory extends BaseActivity implements View.OnClickListener {
     private RelativeLayout searchSearchHistoryLL,searchHistoryLL;
     private CustomEditText searchSearchHistoryEditText;
 

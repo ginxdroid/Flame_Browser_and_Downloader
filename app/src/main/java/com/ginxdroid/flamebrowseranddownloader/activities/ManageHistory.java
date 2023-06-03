@@ -30,7 +30,7 @@ import com.google.android.material.button.MaterialButton;
 import java.io.File;
 import java.util.ArrayList;
 
-public class ManageHistory extends AppCompatActivity implements View.OnClickListener {
+public class ManageHistory extends BaseActivity implements View.OnClickListener {
 
     private ConstraintLayout historyContainer;
     private ManageHistoryRVAdapter manageHistoryRVAdapter;

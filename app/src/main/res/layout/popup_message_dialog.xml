@@ -17,11 +17,6 @@
         android:layout_gravity="center_horizontal"
         android:textColor="?attr/primaryText"/>
 
-
-
-
-
-
     <TextView
         android:id="@+id/messageTV"
         android:layout_width="wrap_content"
@@ -31,7 +26,6 @@
         android:textColor="?attr/primaryText"
         android:layout_marginTop="10dp"
         />
-
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/closeButton"

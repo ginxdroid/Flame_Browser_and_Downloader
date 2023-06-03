@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:id="@+id/mainContainer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.DownloaderSettings">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize">
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:id="@+id/backIB"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/unbounded_light_ripple"
+            android:src="@drawable/round_arrow_back_ios_new_24"
+            android:contentDescription="@string/back" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/downloader_settings"
+            android:textAppearance="?textAppearanceHeadline6"
+            android:textColor="?attr/primaryText"
+            android:layout_gravity="center_vertical" />
+
+    </LinearLayout>
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:id="@+id/downloadPathLL"
+            android:padding="12dp"
+            android:background="@drawable/card_ripple_effect_light"
+            android:clickable="true"
+            android:focusable="true">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/download_path"
+                android:textColor="?attr/primaryText"
+                android:textAppearance="?textAppearanceButton" />
+
+            <TextView
+                android:id="@+id/downloadLocationValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/download_path"
+                android:textColor="?attr/secondaryText"
+                 />
+
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="?attr/dividerAndProgressColor" />
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/autoResumeSwitchDownloaderSettings"
+            android:text="@string/auto_resume_upon_network_available"
+            style="@style/CustomSwitchStyle" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="?attr/dividerAndProgressColor" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:id="@+id/simultaneousTasksLL"
+            android:background="@drawable/card_ripple_effect_light"
+            android:weightSum="10"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:clickable="true"
+            android:focusable="true">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="9"
+                android:layout_gravity="center_vertical"
+                android:text="@string/simultaneous_tasks"
+                android:textColor="?attr/primaryText"
+                android:textAppearance="?textAppearanceButton" />
+
+
+
+            <Spinner
+                android:id="@+id/simultaneousTasksSpinner"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_gravity="center"
+                android:background="@null"
+                />
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="?attr/dividerAndProgressColor" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:id="@+id/segmentsForDownloadLL"
+            android:background="@drawable/card_ripple_effect_light"
+            android:weightSum="10"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:clickable="true"
+            android:focusable="true">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="4"
+                android:layout_gravity="center_vertical"
+                android:text="@string/default_segments_for_download_task"
+                android:textColor="?attr/primaryText"
+                android:textAppearance="?textAppearanceButton" />
+
+            <com.google.android.material.slider.Slider
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="5"
+                app:labelBehavior="gone"
+                android:layout_gravity="center"
+                android:id="@+id/segmentsForDownloadSlider"
+                android:valueFrom="0"
+                android:stepSize="1.0"
+                android:valueTo="6" />
+
+            <TextView
+                android:id="@+id/segmentsForDownloadTV"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/_1"
+                android:textStyle="bold"
+                android:textAppearance="?textAppearanceHeadline6"
+                android:textColor="?attr/primaryText"
+                android:layout_gravity="center_vertical"
+                android:gravity="center"
+                android:clickable="false"
+                android:focusable="false"
+                />
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+
+</LinearLayout>

@@ -26,7 +26,7 @@ import com.ginxdroid.flamebrowseranddownloader.sheets.ResetSettingsSheet;
 import com.ginxdroid.flamebrowseranddownloader.sheets.TipsSheet;
 import com.google.android.material.button.MaterialButton;
 
-public class SettingsActivity extends AppCompatActivity implements View.OnClickListener, ResetSettingsSheet.BottomSheetListener {
+public class SettingsActivity extends BaseActivity implements View.OnClickListener, ResetSettingsSheet.BottomSheetListener {
     private DatabaseHandler db;
     private LinearLayout container;
 
@@ -48,7 +48,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         backIB.setOnClickListener(SettingsActivity.this);
 
         MaterialButton manageBTV,manageHPTV,manageHTV,manageSHTV,securityTV,tipsTV,clearRecordsTV,
-                resetToDefaultTV,shareLinkBtn,aboutBtn,startupAndExitFeaturesTV;
+                resetToDefaultTV,shareLinkBtn,aboutBtn,startupAndExitFeaturesTV,downloaderSettingsTV;
 
         manageHPTV = findViewById(R.id.manageHPTV);
         manageHPTV.setOnClickListener(SettingsActivity.this);
@@ -82,6 +82,9 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
 
         startupAndExitFeaturesTV = findViewById(R.id.startupAndExitFeaturesTV);
         startupAndExitFeaturesTV.setOnClickListener(SettingsActivity.this);
+
+        downloaderSettingsTV = findViewById(R.id.downloaderSettingsTV);
+        downloaderSettingsTV.setOnClickListener(SettingsActivity.this);
     }
 
     @Override
@@ -138,6 +141,8 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         } else if(id == R.id.startupAndExitFeaturesTV)
         {
             startActivity(new Intent(SettingsActivity.this, StartupAndExitFeatures.class));
+        } else if (id == R.id.downloaderSettingsTV) {
+            startActivity(new Intent(SettingsActivity.this, DownloaderSettings.class));
         }
     }
 
@@ -200,6 +205,12 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                 userPreferences.setSearchEngineURL("https://www.google.com/search?q=");
                 userPreferences.setIsSaveRecentTabs(1);
                 userPreferences.setBrowserTutorialInfo(1);
+                userPreferences.setDownloadPath("Not found");
+                userPreferences.setAutoResumeStatus(1);
+                userPreferences.setSimultaneousTasks(1);
+                userPreferences.setDefaultSegments(6);
+                userPreferences.setDirectDownload(0);
+                userPreferences.setShowOptimization(1);
                 db.addUserPreferences(userPreferences);
 
                 SiteSettingsModel siteSettingsModel = new SiteSettingsModel();

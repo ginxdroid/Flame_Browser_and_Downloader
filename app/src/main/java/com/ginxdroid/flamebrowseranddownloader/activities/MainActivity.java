@@ -53,6 +53,7 @@ import com.ginxdroid.flamebrowseranddownloader.models.HomePageItem;
 import com.ginxdroid.flamebrowseranddownloader.models.QuickLinkModel;
 import com.ginxdroid.flamebrowseranddownloader.models.SiteSettingsModel;
 import com.ginxdroid.flamebrowseranddownloader.models.UserPreferences;
+import com.ginxdroid.flamebrowseranddownloader.sheets.AddNewDTaskSheet;
 import com.ginxdroid.flamebrowseranddownloader.sheets.ClearRecordsSheet;
 import com.ginxdroid.flamebrowseranddownloader.sheets.ConnectionInformationSheet;
 import com.ginxdroid.flamebrowseranddownloader.sheets.EditQLNameSheet;
@@ -81,7 +82,7 @@ import java.util.Map;
 public class MainActivity extends BaseActivity implements ThemesSheet.BottomSheetListener, View.OnClickListener,
     MainMenuSheet.BottomSheetListener, TextScalingSheet.BottomSheetListener, EditQLNameSheet.BottomSheetListener,
         RelaunchSheet.BottomSheetListener, FileChooserSheet.BottomSheetListener, PopupBlockedSheet.BottomSheetListener,
-    QRContentShowSheet.BottomSheetListener, ConnectionInformationSheet.BottomSheetListener {
+    QRContentShowSheet.BottomSheetListener, ConnectionInformationSheet.BottomSheetListener, AddNewDTaskSheet.BottomSheetListener {
 
     private DatabaseHandler db;
     private Toast toast = null;
@@ -584,6 +585,33 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
         }
     }
 
+    final ActivityResultLauncher<Intent> selectDownloadPathLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    try {
+                        if(result.getResultCode() == Activity.RESULT_OK)
+                        {
+                            Intent data = result.getData();
+                            if(data != null)
+                            {
+                                Uri treeUri = data.getData();
+                                if(treeUri != null)
+                                {
+                                    db.updateDownloadAddress(treeUri.toString());
+                                    getContentResolver().takePersistableUriPermission(treeUri, Intent.FLAG_GRANT_READ_URI_PERMISSION |
+                                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                                    normalTabsRVAdapter.dismissChooseDownloadTaskADAndProceed();
+                                }
+                            }
+                        }
+                    } catch (Exception e)
+                    {
+                        showToast(R.string.please_set_download_directory_again);
+                    }
+                }
+            });
+
     private void firstInitialization()
     {
         try{
@@ -638,6 +666,12 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
             userPreferences.setSearchEngineURL("https://www.google.com/search?q=");
             userPreferences.setIsSaveRecentTabs(1);
             userPreferences.setBrowserTutorialInfo(1);
+            userPreferences.setDownloadPath("Not found");
+            userPreferences.setAutoResumeStatus(1);
+            userPreferences.setSimultaneousTasks(1);
+            userPreferences.setDefaultSegments(6);
+            userPreferences.setDirectDownload(0);
+            userPreferences.setShowOptimization(1);
             db.addUserPreferences(userPreferences);
 
             HomePageItem homePageItem = new HomePageItem();
@@ -894,6 +928,11 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
         try {
             normalTabsRVAdapter.getViewHolder().showConnectionInformationDialog(popupView);
         } catch (Exception ignored) {}
+    }
+
+    @Override
+    public void addTaskSheetDismissed() {
+        //todo  showNotificationPermissionPrompt();
     }
 
 

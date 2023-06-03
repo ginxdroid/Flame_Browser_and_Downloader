@@ -19,7 +19,7 @@ import com.ginxdroid.flamebrowseranddownloader.sheets.SecurityMessageSheet;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
-public class SiteSettings extends AppCompatActivity implements SecurityMessageSheet.BottomSheetListener,
+public class SiteSettings extends BaseActivity implements SecurityMessageSheet.BottomSheetListener,
         ResetSiteSettingsSheet.BottomSheetListener {
 
     private DatabaseHandler db;

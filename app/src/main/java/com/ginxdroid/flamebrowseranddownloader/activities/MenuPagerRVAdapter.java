@@ -165,7 +165,7 @@ public class MenuPagerRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 } else if(id == R.id.downloadsBtn)
                 {
                     mainMenuSheet.dismiss();
-                    activity.startActivity(new Intent(context, DownloadsActivity.class));
+                    activity.startActivity(new Intent(context, FirstActivity.class));
                 }else if(id == R.id.historyBtn)
                 {
                     mainMenuSheet.dismiss();

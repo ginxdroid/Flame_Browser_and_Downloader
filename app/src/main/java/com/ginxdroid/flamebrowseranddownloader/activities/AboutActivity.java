@@ -11,7 +11,7 @@ import android.widget.TextView;
 import com.ginxdroid.flamebrowseranddownloader.BuildConfig;
 import com.ginxdroid.flamebrowseranddownloader.R;
 
-public class AboutActivity extends AppCompatActivity {
+public class AboutActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

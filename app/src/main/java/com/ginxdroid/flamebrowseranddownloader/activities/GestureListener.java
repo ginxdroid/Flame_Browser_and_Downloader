@@ -13,6 +13,7 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
@@ -20,8 +21,14 @@ import android.widget.PopupWindow;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.ginxdroid.flamebrowseranddownloader.BuildConfig;
 import com.ginxdroid.flamebrowseranddownloader.R;
 import com.google.android.material.button.MaterialButton;
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class GestureListener extends GestureDetector.SimpleOnGestureListener {
     private final NormalTabsRVAdapter.ViewHolder viewHolder;
@@ -388,11 +395,9 @@ public class GestureListener extends GestureDetector.SimpleOnGestureListener {
                                 downloadImageURL = result.getExtra();
                             }
 
-                            //noinspection StatementWithEmptyBody
                             if(downloadImageURL != null)
                             {
-                                //todo save this image when our downloader for app is ready
-
+                                new AddImageDownloadTaskData(downloadImageURL, viewHolder.webView.getUrl()).start();
                             } else {
                                 normalTabsRVAdapter.showToastFromMainActivity(R.string.cannot_download_image_from_empty_url);
                             }
@@ -518,6 +523,153 @@ public class GestureListener extends GestureDetector.SimpleOnGestureListener {
                 }
             }
         } catch (Exception ignored) {}
+    }
+
+    private class AddImageDownloadTaskData extends Thread {
+        private final String downloadImageURL;
+        private final String pageURL;
+        private String length;
+        private String contentDisposition;
+        private String contentType;
+        private String newUserAgent;
+        private AddImageDownloadTaskData(String downloadImageURL, String pageURL)
+        {
+            this.downloadImageURL = downloadImageURL;
+            this.pageURL = pageURL;
+        }
+
+        @Override
+        public void run() {
+            super.run();
+            try {
+                int s = 0;
+                if(!normalTabsRVAdapter.isNetworkUrl(downloadImageURL))
+                {
+                    try {
+                        if(downloadImageURL.startsWith("data:"))
+                        {
+                            try {
+                                newUserAgent = WebSettings.getDefaultUserAgent(context)+" Flame/"+ BuildConfig.VERSION_NAME;
+                                newUserAgent = newUserAgent.replace("; wv","");
+
+                                s = 1;
+                            } catch (Exception ignored) {}
+                            finally {
+                                final int finalS = s;
+
+                                activity.runOnUiThread(() -> {
+                                    switch (finalS)
+                                    {
+                                        case 1:
+                                            viewHolder.onListenDownload(downloadImageURL,newUserAgent,null,null,pageURL,
+                                                    -1,null);
+                                            break;
+                                        case 0:
+                                            normalTabsRVAdapter.showToastFromMainActivity(R.string.oops_general_message);
+                                            break;
+                                    }
+                                });
+                            }
+                        } else {
+                            normalTabsRVAdapter.showToastFromMainActivity(R.string.cannot_download_file_from_such_url);
+                        }
+                    } catch (Exception f)
+                    {
+                        normalTabsRVAdapter.showToastFromMainActivity(R.string.cannot_download_file_from_such_url);
+                    }
+                } else {
+                    HttpURLConnection connection = null;
+
+                    try {
+                        URL url = new URL(downloadImageURL);
+                        newUserAgent = WebSettings.getDefaultUserAgent(context)+" Flame/"+ BuildConfig.VERSION_NAME;
+                        newUserAgent = newUserAgent.replace("; wv","");
+
+                        connection = (HttpURLConnection) url.openConnection();
+                        connection.setReadTimeout(45000);
+                        connection.setConnectTimeout(45000);
+                        connection.setRequestProperty("User-Agent",newUserAgent);
+
+                        if((connection.getResponseCode() / 100) == 2)
+                        {
+                            length = connection.getHeaderField("Content-Length");
+                            contentDisposition = connection.getHeaderField("Content-Disposition");
+                            contentType = connection.getHeaderField("Content-Type");
+
+                            s = 1;
+                        } else {
+                            s = 5;
+                        }
+                    } catch (MalformedURLException e1)
+                    {
+                        s = 2;
+                    } catch (IOException e2)
+                    {
+                        s = 3;
+                    } catch (NumberFormatException e3)
+                    {
+                        s = 4;
+                    } catch (Exception ignored) {
+
+                    }finally {
+                        try {
+                            if(connection != null)
+                            {
+                                connection.getInputStream().close();
+                                connection.disconnect();
+                            }
+                        } catch (Exception ignored) {}
+
+                        final int finalS = s;
+
+                        activity.runOnUiThread(() -> {
+                            switch (finalS)
+                            {
+                                case 1:
+                                {
+                                    try {
+                                        viewHolder.onListenDownload(downloadImageURL,newUserAgent,contentDisposition,contentType,pageURL,
+                                                Long.parseLong(length),null);
+                                    } catch (NumberFormatException e)
+                                    {
+                                        viewHolder.onListenDownload(downloadImageURL,newUserAgent,contentDisposition,contentType,pageURL,
+                                                -1,null);
+                                    } catch (Exception e2)
+                                    {
+                                        normalTabsRVAdapter.showToastFromMainActivity(R.string.oops_general_message);
+                                    }
+
+                                    break;
+                                }
+                                case 0:
+                                case 3: {
+                                    normalTabsRVAdapter.showToastFromMainActivity(R.string.oops_general_message);
+                                    break;
+                                }
+                                case 4:
+                                {
+                                    normalTabsRVAdapter.showToastFromMainActivity(R.string.image_size_not_found);
+                                    break;
+                                }
+                                case 2:
+                                {
+                                    normalTabsRVAdapter.showToastFromMainActivity(R.string.malformed_url);
+                                    break;
+                                }
+                                case 5:
+                                {
+                                    normalTabsRVAdapter.showToastFromMainActivity(R.string.file_not_found_on_url);
+                                    break;
+                                }
+                            }
+                        });
+                    }
+                }
+            } catch (Exception e12)
+            {
+                normalTabsRVAdapter.showToastFromMainActivity(R.string.cannot_download_file_from_such_url);
+            }
+        }
     }
 
     private static class IncomingHandler extends Handler {

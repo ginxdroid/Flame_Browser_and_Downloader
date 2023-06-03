@@ -14,6 +14,13 @@ public class UserPreferences {
     private Integer isSaveRecentTabs;
     private Integer browserTutorialInfo;
 
+    private String downloadPath;
+    private Integer autoResumeStatus;
+    private Integer simultaneousTasks;
+    private Integer defaultSegments;
+    private Integer directDownload;
+    private Integer showOptimization;
+
 
     public UserPreferences() {
     }
@@ -81,5 +88,53 @@ public class UserPreferences {
 
     public void setBrowserTutorialInfo(Integer browserTutorialInfo) {
         this.browserTutorialInfo = browserTutorialInfo;
+    }
+
+    public String getDownloadPath() {
+        return downloadPath;
+    }
+
+    public void setDownloadPath(String downloadPath) {
+        this.downloadPath = downloadPath;
+    }
+
+    public Integer getAutoResumeStatus() {
+        return autoResumeStatus;
+    }
+
+    public void setAutoResumeStatus(Integer autoResumeStatus) {
+        this.autoResumeStatus = autoResumeStatus;
+    }
+
+    public Integer getSimultaneousTasks() {
+        return simultaneousTasks;
+    }
+
+    public void setSimultaneousTasks(Integer simultaneousTasks) {
+        this.simultaneousTasks = simultaneousTasks;
+    }
+
+    public Integer getDefaultSegments() {
+        return defaultSegments;
+    }
+
+    public void setDefaultSegments(Integer defaultSegments) {
+        this.defaultSegments = defaultSegments;
+    }
+
+    public Integer getDirectDownload() {
+        return directDownload;
+    }
+
+    public void setDirectDownload(Integer directDownload) {
+        this.directDownload = directDownload;
+    }
+
+    public Integer getShowOptimization() {
+        return showOptimization;
+    }
+
+    public void setShowOptimization(Integer showOptimization) {
+        this.showOptimization = showOptimization;
     }
 }

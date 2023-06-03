@@ -15,12 +15,113 @@ import com.ginxdroid.flamebrowseranddownloader.models.SearchItem;
 import com.ginxdroid.flamebrowseranddownloader.models.SiteSettingsModel;
 import com.ginxdroid.flamebrowseranddownloader.models.ThemeModel;
 import com.ginxdroid.flamebrowseranddownloader.models.UserPreferences;
+import com.ginxdroid.flamebrowseranddownloader.models.tasks.DownloadTask;
+import com.ginxdroid.flamebrowseranddownloader.models.tasks.PartialBindDownloadTask;
+import com.ginxdroid.flamebrowseranddownloader.models.tasks.PartialCompletedTask;
+import com.ginxdroid.flamebrowseranddownloader.models.tasks.PartialEight;
+import com.ginxdroid.flamebrowseranddownloader.models.tasks.PartialFour;
+import com.ginxdroid.flamebrowseranddownloader.models.tasks.PartialOne;
+import com.ginxdroid.flamebrowseranddownloader.models.tasks.PartialSix;
+import com.ginxdroid.flamebrowseranddownloader.models.tasks.PartialSixteen;
+import com.ginxdroid.flamebrowseranddownloader.models.tasks.PartialThirtyTwo;
+import com.ginxdroid.flamebrowseranddownloader.models.tasks.PartialTwo;
 
 import java.util.ArrayList;
 
 public class DatabaseHandler extends SQLiteOpenHelper {
     private static DatabaseHandler instance = null;
     private static SQLiteDatabase readableDB, writableDB;
+
+    private final String downloadTasksTBL = "downloadTasksTBL";
+    //downloadTasksTBL columns
+    private final String KEY_ID = "dId";
+    private final String FILE_NAME = "dFileName";
+    private final String URL = "dURL";
+    private final String DIR_PATH = "dDirPath";
+    private final String TOTAL_BYTES = "dTotalBytes";
+    private final String DOWNLOADED_BYTES = "dDownloadedBytes";
+    private final String MIME_TYPE = "dMimeType";
+    private final String CURRENT_STATUS = "dCurrentStatus";
+    private final String CURRENT_PROGRESS = "dCurrentProgress";
+    private final String DOWNLOAD_SPEED = "dDownloadSpeed";
+    private final String TIME_LEFT = "dTimeLeft";
+    private final String PAUSE_RESUME_SUPPORTED = "dPauseResumeSupported";
+    private final String IS_PAUSE_RESUME_SUPPORTED = "dIsPauseResumeSupported";
+    private final String CHUNK_MODE = "dChunkMode";
+    private final String USER_AGENT_STRING = "dUserAgentString";
+    private final String PAGE_URL = "dPageURL";
+    private final String WHICH_ERROR = "dWhichError";
+    private final String SEGMENTS_FOR_DOWNLOAD_TASK = "dSegmentsForDownloadTask";
+
+    private final String TPB1 = "dTPB1";
+    private final String TPB2 = "dTPB2";
+    private final String TPB3 = "dTPB3";
+    private final String TPB4 = "dTPB4";
+    private final String TPB5 = "dTPB5";
+    private final String TPB6 = "dTPB6";
+    private final String TPB7 = "dTPB7";
+    private final String TPB8 = "dTPB8";
+    private final String TPB9 = "dTPB9";
+    private final String TPB10 = "dTPB10";
+    private final String TPB11 = "dTPB11";
+    private final String TPB12 = "dTPB12";
+    private final String TPB13 = "dTPB13";
+    private final String TPB14 = "dTPB14";
+    private final String TPB15 = "dTPB15";
+    private final String TPB16 = "dTPB16";
+    private final String TPB17 = "dTPB17";
+    private final String TPB18 = "dTPB18";
+    private final String TPB19 = "dTPB19";
+    private final String TPB20 = "dTPB20";
+    private final String TPB21 = "dTPB21";
+    private final String TPB22 = "dTPB22";
+    private final String TPB23 = "dTPB23";
+    private final String TPB24 = "dTPB24";
+    private final String TPB25 = "dTPB25";
+    private final String TPB26 = "dTPB26";
+    private final String TPB27 = "dTPB27";
+    private final String TPB28 = "dTPB28";
+    private final String TPB29 = "dTPB29";
+    private final String TPB30 = "dTPB30";
+    private final String TPB31 = "dTPB31";
+    private final String TPB32 = "dTPB32";
+
+    private final String TSS1 = "dTSS1";
+    private final String TSS2 = "dTSS2";
+    private final String TSS3 = "dTSS3";
+    private final String TSS4 = "dTSS4";
+    private final String TSS5 = "dTSS5";
+    private final String TSS6 = "dTSS6";
+    private final String TSS7 = "dTSS7";
+    private final String TSS8 = "dTSS8";
+    private final String TSS9 = "dTSS9";
+    private final String TSS10 = "dTSS10";
+    private final String TSS11 = "dTSS11";
+    private final String TSS12 = "dTSS12";
+    private final String TSS13 = "dTSS13";
+    private final String TSS14 = "dTSS14";
+    private final String TSS15 = "dTSS15";
+    private final String TSS16 = "dTSS16";
+    private final String TSS17 = "dTSS17";
+    private final String TSS18 = "dTSS18";
+    private final String TSS19 = "dTSS19";
+    private final String TSS20 = "dTSS20";
+    private final String TSS21 = "dTSS21";
+    private final String TSS22 = "dTSS22";
+    private final String TSS23 = "dTSS23";
+    private final String TSS24 = "dTSS24";
+    private final String TSS25 = "dTSS25";
+    private final String TSS26 = "dTSS26";
+    private final String TSS27 = "dTSS27";
+    private final String TSS28 = "dTSS28";
+    private final String TSS29 = "dTSS29";
+    private final String TSS30 = "dTSS30";
+    private final String TSS31 = "dTSS31";
+    private final String TSS32 = "dTSS32";
+
+    private final String completedTasksTBL = "completedTasksTBL";
+    //completedTasksTBL columns
+    private final String CDT_KEY_ID = "cDtKeyId";
 
     private final String recentSitesTBL = "recentSitesTBL";
     //Recent sites columns
@@ -49,6 +150,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private final String SEARCH_ENGINE_URL = "uSearchEngineURL";
     private final String IS_SAVE_RECENT_TABS = "uIsSaveRecentTabs";
     private final String BROWSER_TUTORIAL_INFO = "uBrowserTutorialInfo";
+
+    private final String DOWNLOAD_PATH = "uDownloadPath";
+    private final String AUTO_RESUME_STATUS = "uAutoResumeStatus";
+    private final String SIMULTANEOUS_TASKS = "uSimultaneousTasks";
+    private final String DEFAULT_SEGMENTS = "uDefaultSegments";
+    private final String DIRECT_DOWNLOAD = "uDirectDownload";
+    private final String SHOW_OPTIMIZATION = "uShowOptimization";
 
 
     private final String differentThemesTBL="differentThemesTBL";
@@ -265,11 +373,38 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         createSearchItemsTbl(db);
         createSiteSettingsTbl(db);
         createRecentSitesTbl(db);
+        createDownloadTasksTbl(db);
+        createCompletedDownloadTasksTbl(db);
     }
 
 
 
     //CRUD: CREATE, READ, UPDATE and DELETE operations
+
+    private void createDownloadTasksTbl(SQLiteDatabase db)
+    {
+        String CREATE_DOWNLOAD_TASKS_TABLE = "CREATE TABLE IF NOT EXISTS "+downloadTasksTBL+"("+KEY_ID+" INTEGER PRIMARY KEY AUTOINCREMENT,"+
+                FILE_NAME + " TEXT," + URL + " TEXT," + DIR_PATH + " TEXT," + TOTAL_BYTES + " LONG,"+DOWNLOADED_BYTES + " LONG," +
+                CURRENT_STATUS + " INTEGER," + CURRENT_PROGRESS + " INTEGER," + DOWNLOAD_SPEED + " TEXT,"+TIME_LEFT + " TEXT," +
+                PAUSE_RESUME_SUPPORTED + " TEXT," + IS_PAUSE_RESUME_SUPPORTED + " INTEGER,"+CHUNK_MODE + " INTEGER,"+ USER_AGENT_STRING + " TEXT,"+
+                PAGE_URL + " TEXT," + WHICH_ERROR + " TEXT," + SEGMENTS_FOR_DOWNLOAD_TASK + " INTEGER," +
+                TPB1 + " Integer," + TPB2 + " Integer," + TPB3 + " Integer," + TPB4 + " Integer," + TPB5 + " Integer," + TPB6 + " Integer," +
+                TPB7 + " Integer," + TPB8 + " Integer," + TPB9 + " Integer," + TPB10 + " Integer," + TPB11 + " Integer," + TPB12 + " Integer," +
+                TPB13 + " Integer," + TPB14 + " Integer," + TPB15 + " Integer," + TPB16 + " Integer," + TPB17 + " Integer," + TPB18 + " Integer," +
+                TPB19 + " Integer," + TPB20 + " Integer," + TPB21 + " Integer," + TPB22 + " Integer," + TPB23 + " Integer," + TPB24 + " Integer," + TPB25 + " Integer," +
+                TPB26 + " Integer," + TPB27 + " Integer," + TPB28 + " Integer," + TPB29 + " Integer," + TPB30 + " Integer," + TPB31 + " Integer," + TPB32 + " Integer," +
+                TSS1 + " LONG," + TSS2 + " LONG," + TSS3 + " LONG," + TSS4 + " LONG," + TSS5 + " LONG," + TSS6 + " LONG," + TSS7 + " LONG," + TSS8 + " LONG," +
+                TSS9 + " LONG," + TSS10 + " LONG," + TSS11 + " LONG," + TSS12 + " LONG," + TSS13 + " LONG," + TSS14 + " LONG," + TSS15 + " LONG," + TSS16 + " LONG," +
+                TSS17 + " LONG," + TSS18 + " LONG," + TSS19 + " LONG," + TSS20 + " LONG," + TSS21 + " LONG," + TSS22 + " LONG," + TSS23 + " LONG," + TSS24 + " LONG," +
+                TSS25 + " LONG," + TSS26 + " LONG," + TSS27 + " LONG," + TSS28 + " LONG," + TSS29 + " LONG," + TSS30 + " LONG," + TSS31 + " LONG," + TSS32 + " LONG," +
+                MIME_TYPE + " TEXT);";
+        db.execSQL(CREATE_DOWNLOAD_TASKS_TABLE);
+    }
+
+    private void createCompletedDownloadTasksTbl(SQLiteDatabase db) {
+        String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS " + completedTasksTBL + "(" + CDT_KEY_ID + " INTEGER);";
+        db.execSQL(CREATE_TABLE);
+    }
 
     private void createRecentSitesTbl(SQLiteDatabase db) {
         String RCT_KEY_ID = "rCTKeyId";
@@ -360,7 +495,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     {
         String CREATE_USER_PREFERENCES_TABLE = "CREATE TABLE IF NOT EXISTS "+ userPreferencesTBL +"("+UP_KEY_ID+" INTEGER PRIMARY KEY,"+
                 CURRENT_THEME_ID+" INTEGER,"+IS_DARK_WEB_UI+" INTEGER,"+DARK_THEME+" INTEGER,"+HOME_PAGE_URL+" TEXT,"+SEARCH_ENGINE_URL+
-                " TEXT,"+IS_SAVE_RECENT_TABS+" INTEGER,"+BROWSER_TUTORIAL_INFO+" INTEGER);";
+                " TEXT,"+IS_SAVE_RECENT_TABS+" INTEGER,"+BROWSER_TUTORIAL_INFO+" INTEGER,"+DOWNLOAD_PATH+" TEXT,"+
+                AUTO_RESUME_STATUS + " INTEGER," + SIMULTANEOUS_TASKS + " INTEGER," + DEFAULT_SEGMENTS + " INTEGER," +
+                DIRECT_DOWNLOAD + " INTEGER," + SHOW_OPTIMIZATION +" INTEGER);";
 
         db.execSQL(CREATE_USER_PREFERENCES_TABLE);
     }
@@ -673,8 +810,333 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(SEARCH_ENGINE_URL, userPreferences.getSearchEngineURL());
         values.put(BROWSER_TUTORIAL_INFO, userPreferences.getBrowserTutorialInfo());
         values.put(IS_SAVE_RECENT_TABS,userPreferences.getIsSaveRecentTabs());
+        values.put(DOWNLOAD_PATH,userPreferences.getDownloadPath());
+        values.put(AUTO_RESUME_STATUS,userPreferences.getAutoResumeStatus());
+        values.put(SIMULTANEOUS_TASKS,userPreferences.getSimultaneousTasks());
+        values.put(DEFAULT_SEGMENTS,userPreferences.getDefaultSegments());
+        values.put(DIRECT_DOWNLOAD,userPreferences.getDirectDownload());
+        values.put(SHOW_OPTIMIZATION,userPreferences.getShowOptimization());
 
         writableDB.insert(userPreferencesTBL,null,values);
+
+    }
+
+    public PartialCompletedTask getBindDownloadTaskComplete(int id)
+    {
+        Cursor cursor = readableDB.query(downloadTasksTBL,new String[]{KEY_ID,FILE_NAME,TIME_LEFT,DOWNLOAD_SPEED
+                },KEY_ID + "=?",
+                new String[]{String.valueOf(id)},null,null,null,null);
+        PartialCompletedTask partialCompletedTask = new PartialCompletedTask();
+
+        cursor.moveToFirst();
+        partialCompletedTask.setFileName(cursor.getString(cursor.getColumnIndexOrThrow(FILE_NAME)));
+        partialCompletedTask.setTimeLeft(cursor.getString(cursor.getColumnIndexOrThrow(TIME_LEFT)));
+        partialCompletedTask.setDownloadSpeed(cursor.getString(cursor.getColumnIndexOrThrow(DOWNLOAD_SPEED)));
+        cursor.close();
+        return partialCompletedTask;
+    }
+
+    public ArrayList<Integer> getAllDownloadTaskIDs()
+    {
+        ArrayList<Integer> downloadTaskIDsList = new ArrayList<>();
+        Cursor cursor = readableDB.query(downloadTasksTBL,new String[] {KEY_ID},CURRENT_STATUS + " IN (?,?,?,?,?,?,?)",
+                new String[]{"1","2","3","4","5","6","0"},null,null,KEY_ID + " DESC",null);
+
+        while (cursor.moveToNext())
+        {
+            downloadTaskIDsList.add(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_ID)));
+        }
+
+        cursor.close();
+        return downloadTaskIDsList;
+    }
+
+    public ArrayList<Integer> getCompletedDownloadTaskIDs()
+    {
+        //for e.g. if we want download task with ids in order 2,11,8 then we can do following to get results in reverse order
+        ArrayList<Integer> downloadTaskIDsList = new ArrayList<>();
+        Cursor cursor = readableDB.query(completedTasksTBL,new String[] {CDT_KEY_ID},null,
+                null,null,null,null,null);
+
+        if(cursor.moveToLast())
+        {
+            do {
+                downloadTaskIDsList.add(cursor.getInt(cursor.getColumnIndexOrThrow(CDT_KEY_ID)));
+            } while (cursor.moveToPrevious());
+        }
+
+        cursor.close();
+        return downloadTaskIDsList;
+    }
+
+    public PartialOne getSingleThreadedDT(int id)
+    {
+        Cursor cursor = readableDB.query(downloadTasksTBL,new String[]{CHUNK_MODE,CURRENT_STATUS,CURRENT_PROGRESS},KEY_ID + "=?",
+                new String[]{String.valueOf(id)},null,null,null,null);
+        PartialOne partialOne = new PartialOne();
+
+        cursor.moveToFirst();
+        partialOne.setChunkMode(cursor.getInt(cursor.getColumnIndexOrThrow(CHUNK_MODE)));
+        partialOne.setCurrentStatus(cursor.getInt(cursor.getColumnIndexOrThrow(CURRENT_STATUS)));
+        partialOne.setCurrentProgress(cursor.getInt(cursor.getColumnIndexOrThrow(CURRENT_PROGRESS)));
+        cursor.close();
+        return partialOne;
+    }
+
+    public PartialTwo getTwoThreadedDT(int id)
+    {
+        Cursor cursor = readableDB.query(downloadTasksTBL,new String[]{CURRENT_STATUS,TPB1,TPB2},KEY_ID + "=?",
+                new String[]{String.valueOf(id)},null,null,null,null);
+        PartialTwo partialTwo = new PartialTwo();
+
+        cursor.moveToFirst();
+        partialTwo.setCurrentStatus(cursor.getInt(cursor.getColumnIndexOrThrow(CURRENT_STATUS)));
+        partialTwo.setTPB1(cursor.getInt(cursor.getColumnIndexOrThrow(TPB1)));
+        partialTwo.setTPB2(cursor.getInt(cursor.getColumnIndexOrThrow(TPB2)));
+        cursor.close();
+        return partialTwo;
+    }
+
+    public PartialFour getFourThreadedDT(int id)
+    {
+        Cursor cursor = readableDB.query(downloadTasksTBL,new String[]{CURRENT_STATUS,TPB1,TPB2,TPB3,TPB4},KEY_ID + "=?",
+                new String[]{String.valueOf(id)},null,null,null,null);
+        PartialFour partialFour = new PartialFour();
+
+        cursor.moveToFirst();
+        partialFour.setCurrentStatus(cursor.getInt(cursor.getColumnIndexOrThrow(CURRENT_STATUS)));
+        partialFour.setTPB1(cursor.getInt(cursor.getColumnIndexOrThrow(TPB1)));
+        partialFour.setTPB2(cursor.getInt(cursor.getColumnIndexOrThrow(TPB2)));
+        partialFour.setTPB3(cursor.getInt(cursor.getColumnIndexOrThrow(TPB3)));
+        partialFour.setTPB4(cursor.getInt(cursor.getColumnIndexOrThrow(TPB4)));
+        cursor.close();
+        return partialFour;
+    }
+
+    public PartialSix getSixThreadedDT(int id)
+    {
+        Cursor cursor = readableDB.query(downloadTasksTBL,new String[]{CURRENT_STATUS,TPB1,TPB2,TPB3,TPB4,TPB5,TPB6},KEY_ID + "=?",
+                new String[]{String.valueOf(id)},null,null,null,null);
+        PartialSix partialSix = new PartialSix();
+
+        cursor.moveToFirst();
+        partialSix.setCurrentStatus(cursor.getInt(cursor.getColumnIndexOrThrow(CURRENT_STATUS)));
+        partialSix.setTPB1(cursor.getInt(cursor.getColumnIndexOrThrow(TPB1)));
+        partialSix.setTPB2(cursor.getInt(cursor.getColumnIndexOrThrow(TPB2)));
+        partialSix.setTPB3(cursor.getInt(cursor.getColumnIndexOrThrow(TPB3)));
+        partialSix.setTPB4(cursor.getInt(cursor.getColumnIndexOrThrow(TPB4)));
+        partialSix.setTPB5(cursor.getInt(cursor.getColumnIndexOrThrow(TPB5)));
+        partialSix.setTPB6(cursor.getInt(cursor.getColumnIndexOrThrow(TPB6)));
+        cursor.close();
+        return partialSix;
+    }
+
+    public PartialEight getEightThreadedDT(int id)
+    {
+        Cursor cursor = readableDB.query(downloadTasksTBL,new String[]{CURRENT_STATUS,TPB1,TPB2,TPB3,TPB4,TPB5,TPB6,TPB7,TPB8},KEY_ID + "=?",
+                new String[]{String.valueOf(id)},null,null,null,null);
+        PartialEight partialEight = new PartialEight();
+
+        cursor.moveToFirst();
+        partialEight.setCurrentStatus(cursor.getInt(cursor.getColumnIndexOrThrow(CURRENT_STATUS)));
+        partialEight.setTPB1(cursor.getInt(cursor.getColumnIndexOrThrow(TPB1)));
+        partialEight.setTPB2(cursor.getInt(cursor.getColumnIndexOrThrow(TPB2)));
+        partialEight.setTPB3(cursor.getInt(cursor.getColumnIndexOrThrow(TPB3)));
+        partialEight.setTPB4(cursor.getInt(cursor.getColumnIndexOrThrow(TPB4)));
+        partialEight.setTPB5(cursor.getInt(cursor.getColumnIndexOrThrow(TPB5)));
+        partialEight.setTPB6(cursor.getInt(cursor.getColumnIndexOrThrow(TPB6)));
+        partialEight.setTPB7(cursor.getInt(cursor.getColumnIndexOrThrow(TPB7)));
+        partialEight.setTPB8(cursor.getInt(cursor.getColumnIndexOrThrow(TPB8)));
+        cursor.close();
+        return partialEight;
+    }
+
+    public PartialSixteen getSixteenThreadedDT(int id)
+    {
+        Cursor cursor = readableDB.query(downloadTasksTBL,new String[]{CURRENT_STATUS,TPB1,TPB2,TPB3,TPB4,TPB5,TPB6,TPB7,TPB8,
+                TPB9,TPB10,TPB11,TPB12,TPB13,TPB14,TPB15,TPB16},KEY_ID + "=?",
+                new String[]{String.valueOf(id)},null,null,null,null);
+        PartialSixteen partialSixteen = new PartialSixteen();
+
+        cursor.moveToFirst();
+        partialSixteen.setCurrentStatus(cursor.getInt(cursor.getColumnIndexOrThrow(CURRENT_STATUS)));
+        partialSixteen.setTPB1(cursor.getInt(cursor.getColumnIndexOrThrow(TPB1)));
+        partialSixteen.setTPB2(cursor.getInt(cursor.getColumnIndexOrThrow(TPB2)));
+        partialSixteen.setTPB3(cursor.getInt(cursor.getColumnIndexOrThrow(TPB3)));
+        partialSixteen.setTPB4(cursor.getInt(cursor.getColumnIndexOrThrow(TPB4)));
+        partialSixteen.setTPB5(cursor.getInt(cursor.getColumnIndexOrThrow(TPB5)));
+        partialSixteen.setTPB6(cursor.getInt(cursor.getColumnIndexOrThrow(TPB6)));
+        partialSixteen.setTPB7(cursor.getInt(cursor.getColumnIndexOrThrow(TPB7)));
+        partialSixteen.setTPB8(cursor.getInt(cursor.getColumnIndexOrThrow(TPB8)));
+        partialSixteen.setTPB9(cursor.getInt(cursor.getColumnIndexOrThrow(TPB9)));
+        partialSixteen.setTPB10(cursor.getInt(cursor.getColumnIndexOrThrow(TPB10)));
+        partialSixteen.setTPB11(cursor.getInt(cursor.getColumnIndexOrThrow(TPB11)));
+        partialSixteen.setTPB12(cursor.getInt(cursor.getColumnIndexOrThrow(TPB12)));
+        partialSixteen.setTPB13(cursor.getInt(cursor.getColumnIndexOrThrow(TPB13)));
+        partialSixteen.setTPB14(cursor.getInt(cursor.getColumnIndexOrThrow(TPB14)));
+        partialSixteen.setTPB15(cursor.getInt(cursor.getColumnIndexOrThrow(TPB15)));
+        partialSixteen.setTPB16(cursor.getInt(cursor.getColumnIndexOrThrow(TPB16)));
+        cursor.close();
+        return partialSixteen;
+    }
+
+    public PartialThirtyTwo getThirtyTwoThreadedDT(int id)
+    {
+        Cursor cursor = readableDB.query(downloadTasksTBL,new String[]{CURRENT_STATUS,TPB1,TPB2,TPB3,TPB4,TPB5,TPB6,TPB7,TPB8,
+                        TPB9,TPB10,TPB11,TPB12,TPB13,TPB14,TPB15,TPB16,
+                TPB17,TPB18,TPB19,TPB20,TPB21,TPB22,TPB23,TPB24,TPB25,TPB26,TPB27,TPB28,TPB29,TPB30,TPB31,TPB32},KEY_ID + "=?",
+                new String[]{String.valueOf(id)},null,null,null,null);
+        PartialThirtyTwo partialThirtyTwo = new PartialThirtyTwo();
+
+        cursor.moveToFirst();
+        partialThirtyTwo.setCurrentStatus(cursor.getInt(cursor.getColumnIndexOrThrow(CURRENT_STATUS)));
+        partialThirtyTwo.setTPB1(cursor.getInt(cursor.getColumnIndexOrThrow(TPB1)));
+        partialThirtyTwo.setTPB2(cursor.getInt(cursor.getColumnIndexOrThrow(TPB2)));
+        partialThirtyTwo.setTPB3(cursor.getInt(cursor.getColumnIndexOrThrow(TPB3)));
+        partialThirtyTwo.setTPB4(cursor.getInt(cursor.getColumnIndexOrThrow(TPB4)));
+        partialThirtyTwo.setTPB5(cursor.getInt(cursor.getColumnIndexOrThrow(TPB5)));
+        partialThirtyTwo.setTPB6(cursor.getInt(cursor.getColumnIndexOrThrow(TPB6)));
+        partialThirtyTwo.setTPB7(cursor.getInt(cursor.getColumnIndexOrThrow(TPB7)));
+        partialThirtyTwo.setTPB8(cursor.getInt(cursor.getColumnIndexOrThrow(TPB8)));
+        partialThirtyTwo.setTPB9(cursor.getInt(cursor.getColumnIndexOrThrow(TPB9)));
+        partialThirtyTwo.setTPB10(cursor.getInt(cursor.getColumnIndexOrThrow(TPB10)));
+        partialThirtyTwo.setTPB11(cursor.getInt(cursor.getColumnIndexOrThrow(TPB11)));
+        partialThirtyTwo.setTPB12(cursor.getInt(cursor.getColumnIndexOrThrow(TPB12)));
+        partialThirtyTwo.setTPB13(cursor.getInt(cursor.getColumnIndexOrThrow(TPB13)));
+        partialThirtyTwo.setTPB14(cursor.getInt(cursor.getColumnIndexOrThrow(TPB14)));
+        partialThirtyTwo.setTPB15(cursor.getInt(cursor.getColumnIndexOrThrow(TPB15)));
+        partialThirtyTwo.setTPB16(cursor.getInt(cursor.getColumnIndexOrThrow(TPB16)));
+        partialThirtyTwo.setTPB17(cursor.getInt(cursor.getColumnIndexOrThrow(TPB17)));
+        partialThirtyTwo.setTPB18(cursor.getInt(cursor.getColumnIndexOrThrow(TPB18)));
+        partialThirtyTwo.setTPB19(cursor.getInt(cursor.getColumnIndexOrThrow(TPB19)));
+        partialThirtyTwo.setTPB20(cursor.getInt(cursor.getColumnIndexOrThrow(TPB20)));
+        partialThirtyTwo.setTPB21(cursor.getInt(cursor.getColumnIndexOrThrow(TPB21)));
+        partialThirtyTwo.setTPB22(cursor.getInt(cursor.getColumnIndexOrThrow(TPB22)));
+        partialThirtyTwo.setTPB23(cursor.getInt(cursor.getColumnIndexOrThrow(TPB23)));
+        partialThirtyTwo.setTPB24(cursor.getInt(cursor.getColumnIndexOrThrow(TPB24)));
+        partialThirtyTwo.setTPB25(cursor.getInt(cursor.getColumnIndexOrThrow(TPB25)));
+        partialThirtyTwo.setTPB26(cursor.getInt(cursor.getColumnIndexOrThrow(TPB26)));
+        partialThirtyTwo.setTPB27(cursor.getInt(cursor.getColumnIndexOrThrow(TPB27)));
+        partialThirtyTwo.setTPB28(cursor.getInt(cursor.getColumnIndexOrThrow(TPB28)));
+        partialThirtyTwo.setTPB29(cursor.getInt(cursor.getColumnIndexOrThrow(TPB29)));
+        partialThirtyTwo.setTPB30(cursor.getInt(cursor.getColumnIndexOrThrow(TPB30)));
+        partialThirtyTwo.setTPB31(cursor.getInt(cursor.getColumnIndexOrThrow(TPB31)));
+        partialThirtyTwo.setTPB32(cursor.getInt(cursor.getColumnIndexOrThrow(TPB32)));
+        cursor.close();
+        return partialThirtyTwo;
+    }
+
+    public PartialBindDownloadTask getBindDownloadTask(int id)
+    {
+        Cursor cursor = readableDB.query(downloadTasksTBL,new String[]{KEY_ID,FILE_NAME,TIME_LEFT,DOWNLOAD_SPEED,PAUSE_RESUME_SUPPORTED,CURRENT_STATUS
+                        },KEY_ID + "=?",
+                new String[]{String.valueOf(id)},null,null,null,null);
+        PartialBindDownloadTask partialBindDownloadTask = new PartialBindDownloadTask();
+
+        cursor.moveToFirst();
+        partialBindDownloadTask.setKeyId(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_ID)));
+        partialBindDownloadTask.setFileName(cursor.getString(cursor.getColumnIndexOrThrow(FILE_NAME)));
+        partialBindDownloadTask.setTimeLeft(cursor.getString(cursor.getColumnIndexOrThrow(TIME_LEFT)));
+        partialBindDownloadTask.setDownloadSpeed(cursor.getString(cursor.getColumnIndexOrThrow(DOWNLOAD_SPEED)));
+        partialBindDownloadTask.setPauseResumeSupported(cursor.getString(cursor.getColumnIndexOrThrow(PAUSE_RESUME_SUPPORTED)));
+        partialBindDownloadTask.setCurrentStatus(cursor.getInt(cursor.getColumnIndexOrThrow(CURRENT_STATUS)));
+        cursor.close();
+        return partialBindDownloadTask;
+    }
+
+
+    public void updateAutoResumeStatus(int value)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(AUTO_RESUME_STATUS,value);
+
+        writableDB.update(userPreferencesTBL,contentValues,UP_KEY_ID + "=?",new String[]{String.valueOf(1)});
+    }
+
+    public void updateSimultaneousTasks(int tasks)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(SIMULTANEOUS_TASKS,tasks);
+
+        writableDB.update(userPreferencesTBL,contentValues,UP_KEY_ID + "=?",new String[]{String.valueOf(1)});
+    }
+
+    public void updateDefaultSegments(int segments)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DEFAULT_SEGMENTS,segments);
+
+        writableDB.update(userPreferencesTBL,contentValues,UP_KEY_ID + "=?",new String[]{String.valueOf(1)});
+    }
+
+    public void updateDownloadAddress(String downloadAddress)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DOWNLOAD_PATH,downloadAddress);
+
+        writableDB.update(userPreferencesTBL,contentValues,UP_KEY_ID + "=?",new String[]{String.valueOf(1)});
+    }
+
+    public ArrayList<String> getAllDownloadTaskNames()
+    {
+
+        ArrayList<String> result = new ArrayList<>();
+        Cursor cursor = readableDB.query(downloadTasksTBL,new String[]{FILE_NAME},null,null,null,null,null,null);
+
+        while (cursor.moveToNext())
+        {
+            result.add(cursor.getString(cursor.getColumnIndexOrThrow(FILE_NAME)));
+        }
+
+        cursor.close();
+
+        return result;
+    }
+
+
+
+    public UserPreferences getDTSettingsUP()
+    {
+        UserPreferences userPreferences = new UserPreferences();
+
+        Cursor cursor = readableDB.query(userPreferencesTBL, new String[]{UP_KEY_ID,DOWNLOAD_PATH,
+                        AUTO_RESUME_STATUS,SIMULTANEOUS_TASKS,DEFAULT_SEGMENTS,DIRECT_DOWNLOAD}
+                , UP_KEY_ID + "=?",
+                new String[]{String.valueOf(1)}, null, null, null
+        );
+
+        cursor.moveToFirst();
+        userPreferences.setUpKeyId(cursor.getInt(cursor.getColumnIndexOrThrow(UP_KEY_ID)));
+        userPreferences.setDownloadPath(cursor.getString(cursor.getColumnIndexOrThrow(DOWNLOAD_PATH)));
+        userPreferences.setAutoResumeStatus(cursor.getInt(cursor.getColumnIndexOrThrow(AUTO_RESUME_STATUS)));
+        userPreferences.setSimultaneousTasks(cursor.getInt(cursor.getColumnIndexOrThrow(SIMULTANEOUS_TASKS)));
+        userPreferences.setDefaultSegments(cursor.getInt(cursor.getColumnIndexOrThrow(DEFAULT_SEGMENTS)));
+        userPreferences.setDirectDownload(cursor.getInt(cursor.getColumnIndexOrThrow(DIRECT_DOWNLOAD)));
+
+        cursor.close();
+
+        return userPreferences;
+    }
+
+    public UserPreferences getHalfUserPreferences()
+    {
+        UserPreferences userPreferences = new UserPreferences();
+
+        Cursor cursor = readableDB.query(userPreferencesTBL, new String[]{UP_KEY_ID,DOWNLOAD_PATH, AUTO_RESUME_STATUS}
+                , UP_KEY_ID + "=?",
+                new String[]{String.valueOf(1)}, null, null, null
+        );
+
+
+        cursor.moveToFirst();
+        userPreferences.setUpKeyId(cursor.getInt(cursor.getColumnIndexOrThrow(UP_KEY_ID)));
+        userPreferences.setDownloadPath(cursor.getString(cursor.getColumnIndexOrThrow(DOWNLOAD_PATH)));
+        userPreferences.setAutoResumeStatus(cursor.getInt(cursor.getColumnIndexOrThrow(AUTO_RESUME_STATUS)));
+
+        cursor.close();
+
+        return userPreferences;
+
 
     }
     
@@ -858,6 +1320,35 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         cursor.close();
 
         return quickLinksList;
+    }
+
+    public int getDefaultSegments()
+    {
+        Cursor cursor = readableDB.query(userPreferencesTBL,new String[]{DEFAULT_SEGMENTS},
+                UP_KEY_ID + "=?",new String[]{String.valueOf(1)},null,null,null,null);
+        cursor.moveToFirst();
+        int result = cursor.getInt(cursor.getColumnIndexOrThrow(DEFAULT_SEGMENTS));
+        cursor.close();
+        return result;
+
+    }
+
+    //Get all downloadTasks
+    public int getRecentTaskID()
+    {
+        Cursor cursor = readableDB.query(downloadTasksTBL, new String[]{KEY_ID
+                }
+                , CURRENT_STATUS + " IN (?,?,?,?,?,?,?)",
+                new String[]{"1","2","3","4","5","6","0"}, null, null, KEY_ID
+                        + " DESC", String.valueOf(1)
+        );
+
+        cursor.moveToFirst();
+        final int recentTaskID = cursor.getInt(cursor.getColumnIndexOrThrow(KEY_ID));
+        cursor.close();
+
+        return recentTaskID;
+
     }
 
     public void deleteQuickLinkItem(int id) {
@@ -1417,6 +1908,126 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         writableDB.update(userPreferencesTBL,contentValues,UP_KEY_ID + "=?", new String[]{String.valueOf(1)});
     }
+
+    public int getSegmentsForDownloadTask(int id)
+    {
+        Cursor cursor = readableDB.query(downloadTasksTBL,new String[] {SEGMENTS_FOR_DOWNLOAD_TASK},KEY_ID + "=?",
+                new String[]{String.valueOf(id)},null,null,null,null);
+        cursor.moveToFirst();
+        int result = cursor.getInt(cursor.getColumnIndexOrThrow(SEGMENTS_FOR_DOWNLOAD_TASK));
+        cursor.close();
+        return result;
+    }
+
+    public void addTask(DownloadTask downloadTask)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(FILE_NAME,downloadTask.getFileName());
+        contentValues.put(URL,downloadTask.getUrl());
+        contentValues.put(DIR_PATH,downloadTask.getDirPath());
+        contentValues.put(TOTAL_BYTES,downloadTask.getTotalBytes());
+        contentValues.put(DOWNLOADED_BYTES,downloadTask.getDownloadedBytes());
+        contentValues.put(CURRENT_STATUS,downloadTask.getCurrentStatus());
+        contentValues.put(CURRENT_PROGRESS,downloadTask.getCurrentProgress());
+        contentValues.put(DOWNLOAD_SPEED,downloadTask.getDownloadSpeed());
+        contentValues.put(TIME_LEFT,downloadTask.getTimeLeft());
+        contentValues.put(PAUSE_RESUME_SUPPORTED,downloadTask.getPauseResumeSupported());
+        contentValues.put(IS_PAUSE_RESUME_SUPPORTED,downloadTask.getIsPauseResumeSupported());
+        contentValues.put(CHUNK_MODE,downloadTask.getChunkMode());
+        contentValues.put(USER_AGENT_STRING,downloadTask.getUserAgentString());
+        contentValues.put(PAGE_URL,downloadTask.getPageURL());
+        contentValues.put(WHICH_ERROR,downloadTask.getWhichError());
+        contentValues.put(SEGMENTS_FOR_DOWNLOAD_TASK,downloadTask.getSegmentsForDownloadTask());
+
+        contentValues.put(TPB1,downloadTask.getTPB1());
+        contentValues.put(TPB2,downloadTask.getTPB2());
+        contentValues.put(TPB3,downloadTask.getTPB3());
+        contentValues.put(TPB4,downloadTask.getTPB4());
+        contentValues.put(TPB5,downloadTask.getTPB5());
+        contentValues.put(TPB6,downloadTask.getTPB6());
+        contentValues.put(TPB7,downloadTask.getTPB7());
+        contentValues.put(TPB8,downloadTask.getTPB8());
+        contentValues.put(TPB9,downloadTask.getTPB9());
+        contentValues.put(TPB10,downloadTask.getTPB10());
+        contentValues.put(TPB11,downloadTask.getTPB11());
+        contentValues.put(TPB12,downloadTask.getTPB12());
+        contentValues.put(TPB13,downloadTask.getTPB13());
+        contentValues.put(TPB14,downloadTask.getTPB14());
+        contentValues.put(TPB15,downloadTask.getTPB15());
+        contentValues.put(TPB16,downloadTask.getTPB16());
+        contentValues.put(TPB17,downloadTask.getTPB17());
+        contentValues.put(TPB18,downloadTask.getTPB18());
+        contentValues.put(TPB19,downloadTask.getTPB19());
+        contentValues.put(TPB20,downloadTask.getTPB20());
+        contentValues.put(TPB21,downloadTask.getTPB21());
+        contentValues.put(TPB22,downloadTask.getTPB22());
+        contentValues.put(TPB23,downloadTask.getTPB23());
+        contentValues.put(TPB24,downloadTask.getTPB24());
+        contentValues.put(TPB25,downloadTask.getTPB25());
+        contentValues.put(TPB26,downloadTask.getTPB26());
+        contentValues.put(TPB27,downloadTask.getTPB27());
+        contentValues.put(TPB28,downloadTask.getTPB28());
+        contentValues.put(TPB29,downloadTask.getTPB29());
+        contentValues.put(TPB30,downloadTask.getTPB30());
+        contentValues.put(TPB31,downloadTask.getTPB31());
+        contentValues.put(TPB32,downloadTask.getTPB32());
+
+        contentValues.put(TSS1,downloadTask.getTSS1());
+        contentValues.put(TSS2,downloadTask.getTSS2());
+        contentValues.put(TSS3,downloadTask.getTSS3());
+        contentValues.put(TSS4,downloadTask.getTSS4());
+        contentValues.put(TSS5,downloadTask.getTSS5());
+        contentValues.put(TSS6,downloadTask.getTSS6());
+        contentValues.put(TSS7,downloadTask.getTSS7());
+        contentValues.put(TSS8,downloadTask.getTSS8());
+        contentValues.put(TSS9,downloadTask.getTSS9());
+        contentValues.put(TSS10,downloadTask.getTSS10());
+        contentValues.put(TSS11,downloadTask.getTSS11());
+        contentValues.put(TSS12,downloadTask.getTSS12());
+        contentValues.put(TSS13,downloadTask.getTSS13());
+        contentValues.put(TSS14,downloadTask.getTSS14());
+        contentValues.put(TSS15,downloadTask.getTSS15());
+        contentValues.put(TSS16,downloadTask.getTSS16());
+        contentValues.put(TSS17,downloadTask.getTSS17());
+        contentValues.put(TSS18,downloadTask.getTSS18());
+        contentValues.put(TSS19,downloadTask.getTSS19());
+        contentValues.put(TSS20,downloadTask.getTSS20());
+        contentValues.put(TSS21,downloadTask.getTSS21());
+        contentValues.put(TSS22,downloadTask.getTSS22());
+        contentValues.put(TSS23,downloadTask.getTSS23());
+        contentValues.put(TSS24,downloadTask.getTSS24());
+        contentValues.put(TSS25,downloadTask.getTSS25());
+        contentValues.put(TSS26,downloadTask.getTSS26());
+        contentValues.put(TSS27,downloadTask.getTSS27());
+        contentValues.put(TSS28,downloadTask.getTSS28());
+        contentValues.put(TSS29,downloadTask.getTSS29());
+        contentValues.put(TSS30,downloadTask.getTSS30());
+        contentValues.put(TSS31,downloadTask.getTSS31());
+        contentValues.put(TSS32,downloadTask.getTSS32());
+
+        contentValues.put(MIME_TYPE,downloadTask.getMimeType());
+
+        writableDB.insert(downloadTasksTBL,null,contentValues);
+    }
+
+    public boolean isShowOptimization()
+    {
+        Cursor cursor = readableDB.query(userPreferencesTBL,new String[]{SHOW_OPTIMIZATION},UP_KEY_ID + "=?",new String[]{String.valueOf(1)},
+                null,null,null);
+        cursor.moveToFirst();
+        int result = cursor.getInt(cursor.getColumnIndexOrThrow(SHOW_OPTIMIZATION));
+        cursor.close();
+        return result == 1;
+    }
+
+    public void updateShowOptimizationStatus()
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(SHOW_OPTIMIZATION,0);
+
+        writableDB.update(userPreferencesTBL,contentValues,UP_KEY_ID + "=?",new String[]{String.valueOf(1)});
+    }
+
 }
 
 

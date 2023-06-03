@@ -15,7 +15,7 @@ import com.ginxdroid.flamebrowseranddownloader.R;
 import com.ginxdroid.flamebrowseranddownloader.classes.CustomEditText;
 import com.ginxdroid.flamebrowseranddownloader.classes.HelperTextUtility;
 
-public class ManageHomePages extends AppCompatActivity implements View.OnClickListener {
+public class ManageHomePages extends BaseActivity implements View.OnClickListener {
 
     private RelativeLayout searchHomePagesLL,homePagesLL;
     private CustomEditText searchHomePagesEditText;

@@ -12,7 +12,7 @@ import android.widget.Toast;
 import com.ginxdroid.flamebrowseranddownloader.R;
 import com.google.android.material.button.MaterialButton;
 
-public class LegalInformation extends AppCompatActivity implements View.OnClickListener {
+public class LegalInformation extends BaseActivity implements View.OnClickListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

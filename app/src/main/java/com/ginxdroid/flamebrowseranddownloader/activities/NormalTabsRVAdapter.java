@@ -45,6 +45,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.view.Window;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.CookieManager;
@@ -73,6 +74,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.webkit.WebSettingsCompat;
@@ -86,6 +88,7 @@ import com.ginxdroid.flamebrowseranddownloader.classes.HelperTextUtility;
 import com.ginxdroid.flamebrowseranddownloader.models.HistoryItem;
 import com.ginxdroid.flamebrowseranddownloader.models.SearchEngineItem;
 import com.ginxdroid.flamebrowseranddownloader.models.SiteSettingsModel;
+import com.ginxdroid.flamebrowseranddownloader.models.tasks.TemporaryTask;
 import com.ginxdroid.flamebrowseranddownloader.sheets.ConnectionInformationSheet;
 import com.ginxdroid.flamebrowseranddownloader.sheets.FileChooserSheet;
 import com.ginxdroid.flamebrowseranddownloader.sheets.MainMenuSheet;
@@ -162,6 +165,8 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
     private boolean isWindowOpened = false;
     private Message storeMsg = null;
 
+    private DownloadTaskFetcher fetcher = null;
+    private AlertDialog chooseDownloadLocationAD;
 
     public NormalTabsRVAdapter(Context context, MainActivity mainActivity,
                                CustomHorizontalManager customHorizontalManager, CoordinatorLayout recyclerViewContainer,
@@ -284,6 +289,24 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
 
     }
 
+
+    void dismissChooseDownloadTaskADAndProceed()
+    {
+        try {
+            if(fetcher != null)
+            {
+                fetcher.start();
+                fetcher = null;
+            }
+        } catch (Exception ignored) {}
+
+        try {
+            if(chooseDownloadLocationAD != null)
+            {
+                chooseDownloadLocationAD.dismiss();
+            }
+        } catch (Exception ignored) {}
+    }
 
     void setUploadMessage(Uri[] uploadMessage)
     {
@@ -757,6 +780,8 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
 
         webView.setWebChromeClient(viewHolder.webChromeClient);
         webView.setWebViewClient(viewHolder.webViewClient);
+        webView.setDownloadListener((url, userAgent, contentDisposition, mimeType, contentLength) ->
+                viewHolder.onListenDownload(url,userAgent,contentDisposition,mimeType,viewHolder.webViewURLString,contentLength,null));
 
         webView.setOnTouchListener(viewHolder.onTouchListener);
 
@@ -964,6 +989,115 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
         private final OnBackPressedCallback onBackPressedCallback;
         private final View.OnTouchListener onTouchListener;
         private final GestureDetector gestureDetector;
+        private TemporaryTask temporaryTask = null;
+
+        void onListenDownload(String url, String userAgent, String contentDisposition, String mimeType, String pageURL, long contentLength,
+                             String name)
+        {
+            if(!HelperTextUtility.isNotEmpty(pageURL))
+            {
+                if(HelperTextUtility.isNotEmpty(url))
+                {
+                    pageURL = url;
+                } else {
+                    pageURL = "Unknown";
+                }
+            }
+
+            if(!isLayoutInvisible)
+            {
+                try {
+                    DocumentFile pickedDir = DocumentFile.fromTreeUri(context,Uri.parse(db.getHalfUserPreferences().getDownloadPath()));
+                    String dirName = null;
+                    if(pickedDir != null)
+                    {
+                        dirName = pickedDir.getName();
+                    }
+
+                    if(dirName == null)
+                    {
+                        throw new Exception();
+                    } else {
+                        //call downloadTaskFetcher which will fetch downloadTaskDetails
+                        new DownloadTaskFetcher(url,userAgent,contentDisposition,mimeType,pageURL,contentLength,name,NormalTabsRVAdapter.this,
+                                db,context,mainActivity).start();
+                    }
+                } catch (Exception e)
+                {
+                    temporaryTask = new TemporaryTask();
+                    temporaryTask.setURL(url);
+                    temporaryTask.setUserAgent(userAgent);
+                    temporaryTask.setContentDisposition(contentDisposition);
+                    temporaryTask.setMimeType(mimeType);
+                    temporaryTask.setPageURL(pageURL);
+                    temporaryTask.setContentLength(contentLength);
+                    temporaryTask.setName(name);
+                }
+            } else {
+                try {
+                    DocumentFile pickedDir = DocumentFile.fromTreeUri(context,Uri.parse(db.getHalfUserPreferences().getDownloadPath()));
+                    String dirName = null;
+                    if(pickedDir != null)
+                    {
+                        dirName = pickedDir.getName();
+                    }
+
+                    if(dirName == null)
+                    {
+                        throw new Exception();
+                    } else {
+                        //call downloadTaskFetcher which will fetch downloadTaskDetails
+                        new DownloadTaskFetcher(url,userAgent,contentDisposition,mimeType,pageURL,contentLength,name,NormalTabsRVAdapter.this,
+                                db,context,mainActivity).start();
+                    }
+                } catch (Exception e)
+                {
+                    //Show storagePathNotChosenDialog
+                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+                    View view = inflater.inflate(R.layout.popup_storage_path_not_choosen,recyclerViewContainer,false);
+
+                    final MaterialButton closeBtn,chooseBtn;
+                    closeBtn = view.findViewById(R.id.closeBtn);
+                    chooseBtn = view.findViewById(R.id.chooseBtn);
+
+                    closeBtn.setOnClickListener(view1 -> chooseDownloadLocationAD.dismiss());
+
+                    chooseBtn.setOnClickListener(view12 -> {
+                        try {
+                            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+                            mainActivity.selectDownloadPathLauncher.launch(intent);
+                        } catch (Exception e1)
+                        {
+                            showToastFromMainActivity(R.string.maybe_you_have_disabled);
+                        }
+                    });
+
+                    dialogBuilder.setView(view);
+                    chooseDownloadLocationAD = dialogBuilder.create();
+                    Window window = chooseDownloadLocationAD.getWindow();
+                    WindowManager.LayoutParams layoutParams;
+                    if(window != null)
+                    {
+                        layoutParams = window.getAttributes();
+                        if(layoutParams != null)
+                        {
+                            layoutParams.windowAnimations = R.style.PopupWindowAnimationStyleSmallPopupWindow;
+                            window.setAttributes(layoutParams);
+                        }
+                    }
+
+                    chooseDownloadLocationAD.setOnDismissListener(dialogInterface -> fetcher = null);
+
+                    if(fetcher == null)
+                    {
+                        fetcher = new DownloadTaskFetcher(url,userAgent,contentDisposition,mimeType,pageURL,contentLength,name,NormalTabsRVAdapter.this,
+                                db,context,mainActivity);
+                    }
+
+                    chooseDownloadLocationAD.show();
+                }
+            }
+        }
 
 
         void showConnectionInformationDialog(View popupView)
@@ -2775,6 +2909,81 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
                 {
                     locationDialog.show();
                 }
+
+                if(temporaryTask != null)
+                {
+                    try {
+                        DocumentFile pickedDir = DocumentFile.fromTreeUri(context,Uri.parse(db.getHalfUserPreferences().getDownloadPath()));
+
+                        String dirName = null;
+                        if(pickedDir != null)
+                        {
+                            dirName = pickedDir.getName();
+                        }
+
+                        if(dirName == null)
+                        {
+                            throw new Exception();
+                        } else {
+                            new DownloadTaskFetcher(temporaryTask.getURL(),temporaryTask.getUserAgent(),
+                                    temporaryTask.getContentDisposition(),temporaryTask.getMimeType(),
+                                    temporaryTask.getPageURL(),
+                                    temporaryTask.getContentLength(),temporaryTask.getName(),NormalTabsRVAdapter.this,
+                                    db,context,mainActivity).start();
+                        }
+                    } catch (Exception e)
+                    {
+                        //Show storagePathNotChosenDialog
+                        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+                        View view = inflater.inflate(R.layout.popup_storage_path_not_choosen,recyclerViewContainer,false);
+
+                        final MaterialButton closeBtn,chooseBtn;
+                        closeBtn = view.findViewById(R.id.closeBtn);
+                        chooseBtn = view.findViewById(R.id.chooseBtn);
+
+                        closeBtn.setOnClickListener(view1 -> chooseDownloadLocationAD.dismiss());
+
+                        chooseBtn.setOnClickListener(view12 -> {
+                            try {
+                                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+                                mainActivity.selectDownloadPathLauncher.launch(intent);
+                            } catch (Exception e1)
+                            {
+                                showToastFromMainActivity(R.string.maybe_you_have_disabled);
+                            }
+                        });
+
+                        dialogBuilder.setView(view);
+                        chooseDownloadLocationAD = dialogBuilder.create();
+                        Window window = chooseDownloadLocationAD.getWindow();
+                        WindowManager.LayoutParams layoutParams;
+                        if(window != null)
+                        {
+                            layoutParams = window.getAttributes();
+                            if(layoutParams != null)
+                            {
+                                layoutParams.windowAnimations = R.style.PopupWindowAnimationStyleSmallPopupWindow;
+                                window.setAttributes(layoutParams);
+                            }
+                        }
+
+                        chooseDownloadLocationAD.setOnDismissListener(dialogInterface -> fetcher = null);
+
+                        if(fetcher == null)
+                        {
+                            fetcher = new DownloadTaskFetcher(temporaryTask.getURL(),temporaryTask.getUserAgent(),
+                                    temporaryTask.getContentDisposition(),temporaryTask.getMimeType(),
+                                    temporaryTask.getPageURL(),
+                                    temporaryTask.getContentLength(),temporaryTask.getName(),NormalTabsRVAdapter.this,
+                                    db,context,mainActivity);
+                        }
+
+                        chooseDownloadLocationAD.show();
+                    } finally {
+                        temporaryTask = null;
+                    }
+                }
+
 
                 setProgressBarProgressSpecial(historyProgress);
                 setDecorURL();

@@ -10,7 +10,7 @@ import android.widget.Toast;
 import com.ginxdroid.flamebrowseranddownloader.DatabaseHandler;
 import com.ginxdroid.flamebrowseranddownloader.R;
 
-public class StartupAndExitFeatures extends AppCompatActivity {
+public class StartupAndExitFeatures extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

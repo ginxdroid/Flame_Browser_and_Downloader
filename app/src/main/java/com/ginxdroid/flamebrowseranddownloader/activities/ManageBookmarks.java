@@ -15,7 +15,7 @@ import com.ginxdroid.flamebrowseranddownloader.R;
 import com.ginxdroid.flamebrowseranddownloader.classes.CustomEditText;
 import com.ginxdroid.flamebrowseranddownloader.classes.HelperTextUtility;
 
-public class ManageBookmarks extends AppCompatActivity implements View.OnClickListener {
+public class ManageBookmarks extends BaseActivity implements View.OnClickListener {
     private RelativeLayout searchBookmarksLL,bookmarksLL;
     private CustomEditText searchBookmarksEditText;
 
