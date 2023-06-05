@@ -1,6 +1,5 @@
 package com.ginxdroid.flamebrowseranddownloader.activities;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 

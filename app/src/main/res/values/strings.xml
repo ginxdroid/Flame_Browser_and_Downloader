@@ -329,6 +329,21 @@
     <string name="battery_optimization_activity_not_found">Battery Optimization activity not found</string>
     <string name="notifications_turned_off">Notifications turned off</string>
     <string name="maybe_notifications_turned_off">Maybe notifications turned off.</string>
+    <string name="pause_resume_not_supported">Pause resume not supported</string>
+    <string name="out_of_storage_space">Out of storage space</string>
+    <string name="connection_timed_out">Connection timed out</string>
+    <string name="server_temporarily_unavailable">Server temporarily unavailable</string>
+    <string name="directory_not_found">Directory not found</string>
+    <string name="failed_after_several_tries">Failed after several tries</string>
+    <string name="unknown_error">Unknown error</string>
+    <string name="initializing">Initializing</string>
+    <string name="started">Started</string>
+    <string name="pause">Pause</string>
+    <string name="stop">Stop</string>
+    <string name="waiting">Waiting</string>
+    <string name="resume">Resume</string>
+    <string name="start">Start</string>
+    <string name="error_occurred">Error occurred</string>
 
 
 </resources>

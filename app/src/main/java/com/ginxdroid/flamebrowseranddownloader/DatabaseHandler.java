@@ -18,8 +18,10 @@ import com.ginxdroid.flamebrowseranddownloader.models.UserPreferences;
 import com.ginxdroid.flamebrowseranddownloader.models.tasks.DownloadTask;
 import com.ginxdroid.flamebrowseranddownloader.models.tasks.PartialBindDownloadTask;
 import com.ginxdroid.flamebrowseranddownloader.models.tasks.PartialCompletedTask;
+import com.ginxdroid.flamebrowseranddownloader.models.tasks.PartialDetailsTask;
 import com.ginxdroid.flamebrowseranddownloader.models.tasks.PartialEight;
 import com.ginxdroid.flamebrowseranddownloader.models.tasks.PartialFour;
+import com.ginxdroid.flamebrowseranddownloader.models.tasks.PartialHalfTask;
 import com.ginxdroid.flamebrowseranddownloader.models.tasks.PartialOne;
 import com.ginxdroid.flamebrowseranddownloader.models.tasks.PartialSix;
 import com.ginxdroid.flamebrowseranddownloader.models.tasks.PartialSixteen;
@@ -2026,6 +2028,944 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         contentValues.put(SHOW_OPTIMIZATION,0);
 
         writableDB.update(userPreferencesTBL,contentValues,UP_KEY_ID + "=?",new String[]{String.valueOf(1)});
+    }
+
+    @Override
+    public void onConfigure(SQLiteDatabase db) {
+        super.onConfigure(db);
+        setWriteAheadLoggingEnabled(true);
+    }
+
+    boolean isTaskCompleted(int dTID)
+    {
+        Cursor cursor = readableDB.query(downloadTasksTBL,new String[]{CURRENT_STATUS},KEY_ID + "=?",new String[]{String.valueOf(dTID)},
+                null,null,null,null);
+        cursor.moveToFirst();
+        int result = cursor.getInt(cursor.getColumnIndexOrThrow(CURRENT_STATUS));
+        cursor.close();
+        return result == 7;
+    }
+
+    public boolean isTaskPaused(int dTID)
+    {
+        Cursor cursor = readableDB.query(downloadTasksTBL,new String[]{CURRENT_STATUS},KEY_ID + "=?",new String[]{String.valueOf(dTID)},
+                null,null,null,null);
+        cursor.moveToFirst();
+        int result = cursor.getInt(cursor.getColumnIndexOrThrow(CURRENT_STATUS));
+        cursor.close();
+        return result == 4 || result == 0;
+    }
+
+    public void addCompletedTaskID(Integer dTID)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(CDT_KEY_ID,dTID);
+        writableDB.insert(completedTasksTBL,null,contentValues);
+    }
+
+    public DownloadTask getDownloadTask(int id)
+    {
+        Cursor cursor = readableDB.query(downloadTasksTBL,new String[]{KEY_ID,FILE_NAME,URL,DIR_PATH,TOTAL_BYTES,DOWNLOADED_BYTES,
+        CURRENT_STATUS,CURRENT_PROGRESS,DOWNLOAD_SPEED,TIME_LEFT,PAUSE_RESUME_SUPPORTED,IS_PAUSE_RESUME_SUPPORTED,CHUNK_MODE,USER_AGENT_STRING,
+        PAGE_URL,WHICH_ERROR,SEGMENTS_FOR_DOWNLOAD_TASK,TPB1,TPB2,TPB3,TPB4,TPB5,TPB6,TPB7,TPB8,
+                TPB9,TPB10,TPB11,TPB12,TPB13,TPB14,TPB15,TPB16,
+                TPB17,TPB18,TPB19,TPB20,TPB21,TPB22,TPB23,TPB24,TPB25,TPB26,TPB27,TPB28,TPB29,TPB30,TPB31,TPB32,
+                TSS1,TSS2,TSS3,TSS4,TSS5,TSS6,TSS7,TSS8,
+                TSS9,TSS10,TSS11,TSS12,TSS13,TSS14,TSS15,TSS16,
+                TSS17,TSS18,TSS19,TSS20,TSS21,TSS22,TSS23,TSS24,TSS25,TSS26,TSS27,TSS28,TSS29,TSS30,TSS31,TSS32,
+                MIME_TYPE},KEY_ID + "=?",new String[]{String.valueOf(id)},null,null,null,null);
+
+        DownloadTask downloadTask = new DownloadTask();
+
+        downloadTask.setKeyId(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_ID)));
+        downloadTask.setFileName(cursor.getString(cursor.getColumnIndexOrThrow(FILE_NAME)));
+        downloadTask.setUrl(cursor.getString(cursor.getColumnIndexOrThrow(URL)));
+        downloadTask.setDirPath(cursor.getString(cursor.getColumnIndexOrThrow(DIR_PATH)));
+        downloadTask.setTotalBytes(cursor.getLong(cursor.getColumnIndexOrThrow(TOTAL_BYTES)));
+        downloadTask.setDownloadedBytes(cursor.getLong(cursor.getColumnIndexOrThrow(DOWNLOADED_BYTES)));
+        downloadTask.setCurrentStatus(cursor.getInt(cursor.getColumnIndexOrThrow(CURRENT_STATUS)));
+        downloadTask.setCurrentProgress(cursor.getInt(cursor.getColumnIndexOrThrow(CURRENT_PROGRESS)));
+        downloadTask.setDownloadSpeed(cursor.getString(cursor.getColumnIndexOrThrow(DOWNLOAD_SPEED)));
+        downloadTask.setTimeLeft(cursor.getString(cursor.getColumnIndexOrThrow(TIME_LEFT)));
+        downloadTask.setPauseResumeSupported(cursor.getString(cursor.getColumnIndexOrThrow(PAUSE_RESUME_SUPPORTED)));
+        downloadTask.setIsPauseResumeSupported(cursor.getInt(cursor.getColumnIndexOrThrow(IS_PAUSE_RESUME_SUPPORTED)));
+        downloadTask.setChunkMode(cursor.getInt(cursor.getColumnIndexOrThrow(CHUNK_MODE)));
+        downloadTask.setUserAgentString(cursor.getString(cursor.getColumnIndexOrThrow(USER_AGENT_STRING)));
+        downloadTask.setPageURL(cursor.getString(cursor.getColumnIndexOrThrow(PAGE_URL)));
+        downloadTask.setWhichError(cursor.getString(cursor.getColumnIndexOrThrow(WHICH_ERROR)));
+        downloadTask.setSegmentsForDownloadTask(cursor.getInt(cursor.getColumnIndexOrThrow(SEGMENTS_FOR_DOWNLOAD_TASK)));
+
+        downloadTask.setTPB1(cursor.getInt(cursor.getColumnIndexOrThrow(TPB1)));
+        downloadTask.setTPB2(cursor.getInt(cursor.getColumnIndexOrThrow(TPB2)));
+        downloadTask.setTPB3(cursor.getInt(cursor.getColumnIndexOrThrow(TPB3)));
+        downloadTask.setTPB4(cursor.getInt(cursor.getColumnIndexOrThrow(TPB4)));
+        downloadTask.setTPB5(cursor.getInt(cursor.getColumnIndexOrThrow(TPB5)));
+        downloadTask.setTPB6(cursor.getInt(cursor.getColumnIndexOrThrow(TPB6)));
+        downloadTask.setTPB7(cursor.getInt(cursor.getColumnIndexOrThrow(TPB7)));
+        downloadTask.setTPB8(cursor.getInt(cursor.getColumnIndexOrThrow(TPB8)));
+        downloadTask.setTPB9(cursor.getInt(cursor.getColumnIndexOrThrow(TPB9)));
+        downloadTask.setTPB10(cursor.getInt(cursor.getColumnIndexOrThrow(TPB10)));
+        downloadTask.setTPB11(cursor.getInt(cursor.getColumnIndexOrThrow(TPB11)));
+        downloadTask.setTPB12(cursor.getInt(cursor.getColumnIndexOrThrow(TPB12)));
+        downloadTask.setTPB13(cursor.getInt(cursor.getColumnIndexOrThrow(TPB13)));
+        downloadTask.setTPB14(cursor.getInt(cursor.getColumnIndexOrThrow(TPB14)));
+        downloadTask.setTPB15(cursor.getInt(cursor.getColumnIndexOrThrow(TPB15)));
+        downloadTask.setTPB16(cursor.getInt(cursor.getColumnIndexOrThrow(TPB16)));
+        downloadTask.setTPB17(cursor.getInt(cursor.getColumnIndexOrThrow(TPB17)));
+        downloadTask.setTPB18(cursor.getInt(cursor.getColumnIndexOrThrow(TPB18)));
+        downloadTask.setTPB19(cursor.getInt(cursor.getColumnIndexOrThrow(TPB19)));
+        downloadTask.setTPB20(cursor.getInt(cursor.getColumnIndexOrThrow(TPB20)));
+        downloadTask.setTPB21(cursor.getInt(cursor.getColumnIndexOrThrow(TPB21)));
+        downloadTask.setTPB22(cursor.getInt(cursor.getColumnIndexOrThrow(TPB22)));
+        downloadTask.setTPB23(cursor.getInt(cursor.getColumnIndexOrThrow(TPB23)));
+        downloadTask.setTPB24(cursor.getInt(cursor.getColumnIndexOrThrow(TPB24)));
+        downloadTask.setTPB25(cursor.getInt(cursor.getColumnIndexOrThrow(TPB25)));
+        downloadTask.setTPB26(cursor.getInt(cursor.getColumnIndexOrThrow(TPB26)));
+        downloadTask.setTPB27(cursor.getInt(cursor.getColumnIndexOrThrow(TPB27)));
+        downloadTask.setTPB28(cursor.getInt(cursor.getColumnIndexOrThrow(TPB28)));
+        downloadTask.setTPB29(cursor.getInt(cursor.getColumnIndexOrThrow(TPB29)));
+        downloadTask.setTPB30(cursor.getInt(cursor.getColumnIndexOrThrow(TPB30)));
+        downloadTask.setTPB31(cursor.getInt(cursor.getColumnIndexOrThrow(TPB31)));
+        downloadTask.setTPB32(cursor.getInt(cursor.getColumnIndexOrThrow(TPB32)));
+
+        downloadTask.setTSS1(cursor.getLong(cursor.getColumnIndexOrThrow(TSS1)));
+        downloadTask.setTSS2(cursor.getLong(cursor.getColumnIndexOrThrow(TSS2)));
+        downloadTask.setTSS3(cursor.getLong(cursor.getColumnIndexOrThrow(TSS3)));
+        downloadTask.setTSS4(cursor.getLong(cursor.getColumnIndexOrThrow(TSS4)));
+        downloadTask.setTSS5(cursor.getLong(cursor.getColumnIndexOrThrow(TSS5)));
+        downloadTask.setTSS6(cursor.getLong(cursor.getColumnIndexOrThrow(TSS6)));
+        downloadTask.setTSS7(cursor.getLong(cursor.getColumnIndexOrThrow(TSS7)));
+        downloadTask.setTSS8(cursor.getLong(cursor.getColumnIndexOrThrow(TSS8)));
+        downloadTask.setTSS9(cursor.getLong(cursor.getColumnIndexOrThrow(TSS9)));
+        downloadTask.setTSS10(cursor.getLong(cursor.getColumnIndexOrThrow(TSS10)));
+        downloadTask.setTSS11(cursor.getLong(cursor.getColumnIndexOrThrow(TSS11)));
+        downloadTask.setTSS12(cursor.getLong(cursor.getColumnIndexOrThrow(TSS12)));
+        downloadTask.setTSS13(cursor.getLong(cursor.getColumnIndexOrThrow(TSS13)));
+        downloadTask.setTSS14(cursor.getLong(cursor.getColumnIndexOrThrow(TSS14)));
+        downloadTask.setTSS15(cursor.getLong(cursor.getColumnIndexOrThrow(TSS15)));
+        downloadTask.setTSS16(cursor.getLong(cursor.getColumnIndexOrThrow(TSS16)));
+        downloadTask.setTSS17(cursor.getLong(cursor.getColumnIndexOrThrow(TSS17)));
+        downloadTask.setTSS18(cursor.getLong(cursor.getColumnIndexOrThrow(TSS18)));
+        downloadTask.setTSS19(cursor.getLong(cursor.getColumnIndexOrThrow(TSS19)));
+        downloadTask.setTSS20(cursor.getLong(cursor.getColumnIndexOrThrow(TSS20)));
+        downloadTask.setTSS21(cursor.getLong(cursor.getColumnIndexOrThrow(TSS21)));
+        downloadTask.setTSS22(cursor.getLong(cursor.getColumnIndexOrThrow(TSS22)));
+        downloadTask.setTSS23(cursor.getLong(cursor.getColumnIndexOrThrow(TSS23)));
+        downloadTask.setTSS24(cursor.getLong(cursor.getColumnIndexOrThrow(TSS24)));
+        downloadTask.setTSS25(cursor.getLong(cursor.getColumnIndexOrThrow(TSS25)));
+        downloadTask.setTSS26(cursor.getLong(cursor.getColumnIndexOrThrow(TSS26)));
+        downloadTask.setTSS27(cursor.getLong(cursor.getColumnIndexOrThrow(TSS27)));
+        downloadTask.setTSS28(cursor.getLong(cursor.getColumnIndexOrThrow(TSS28)));
+        downloadTask.setTSS29(cursor.getLong(cursor.getColumnIndexOrThrow(TSS29)));
+        downloadTask.setTSS30(cursor.getLong(cursor.getColumnIndexOrThrow(TSS30)));
+        downloadTask.setTSS31(cursor.getLong(cursor.getColumnIndexOrThrow(TSS31)));
+        downloadTask.setTSS32(cursor.getLong(cursor.getColumnIndexOrThrow(TSS32)));
+
+        downloadTask.setMimeType(cursor.getString(cursor.getColumnIndexOrThrow(MIME_TYPE)));
+        cursor.close();
+        return downloadTask;
+    }
+
+    public boolean isPauseResumeSupported(int dTID)
+    {
+        Cursor cursor = readableDB.query(downloadTasksTBL,new String[]{IS_PAUSE_RESUME_SUPPORTED},KEY_ID + "=?",new String[]{String.valueOf(dTID)},
+                null,null,null,null);
+        cursor.moveToFirst();
+        int result = cursor.getInt(cursor.getColumnIndexOrThrow(IS_PAUSE_RESUME_SUPPORTED));
+        cursor.close();
+        return result == 1;
+    }
+
+    PartialDetailsTask getDownloadTaskDetails(int dTID)
+    {
+        Cursor cursor = readableDB.query(downloadTasksTBL,new String[]{FILE_NAME,URL,DIR_PATH,TOTAL_BYTES,DOWNLOADED_BYTES,
+                CURRENT_STATUS,PAUSE_RESUME_SUPPORTED,CHUNK_MODE,
+                PAGE_URL,SEGMENTS_FOR_DOWNLOAD_TASK},KEY_ID + "=?",new String[]{String.valueOf(dTID)},null,null,null,null);
+
+        PartialDetailsTask downloadTask = new PartialDetailsTask();
+        downloadTask.setFileName(cursor.getString(cursor.getColumnIndexOrThrow(FILE_NAME)));
+        downloadTask.setUrl(cursor.getString(cursor.getColumnIndexOrThrow(URL)));
+        downloadTask.setTotalBytes(cursor.getLong(cursor.getColumnIndexOrThrow(TOTAL_BYTES)));
+        downloadTask.setDownloadedBytes(cursor.getLong(cursor.getColumnIndexOrThrow(DOWNLOADED_BYTES)));
+        downloadTask.setCurrentStatus(cursor.getInt(cursor.getColumnIndexOrThrow(CURRENT_STATUS)));
+        downloadTask.setPauseResumeSupported(cursor.getString(cursor.getColumnIndexOrThrow(PAUSE_RESUME_SUPPORTED)));
+        downloadTask.setChunkMode(cursor.getInt(cursor.getColumnIndexOrThrow(CHUNK_MODE)));
+        downloadTask.setPageURL(cursor.getString(cursor.getColumnIndexOrThrow(PAGE_URL)));
+        downloadTask.setSegmentsForDownloadTask(cursor.getInt(cursor.getColumnIndexOrThrow(SEGMENTS_FOR_DOWNLOAD_TASK)));
+        downloadTask.setDirPath(cursor.getString(cursor.getColumnIndexOrThrow(DIR_PATH)));
+        cursor.close();
+        return downloadTask;
+    }
+
+    public int getDownloadTaskCurrentStatus(int dTID)
+    {
+        Cursor cursor = readableDB.query(downloadTasksTBL,new String[]{CURRENT_STATUS},KEY_ID + "=?",new String[]{String.valueOf(dTID)},
+                null,null,null,null);
+        cursor.moveToFirst();
+        int result = cursor.getInt(cursor.getColumnIndexOrThrow(CURRENT_STATUS));
+        cursor.close();
+        return result;
+    }
+
+    public DownloadTask getBindDownloadTaskCompleteDM(int dTID)
+    {
+        Cursor cursor = readableDB.query(downloadTasksTBL,new String[]{KEY_ID,FILE_NAME,TIME_LEFT,DOWNLOAD_SPEED
+                },KEY_ID + "=?",
+                new String[]{String.valueOf(dTID)},null,null,null,null);
+        DownloadTask downloadTask = new DownloadTask();
+
+        cursor.moveToFirst();
+        downloadTask.setFileName(cursor.getString(cursor.getColumnIndexOrThrow(FILE_NAME)));
+        downloadTask.setTimeLeft(cursor.getString(cursor.getColumnIndexOrThrow(TIME_LEFT)));
+        downloadTask.setDownloadSpeed(cursor.getString(cursor.getColumnIndexOrThrow(DOWNLOAD_SPEED)));
+        cursor.close();
+        return downloadTask;
+    }
+
+    int getPauseResumeSupported(int dTID)
+    {
+        Cursor cursor = readableDB.query(downloadTasksTBL,new String[]{IS_PAUSE_RESUME_SUPPORTED},KEY_ID + "=?",new String[]{String.valueOf(dTID)},
+                null,null,null,null);
+        cursor.moveToFirst();
+        int result = cursor.getInt(cursor.getColumnIndexOrThrow(IS_PAUSE_RESUME_SUPPORTED));
+        cursor.close();
+        return result;
+    }
+
+    PartialHalfTask getHalfDownloadTask(int dTID)
+    {
+        Cursor cursor = readableDB.query(downloadTasksTBL,new String[]{KEY_ID,FILE_NAME,DIR_PATH
+                },KEY_ID + "=?",
+                new String[]{String.valueOf(dTID)},null,null,null,null);
+        PartialHalfTask downloadTask = new PartialHalfTask();
+
+        cursor.moveToFirst();
+        downloadTask.setKeyId(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_ID)));
+        downloadTask.setFileName(cursor.getString(cursor.getColumnIndexOrThrow(FILE_NAME)));
+        downloadTask.setDirPath(cursor.getString(cursor.getColumnIndexOrThrow(DIR_PATH)));
+        cursor.close();
+        return downloadTask;
+    }
+
+    int getCurrentStatusOfDT(int dTID)
+    {
+        Cursor cursor = readableDB.query(downloadTasksTBL,new String[]{CURRENT_STATUS},KEY_ID + "=?",new String[]{String.valueOf(dTID)},
+                null,null,null,null);
+        cursor.moveToFirst();
+        int result = cursor.getInt(cursor.getColumnIndexOrThrow(CURRENT_STATUS));
+        cursor.close();
+        return result;
+    }
+
+    public int getAutoResumeStatus()
+    {
+        Cursor cursor = readableDB.query(userPreferencesTBL,new String[]{AUTO_RESUME_STATUS},UP_KEY_ID + "=?",new String[]{String.valueOf(1)},
+                null,null,null,null);
+        cursor.moveToFirst();
+        int result = cursor.getInt(cursor.getColumnIndexOrThrow(AUTO_RESUME_STATUS));
+        cursor.close();
+        return result;
+    }
+
+    public int getRecentCompletedTaskID()
+    {
+        Cursor cursor = readableDB.query(downloadTasksTBL, new String[]{KEY_ID
+                }
+                , CURRENT_STATUS + "=?",
+                new String[]{"7"}, null, null, KEY_ID
+                        + " DESC", String.valueOf(1)
+        );
+
+        cursor.moveToFirst();
+        final int recentTaskID = cursor.getInt(cursor.getColumnIndexOrThrow(KEY_ID));
+        cursor.close();
+        return recentTaskID;
+    }
+
+    public boolean isTaskResumable(int dTID, long contentLength)
+    {
+        Cursor cursor = readableDB.query(downloadTasksTBL, new String[]{TOTAL_BYTES,IS_PAUSE_RESUME_SUPPORTED
+                }
+                , KEY_ID + "=?",
+                new String[]{String.valueOf(dTID)}, null, null, null);
+
+        cursor.moveToFirst();
+        final long totalBytes = cursor.getLong(cursor.getColumnIndexOrThrow(TOTAL_BYTES));
+        final int isPauseResumeSupported = cursor.getInt(cursor.getColumnIndexOrThrow(IS_PAUSE_RESUME_SUPPORTED));
+        cursor.close();
+        return isPauseResumeSupported == 1 && contentLength == totalBytes;
+    }
+
+    public boolean isComplete(int dTID, long contentLength)
+    {
+        Cursor cursor = readableDB.query(downloadTasksTBL, new String[]{TOTAL_BYTES,CURRENT_STATUS
+                }
+                , KEY_ID + "=?",
+                new String[]{String.valueOf(dTID)}, null, null, null);
+
+        cursor.moveToFirst();
+        final long totalBytes = cursor.getLong(cursor.getColumnIndexOrThrow(TOTAL_BYTES));
+        final int currentStatus = cursor.getInt(cursor.getColumnIndexOrThrow(CURRENT_STATUS));
+        cursor.close();
+        return currentStatus == 7 && contentLength == totalBytes;
+    }
+
+    public int isNotChunkTask(String name)
+    {
+        Cursor cursor = readableDB.query(downloadTasksTBL, new String[]{KEY_ID,TOTAL_BYTES
+                }
+                , FILE_NAME + "=?",
+                new String[]{name}, null, null, null);
+
+        cursor.moveToFirst();
+        int id = cursor.getInt(cursor.getColumnIndexOrThrow(KEY_ID));
+        final long totalBytes = cursor.getLong(cursor.getColumnIndexOrThrow(TOTAL_BYTES));
+        cursor.close();
+
+        if(-1 != totalBytes)
+        {
+            return id;
+        } else {
+            return -1;
+        }
+    }
+
+    public int isTaskExists(String name)
+    {
+        Cursor cursor = readableDB.query(downloadTasksTBL, new String[]{KEY_ID
+                }
+                , FILE_NAME + "=? AND " + TOTAL_BYTES +"!=?",
+                new String[]{name,"-1"}, null, null, null);
+
+        int result = -1;
+        if(cursor.getCount() > 0)
+        {
+            cursor.moveToFirst();
+            result = cursor.getInt(cursor.getColumnIndexOrThrow(KEY_ID));
+
+        }
+        cursor.close();
+        return result;
+    }
+
+    public int isLinkExists(String link)
+    {
+        Cursor cursor = readableDB.query(downloadTasksTBL, new String[]{KEY_ID
+                }
+                , URL + "=? AND " + TOTAL_BYTES +"!=?",
+                new String[]{link,"-1"}, null, null, null);
+
+        int result = -1;
+        if(cursor.getCount() > 0)
+        {
+            cursor.moveToFirst();
+            result = cursor.getInt(cursor.getColumnIndexOrThrow(KEY_ID));
+
+        }
+        cursor.close();
+        return result;
+    }
+
+
+    void updateDownloadTask(DownloadTask downloadTask)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(FILE_NAME,downloadTask.getFileName());
+        contentValues.put(URL,downloadTask.getUrl());
+        contentValues.put(DIR_PATH,downloadTask.getDirPath());
+        contentValues.put(TOTAL_BYTES,downloadTask.getTotalBytes());
+        contentValues.put(DOWNLOADED_BYTES,downloadTask.getDownloadedBytes());
+        contentValues.put(CURRENT_STATUS,downloadTask.getCurrentStatus());
+        contentValues.put(CURRENT_PROGRESS,downloadTask.getCurrentProgress());
+        contentValues.put(DOWNLOAD_SPEED,downloadTask.getDownloadSpeed());
+        contentValues.put(TIME_LEFT,downloadTask.getTimeLeft());
+        contentValues.put(PAUSE_RESUME_SUPPORTED,downloadTask.getPauseResumeSupported());
+        contentValues.put(IS_PAUSE_RESUME_SUPPORTED,downloadTask.getIsPauseResumeSupported());
+        contentValues.put(CHUNK_MODE,downloadTask.getChunkMode());
+        contentValues.put(WHICH_ERROR,downloadTask.getWhichError());
+
+        contentValues.put(TPB1,downloadTask.getTPB1());
+        contentValues.put(TPB2,downloadTask.getTPB2());
+        contentValues.put(TPB3,downloadTask.getTPB3());
+        contentValues.put(TPB4,downloadTask.getTPB4());
+        contentValues.put(TPB5,downloadTask.getTPB5());
+        contentValues.put(TPB6,downloadTask.getTPB6());
+        contentValues.put(TPB7,downloadTask.getTPB7());
+        contentValues.put(TPB8,downloadTask.getTPB8());
+        contentValues.put(TPB9,downloadTask.getTPB9());
+        contentValues.put(TPB10,downloadTask.getTPB10());
+        contentValues.put(TPB11,downloadTask.getTPB11());
+        contentValues.put(TPB12,downloadTask.getTPB12());
+        contentValues.put(TPB13,downloadTask.getTPB13());
+        contentValues.put(TPB14,downloadTask.getTPB14());
+        contentValues.put(TPB15,downloadTask.getTPB15());
+        contentValues.put(TPB16,downloadTask.getTPB16());
+        contentValues.put(TPB17,downloadTask.getTPB17());
+        contentValues.put(TPB18,downloadTask.getTPB18());
+        contentValues.put(TPB19,downloadTask.getTPB19());
+        contentValues.put(TPB20,downloadTask.getTPB20());
+        contentValues.put(TPB21,downloadTask.getTPB21());
+        contentValues.put(TPB22,downloadTask.getTPB22());
+        contentValues.put(TPB23,downloadTask.getTPB23());
+        contentValues.put(TPB24,downloadTask.getTPB24());
+        contentValues.put(TPB25,downloadTask.getTPB25());
+        contentValues.put(TPB26,downloadTask.getTPB26());
+        contentValues.put(TPB27,downloadTask.getTPB27());
+        contentValues.put(TPB28,downloadTask.getTPB28());
+        contentValues.put(TPB29,downloadTask.getTPB29());
+        contentValues.put(TPB30,downloadTask.getTPB30());
+        contentValues.put(TPB31,downloadTask.getTPB31());
+        contentValues.put(TPB32,downloadTask.getTPB32());
+
+        contentValues.put(TSS1,downloadTask.getTSS1());
+        contentValues.put(TSS2,downloadTask.getTSS2());
+        contentValues.put(TSS3,downloadTask.getTSS3());
+        contentValues.put(TSS4,downloadTask.getTSS4());
+        contentValues.put(TSS5,downloadTask.getTSS5());
+        contentValues.put(TSS6,downloadTask.getTSS6());
+        contentValues.put(TSS7,downloadTask.getTSS7());
+        contentValues.put(TSS8,downloadTask.getTSS8());
+        contentValues.put(TSS9,downloadTask.getTSS9());
+        contentValues.put(TSS10,downloadTask.getTSS10());
+        contentValues.put(TSS11,downloadTask.getTSS11());
+        contentValues.put(TSS12,downloadTask.getTSS12());
+        contentValues.put(TSS13,downloadTask.getTSS13());
+        contentValues.put(TSS14,downloadTask.getTSS14());
+        contentValues.put(TSS15,downloadTask.getTSS15());
+        contentValues.put(TSS16,downloadTask.getTSS16());
+        contentValues.put(TSS17,downloadTask.getTSS17());
+        contentValues.put(TSS18,downloadTask.getTSS18());
+        contentValues.put(TSS19,downloadTask.getTSS19());
+        contentValues.put(TSS20,downloadTask.getTSS20());
+        contentValues.put(TSS21,downloadTask.getTSS21());
+        contentValues.put(TSS22,downloadTask.getTSS22());
+        contentValues.put(TSS23,downloadTask.getTSS23());
+        contentValues.put(TSS24,downloadTask.getTSS24());
+        contentValues.put(TSS25,downloadTask.getTSS25());
+        contentValues.put(TSS26,downloadTask.getTSS26());
+        contentValues.put(TSS27,downloadTask.getTSS27());
+        contentValues.put(TSS28,downloadTask.getTSS28());
+        contentValues.put(TSS29,downloadTask.getTSS29());
+        contentValues.put(TSS30,downloadTask.getTSS30());
+        contentValues.put(TSS31,downloadTask.getTSS31());
+        contentValues.put(TSS32,downloadTask.getTSS32());
+
+
+        writableDB.update(downloadTasksTBL,contentValues,KEY_ID + "=?",new String[]{String.valueOf(downloadTask.getKeyId())});
+    }
+
+    public void updateDownloadTaskUSSP(int dTID, int isPauseResumeSupported,String url,String pauseResumeSupported)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(URL,url);
+        contentValues.put(CURRENT_STATUS,3);
+        contentValues.put(DOWNLOAD_SPEED,"Resuming");
+        contentValues.put(PAUSE_RESUME_SUPPORTED,pauseResumeSupported);
+        contentValues.put(IS_PAUSE_RESUME_SUPPORTED,isPauseResumeSupported);
+
+        writableDB.update(downloadTasksTBL,contentValues,KEY_ID + "=?",new String[]{String.valueOf(dTID)});
+    }
+
+    public void updateDownloadTaskCompletePartial(DownloadTask downloadTask)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DOWNLOADED_BYTES,downloadTask.getDownloadedBytes());
+        contentValues.put(CURRENT_STATUS,downloadTask.getCurrentStatus());
+        contentValues.put(DOWNLOAD_SPEED,downloadTask.getDownloadSpeed());
+        contentValues.put(TIME_LEFT,downloadTask.getTimeLeft());
+        contentValues.put(CURRENT_PROGRESS,downloadTask.getCurrentProgress());
+
+        writableDB.update(downloadTasksTBL,contentValues,KEY_ID + "=?",new String[]{String.valueOf(downloadTask.getKeyId())});
+    }
+
+    public void updateDownloadTaskChunkFreshPartial(DownloadTask downloadTask)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DOWNLOADED_BYTES,downloadTask.getDownloadedBytes());
+        contentValues.put(CURRENT_STATUS,downloadTask.getCurrentStatus());
+        contentValues.put(CURRENT_PROGRESS,downloadTask.getCurrentProgress());
+        contentValues.put(DOWNLOAD_SPEED,downloadTask.getDownloadSpeed());
+        contentValues.put(TIME_LEFT,downloadTask.getTimeLeft());
+        contentValues.put(WHICH_ERROR,downloadTask.getWhichError());
+
+        contentValues.put(TPB1,downloadTask.getTPB1());
+        contentValues.put(TPB2,downloadTask.getTPB2());
+        contentValues.put(TPB3,downloadTask.getTPB3());
+        contentValues.put(TPB4,downloadTask.getTPB4());
+        contentValues.put(TPB5,downloadTask.getTPB5());
+        contentValues.put(TPB6,downloadTask.getTPB6());
+        contentValues.put(TPB7,downloadTask.getTPB7());
+        contentValues.put(TPB8,downloadTask.getTPB8());
+        contentValues.put(TPB9,downloadTask.getTPB9());
+        contentValues.put(TPB10,downloadTask.getTPB10());
+        contentValues.put(TPB11,downloadTask.getTPB11());
+        contentValues.put(TPB12,downloadTask.getTPB12());
+        contentValues.put(TPB13,downloadTask.getTPB13());
+        contentValues.put(TPB14,downloadTask.getTPB14());
+        contentValues.put(TPB15,downloadTask.getTPB15());
+        contentValues.put(TPB16,downloadTask.getTPB16());
+        contentValues.put(TPB17,downloadTask.getTPB17());
+        contentValues.put(TPB18,downloadTask.getTPB18());
+        contentValues.put(TPB19,downloadTask.getTPB19());
+        contentValues.put(TPB20,downloadTask.getTPB20());
+        contentValues.put(TPB21,downloadTask.getTPB21());
+        contentValues.put(TPB22,downloadTask.getTPB22());
+        contentValues.put(TPB23,downloadTask.getTPB23());
+        contentValues.put(TPB24,downloadTask.getTPB24());
+        contentValues.put(TPB25,downloadTask.getTPB25());
+        contentValues.put(TPB26,downloadTask.getTPB26());
+        contentValues.put(TPB27,downloadTask.getTPB27());
+        contentValues.put(TPB28,downloadTask.getTPB28());
+        contentValues.put(TPB29,downloadTask.getTPB29());
+        contentValues.put(TPB30,downloadTask.getTPB30());
+        contentValues.put(TPB31,downloadTask.getTPB31());
+        contentValues.put(TPB32,downloadTask.getTPB32());
+
+        contentValues.put(TSS1,downloadTask.getTSS1());
+        contentValues.put(TSS2,downloadTask.getTSS2());
+        contentValues.put(TSS3,downloadTask.getTSS3());
+        contentValues.put(TSS4,downloadTask.getTSS4());
+        contentValues.put(TSS5,downloadTask.getTSS5());
+        contentValues.put(TSS6,downloadTask.getTSS6());
+        contentValues.put(TSS7,downloadTask.getTSS7());
+        contentValues.put(TSS8,downloadTask.getTSS8());
+        contentValues.put(TSS9,downloadTask.getTSS9());
+        contentValues.put(TSS10,downloadTask.getTSS10());
+        contentValues.put(TSS11,downloadTask.getTSS11());
+        contentValues.put(TSS12,downloadTask.getTSS12());
+        contentValues.put(TSS13,downloadTask.getTSS13());
+        contentValues.put(TSS14,downloadTask.getTSS14());
+        contentValues.put(TSS15,downloadTask.getTSS15());
+        contentValues.put(TSS16,downloadTask.getTSS16());
+        contentValues.put(TSS17,downloadTask.getTSS17());
+        contentValues.put(TSS18,downloadTask.getTSS18());
+        contentValues.put(TSS19,downloadTask.getTSS19());
+        contentValues.put(TSS20,downloadTask.getTSS20());
+        contentValues.put(TSS21,downloadTask.getTSS21());
+        contentValues.put(TSS22,downloadTask.getTSS22());
+        contentValues.put(TSS23,downloadTask.getTSS23());
+        contentValues.put(TSS24,downloadTask.getTSS24());
+        contentValues.put(TSS25,downloadTask.getTSS25());
+        contentValues.put(TSS26,downloadTask.getTSS26());
+        contentValues.put(TSS27,downloadTask.getTSS27());
+        contentValues.put(TSS28,downloadTask.getTSS28());
+        contentValues.put(TSS29,downloadTask.getTSS29());
+        contentValues.put(TSS30,downloadTask.getTSS30());
+        contentValues.put(TSS31,downloadTask.getTSS31());
+        contentValues.put(TSS32,downloadTask.getTSS32());
+
+        writableDB.update(downloadTasksTBL,contentValues,KEY_ID + "=?",new String[]{String.valueOf(downloadTask.getKeyId())});
+    }
+
+    public void updateDownloadTaskNormalFreshPartial(DownloadTask downloadTask)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DOWNLOADED_BYTES,downloadTask.getDownloadedBytes());
+        contentValues.put(CURRENT_STATUS,downloadTask.getCurrentStatus());
+        contentValues.put(CURRENT_PROGRESS,downloadTask.getCurrentProgress());
+        contentValues.put(DOWNLOAD_SPEED,downloadTask.getDownloadSpeed());
+        contentValues.put(TIME_LEFT,downloadTask.getTimeLeft());
+        contentValues.put(WHICH_ERROR,downloadTask.getWhichError());
+
+        contentValues.put(TPB1,downloadTask.getTPB1());
+        contentValues.put(TPB2,downloadTask.getTPB2());
+        contentValues.put(TPB3,downloadTask.getTPB3());
+        contentValues.put(TPB4,downloadTask.getTPB4());
+        contentValues.put(TPB5,downloadTask.getTPB5());
+        contentValues.put(TPB6,downloadTask.getTPB6());
+        contentValues.put(TPB7,downloadTask.getTPB7());
+        contentValues.put(TPB8,downloadTask.getTPB8());
+        contentValues.put(TPB9,downloadTask.getTPB9());
+        contentValues.put(TPB10,downloadTask.getTPB10());
+        contentValues.put(TPB11,downloadTask.getTPB11());
+        contentValues.put(TPB12,downloadTask.getTPB12());
+        contentValues.put(TPB13,downloadTask.getTPB13());
+        contentValues.put(TPB14,downloadTask.getTPB14());
+        contentValues.put(TPB15,downloadTask.getTPB15());
+        contentValues.put(TPB16,downloadTask.getTPB16());
+        contentValues.put(TPB17,downloadTask.getTPB17());
+        contentValues.put(TPB18,downloadTask.getTPB18());
+        contentValues.put(TPB19,downloadTask.getTPB19());
+        contentValues.put(TPB20,downloadTask.getTPB20());
+        contentValues.put(TPB21,downloadTask.getTPB21());
+        contentValues.put(TPB22,downloadTask.getTPB22());
+        contentValues.put(TPB23,downloadTask.getTPB23());
+        contentValues.put(TPB24,downloadTask.getTPB24());
+        contentValues.put(TPB25,downloadTask.getTPB25());
+        contentValues.put(TPB26,downloadTask.getTPB26());
+        contentValues.put(TPB27,downloadTask.getTPB27());
+        contentValues.put(TPB28,downloadTask.getTPB28());
+        contentValues.put(TPB29,downloadTask.getTPB29());
+        contentValues.put(TPB30,downloadTask.getTPB30());
+        contentValues.put(TPB31,downloadTask.getTPB31());
+        contentValues.put(TPB32,downloadTask.getTPB32());
+
+        contentValues.put(TSS1,downloadTask.getTSS1());
+        contentValues.put(TSS2,downloadTask.getTSS2());
+        contentValues.put(TSS3,downloadTask.getTSS3());
+        contentValues.put(TSS4,downloadTask.getTSS4());
+        contentValues.put(TSS5,downloadTask.getTSS5());
+        contentValues.put(TSS6,downloadTask.getTSS6());
+        contentValues.put(TSS7,downloadTask.getTSS7());
+        contentValues.put(TSS8,downloadTask.getTSS8());
+        contentValues.put(TSS9,downloadTask.getTSS9());
+        contentValues.put(TSS10,downloadTask.getTSS10());
+        contentValues.put(TSS11,downloadTask.getTSS11());
+        contentValues.put(TSS12,downloadTask.getTSS12());
+        contentValues.put(TSS13,downloadTask.getTSS13());
+        contentValues.put(TSS14,downloadTask.getTSS14());
+        contentValues.put(TSS15,downloadTask.getTSS15());
+        contentValues.put(TSS16,downloadTask.getTSS16());
+        contentValues.put(TSS17,downloadTask.getTSS17());
+        contentValues.put(TSS18,downloadTask.getTSS18());
+        contentValues.put(TSS19,downloadTask.getTSS19());
+        contentValues.put(TSS20,downloadTask.getTSS20());
+        contentValues.put(TSS21,downloadTask.getTSS21());
+        contentValues.put(TSS22,downloadTask.getTSS22());
+        contentValues.put(TSS23,downloadTask.getTSS23());
+        contentValues.put(TSS24,downloadTask.getTSS24());
+        contentValues.put(TSS25,downloadTask.getTSS25());
+        contentValues.put(TSS26,downloadTask.getTSS26());
+        contentValues.put(TSS27,downloadTask.getTSS27());
+        contentValues.put(TSS28,downloadTask.getTSS28());
+        contentValues.put(TSS29,downloadTask.getTSS29());
+        contentValues.put(TSS30,downloadTask.getTSS30());
+        contentValues.put(TSS31,downloadTask.getTSS31());
+        contentValues.put(TSS32,downloadTask.getTSS32());
+
+        writableDB.update(downloadTasksTBL,contentValues,KEY_ID + "=?",new String[]{String.valueOf(downloadTask.getKeyId())});
+    }
+
+    public void updateChunkDownloadTaskPartial(DownloadTask downloadTask)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DOWNLOADED_BYTES,downloadTask.getDownloadedBytes());
+        contentValues.put(CURRENT_STATUS,downloadTask.getCurrentStatus());
+        contentValues.put(DOWNLOAD_SPEED,downloadTask.getDownloadSpeed());
+        contentValues.put(TIME_LEFT,downloadTask.getTimeLeft());
+        contentValues.put(CURRENT_PROGRESS,downloadTask.getCurrentProgress());
+
+        writableDB.update(downloadTasksTBL,contentValues,KEY_ID + "=?",new String[]{String.valueOf(downloadTask.getKeyId())});
+    }
+
+    public void updateDownloadTaskOnePartial(DownloadTask downloadTask)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DOWNLOADED_BYTES,downloadTask.getDownloadedBytes());
+        contentValues.put(CURRENT_STATUS,downloadTask.getCurrentStatus());
+        contentValues.put(CURRENT_PROGRESS,downloadTask.getCurrentProgress());
+        contentValues.put(DOWNLOAD_SPEED,downloadTask.getDownloadSpeed());
+        contentValues.put(TIME_LEFT,downloadTask.getTimeLeft());
+
+        writableDB.update(downloadTasksTBL,contentValues,KEY_ID + "=?",new String[]{String.valueOf(downloadTask.getKeyId())});
+    }
+
+    public void updateDownloadTaskTwoPartial(DownloadTask downloadTask)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DOWNLOADED_BYTES,downloadTask.getDownloadedBytes());
+        contentValues.put(CURRENT_STATUS,downloadTask.getCurrentStatus());
+        contentValues.put(DOWNLOAD_SPEED,downloadTask.getDownloadSpeed());
+        contentValues.put(TIME_LEFT,downloadTask.getTimeLeft());
+        contentValues.put(CURRENT_PROGRESS,downloadTask.getCurrentProgress());
+
+        contentValues.put(TPB1,downloadTask.getTPB1());
+        contentValues.put(TPB2,downloadTask.getTPB2());
+
+        contentValues.put(TSS1,downloadTask.getTSS1());
+        contentValues.put(TSS2,downloadTask.getTSS2());
+
+        writableDB.update(downloadTasksTBL,contentValues,KEY_ID + "=?",new String[]{String.valueOf(downloadTask.getKeyId())});
+    }
+
+    public void updateDownloadTaskFourPartial(DownloadTask downloadTask)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DOWNLOADED_BYTES,downloadTask.getDownloadedBytes());
+        contentValues.put(CURRENT_STATUS,downloadTask.getCurrentStatus());
+        contentValues.put(DOWNLOAD_SPEED,downloadTask.getDownloadSpeed());
+        contentValues.put(TIME_LEFT,downloadTask.getTimeLeft());
+        contentValues.put(CURRENT_PROGRESS,downloadTask.getCurrentProgress());
+
+        contentValues.put(TPB1,downloadTask.getTPB1());
+        contentValues.put(TPB2,downloadTask.getTPB2());
+        contentValues.put(TPB3,downloadTask.getTPB3());
+        contentValues.put(TPB4,downloadTask.getTPB4());
+
+        contentValues.put(TSS1,downloadTask.getTSS1());
+        contentValues.put(TSS2,downloadTask.getTSS2());
+        contentValues.put(TSS3,downloadTask.getTSS3());
+        contentValues.put(TSS4,downloadTask.getTSS4());
+
+        writableDB.update(downloadTasksTBL,contentValues,KEY_ID + "=?",new String[]{String.valueOf(downloadTask.getKeyId())});
+    }
+
+    public void updateDownloadTaskSixPartial(DownloadTask downloadTask)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DOWNLOADED_BYTES,downloadTask.getDownloadedBytes());
+        contentValues.put(CURRENT_STATUS,downloadTask.getCurrentStatus());
+        contentValues.put(DOWNLOAD_SPEED,downloadTask.getDownloadSpeed());
+        contentValues.put(TIME_LEFT,downloadTask.getTimeLeft());
+        contentValues.put(CURRENT_PROGRESS,downloadTask.getCurrentProgress());
+
+        contentValues.put(TPB1,downloadTask.getTPB1());
+        contentValues.put(TPB2,downloadTask.getTPB2());
+        contentValues.put(TPB3,downloadTask.getTPB3());
+        contentValues.put(TPB4,downloadTask.getTPB4());
+        contentValues.put(TPB5,downloadTask.getTPB5());
+        contentValues.put(TPB6,downloadTask.getTPB6());
+
+        contentValues.put(TSS1,downloadTask.getTSS1());
+        contentValues.put(TSS2,downloadTask.getTSS2());
+        contentValues.put(TSS3,downloadTask.getTSS3());
+        contentValues.put(TSS4,downloadTask.getTSS4());
+        contentValues.put(TSS5,downloadTask.getTSS5());
+        contentValues.put(TSS6,downloadTask.getTSS6());
+
+        writableDB.update(downloadTasksTBL,contentValues,KEY_ID + "=?",new String[]{String.valueOf(downloadTask.getKeyId())});
+    }
+
+    public void updateDownloadTaskEightPartial(DownloadTask downloadTask)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DOWNLOADED_BYTES,downloadTask.getDownloadedBytes());
+        contentValues.put(CURRENT_STATUS,downloadTask.getCurrentStatus());
+        contentValues.put(DOWNLOAD_SPEED,downloadTask.getDownloadSpeed());
+        contentValues.put(TIME_LEFT,downloadTask.getTimeLeft());
+        contentValues.put(CURRENT_PROGRESS,downloadTask.getCurrentProgress());
+
+        contentValues.put(TPB1,downloadTask.getTPB1());
+        contentValues.put(TPB2,downloadTask.getTPB2());
+        contentValues.put(TPB3,downloadTask.getTPB3());
+        contentValues.put(TPB4,downloadTask.getTPB4());
+        contentValues.put(TPB5,downloadTask.getTPB5());
+        contentValues.put(TPB6,downloadTask.getTPB6());
+        contentValues.put(TPB7,downloadTask.getTPB7());
+        contentValues.put(TPB8,downloadTask.getTPB8());
+
+        contentValues.put(TSS1,downloadTask.getTSS1());
+        contentValues.put(TSS2,downloadTask.getTSS2());
+        contentValues.put(TSS3,downloadTask.getTSS3());
+        contentValues.put(TSS4,downloadTask.getTSS4());
+        contentValues.put(TSS5,downloadTask.getTSS5());
+        contentValues.put(TSS6,downloadTask.getTSS6());
+        contentValues.put(TSS7,downloadTask.getTSS7());
+        contentValues.put(TSS8,downloadTask.getTSS8());
+
+        writableDB.update(downloadTasksTBL,contentValues,KEY_ID + "=?",new String[]{String.valueOf(downloadTask.getKeyId())});
+    }
+
+    public void updateDownloadTaskSixteenPartial(DownloadTask downloadTask)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DOWNLOADED_BYTES,downloadTask.getDownloadedBytes());
+        contentValues.put(CURRENT_STATUS,downloadTask.getCurrentStatus());
+        contentValues.put(DOWNLOAD_SPEED,downloadTask.getDownloadSpeed());
+        contentValues.put(TIME_LEFT,downloadTask.getTimeLeft());
+        contentValues.put(CURRENT_PROGRESS,downloadTask.getCurrentProgress());
+
+        contentValues.put(TPB1,downloadTask.getTPB1());
+        contentValues.put(TPB2,downloadTask.getTPB2());
+        contentValues.put(TPB3,downloadTask.getTPB3());
+        contentValues.put(TPB4,downloadTask.getTPB4());
+        contentValues.put(TPB5,downloadTask.getTPB5());
+        contentValues.put(TPB6,downloadTask.getTPB6());
+        contentValues.put(TPB7,downloadTask.getTPB7());
+        contentValues.put(TPB8,downloadTask.getTPB8());
+        contentValues.put(TPB9,downloadTask.getTPB9());
+        contentValues.put(TPB10,downloadTask.getTPB10());
+        contentValues.put(TPB11,downloadTask.getTPB11());
+        contentValues.put(TPB12,downloadTask.getTPB12());
+        contentValues.put(TPB13,downloadTask.getTPB13());
+        contentValues.put(TPB14,downloadTask.getTPB14());
+        contentValues.put(TPB15,downloadTask.getTPB15());
+        contentValues.put(TPB16,downloadTask.getTPB16());
+
+        contentValues.put(TSS1,downloadTask.getTSS1());
+        contentValues.put(TSS2,downloadTask.getTSS2());
+        contentValues.put(TSS3,downloadTask.getTSS3());
+        contentValues.put(TSS4,downloadTask.getTSS4());
+        contentValues.put(TSS5,downloadTask.getTSS5());
+        contentValues.put(TSS6,downloadTask.getTSS6());
+        contentValues.put(TSS7,downloadTask.getTSS7());
+        contentValues.put(TSS8,downloadTask.getTSS8());
+        contentValues.put(TSS9,downloadTask.getTSS9());
+        contentValues.put(TSS10,downloadTask.getTSS10());
+        contentValues.put(TSS11,downloadTask.getTSS11());
+        contentValues.put(TSS12,downloadTask.getTSS12());
+        contentValues.put(TSS13,downloadTask.getTSS13());
+        contentValues.put(TSS14,downloadTask.getTSS14());
+        contentValues.put(TSS15,downloadTask.getTSS15());
+        contentValues.put(TSS16,downloadTask.getTSS16());
+
+        writableDB.update(downloadTasksTBL,contentValues,KEY_ID + "=?",new String[]{String.valueOf(downloadTask.getKeyId())});
+    }
+
+    public void updateDownloadTaskThirtyTwoPartial(DownloadTask downloadTask)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DOWNLOADED_BYTES,downloadTask.getDownloadedBytes());
+        contentValues.put(CURRENT_STATUS,downloadTask.getCurrentStatus());
+        contentValues.put(DOWNLOAD_SPEED,downloadTask.getDownloadSpeed());
+        contentValues.put(TIME_LEFT,downloadTask.getTimeLeft());
+        contentValues.put(CURRENT_PROGRESS,downloadTask.getCurrentProgress());
+
+        contentValues.put(TPB1,downloadTask.getTPB1());
+        contentValues.put(TPB2,downloadTask.getTPB2());
+        contentValues.put(TPB3,downloadTask.getTPB3());
+        contentValues.put(TPB4,downloadTask.getTPB4());
+        contentValues.put(TPB5,downloadTask.getTPB5());
+        contentValues.put(TPB6,downloadTask.getTPB6());
+        contentValues.put(TPB7,downloadTask.getTPB7());
+        contentValues.put(TPB8,downloadTask.getTPB8());
+        contentValues.put(TPB9,downloadTask.getTPB9());
+        contentValues.put(TPB10,downloadTask.getTPB10());
+        contentValues.put(TPB11,downloadTask.getTPB11());
+        contentValues.put(TPB12,downloadTask.getTPB12());
+        contentValues.put(TPB13,downloadTask.getTPB13());
+        contentValues.put(TPB14,downloadTask.getTPB14());
+        contentValues.put(TPB15,downloadTask.getTPB15());
+        contentValues.put(TPB16,downloadTask.getTPB16());
+        contentValues.put(TPB17,downloadTask.getTPB17());
+        contentValues.put(TPB18,downloadTask.getTPB18());
+        contentValues.put(TPB19,downloadTask.getTPB19());
+        contentValues.put(TPB20,downloadTask.getTPB20());
+        contentValues.put(TPB21,downloadTask.getTPB21());
+        contentValues.put(TPB22,downloadTask.getTPB22());
+        contentValues.put(TPB23,downloadTask.getTPB23());
+        contentValues.put(TPB24,downloadTask.getTPB24());
+        contentValues.put(TPB25,downloadTask.getTPB25());
+        contentValues.put(TPB26,downloadTask.getTPB26());
+        contentValues.put(TPB27,downloadTask.getTPB27());
+        contentValues.put(TPB28,downloadTask.getTPB28());
+        contentValues.put(TPB29,downloadTask.getTPB29());
+        contentValues.put(TPB30,downloadTask.getTPB30());
+        contentValues.put(TPB31,downloadTask.getTPB31());
+        contentValues.put(TPB32,downloadTask.getTPB32());
+
+        contentValues.put(TSS1,downloadTask.getTSS1());
+        contentValues.put(TSS2,downloadTask.getTSS2());
+        contentValues.put(TSS3,downloadTask.getTSS3());
+        contentValues.put(TSS4,downloadTask.getTSS4());
+        contentValues.put(TSS5,downloadTask.getTSS5());
+        contentValues.put(TSS6,downloadTask.getTSS6());
+        contentValues.put(TSS7,downloadTask.getTSS7());
+        contentValues.put(TSS8,downloadTask.getTSS8());
+        contentValues.put(TSS9,downloadTask.getTSS9());
+        contentValues.put(TSS10,downloadTask.getTSS10());
+        contentValues.put(TSS11,downloadTask.getTSS11());
+        contentValues.put(TSS12,downloadTask.getTSS12());
+        contentValues.put(TSS13,downloadTask.getTSS13());
+        contentValues.put(TSS14,downloadTask.getTSS14());
+        contentValues.put(TSS15,downloadTask.getTSS15());
+        contentValues.put(TSS16,downloadTask.getTSS16());
+        contentValues.put(TSS17,downloadTask.getTSS17());
+        contentValues.put(TSS18,downloadTask.getTSS18());
+        contentValues.put(TSS19,downloadTask.getTSS19());
+        contentValues.put(TSS20,downloadTask.getTSS20());
+        contentValues.put(TSS21,downloadTask.getTSS21());
+        contentValues.put(TSS22,downloadTask.getTSS22());
+        contentValues.put(TSS23,downloadTask.getTSS23());
+        contentValues.put(TSS24,downloadTask.getTSS24());
+        contentValues.put(TSS25,downloadTask.getTSS25());
+        contentValues.put(TSS26,downloadTask.getTSS26());
+        contentValues.put(TSS27,downloadTask.getTSS27());
+        contentValues.put(TSS28,downloadTask.getTSS28());
+        contentValues.put(TSS29,downloadTask.getTSS29());
+        contentValues.put(TSS30,downloadTask.getTSS30());
+        contentValues.put(TSS31,downloadTask.getTSS31());
+        contentValues.put(TSS32,downloadTask.getTSS32());
+
+        writableDB.update(downloadTasksTBL,contentValues,KEY_ID + "=?",new String[]{String.valueOf(downloadTask.getKeyId())});
+    }
+
+    public void updateDownloadTaskChunkComplete(DownloadTask downloadTask)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(TIME_LEFT,downloadTask.getTimeLeft());
+        contentValues.put(CURRENT_STATUS,downloadTask.getCurrentStatus());
+        contentValues.put(DOWNLOADED_BYTES,downloadTask.getDownloadedBytes());
+        contentValues.put(DOWNLOAD_SPEED,downloadTask.getDownloadSpeed());
+        contentValues.put(CURRENT_PROGRESS,downloadTask.getCurrentProgress());
+
+        writableDB.update(downloadTasksTBL,contentValues,KEY_ID + "=?",new String[]{String.valueOf(downloadTask.getKeyId())});
+    }
+
+    public void updateDownloadTaskNA(int dTID, int status,String speed,String timeLeft)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(CURRENT_STATUS,status);
+        contentValues.put(DOWNLOAD_SPEED,speed);
+        contentValues.put(TIME_LEFT,timeLeft);
+
+        writableDB.update(downloadTasksTBL,contentValues,KEY_ID + "=?",new String[]{String.valueOf(dTID)});
+    }
+
+    public void updateDownloadTaskTS(DownloadTask downloadTask)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DOWNLOAD_SPEED,downloadTask.getDownloadSpeed());
+        contentValues.put(TIME_LEFT,downloadTask.getTimeLeft());
+
+        writableDB.update(downloadTasksTBL,contentValues,KEY_ID + "=?",new String[]{String.valueOf(downloadTask.getKeyId())});
+    }
+
+    public void updateDownloadTaskTSSE(DownloadTask downloadTask)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(CURRENT_STATUS,downloadTask.getCurrentStatus());
+        contentValues.put(DOWNLOAD_SPEED,downloadTask.getDownloadSpeed());
+        contentValues.put(TIME_LEFT,downloadTask.getTimeLeft());
+        contentValues.put(WHICH_ERROR,downloadTask.getWhichError());
+
+        writableDB.update(downloadTasksTBL,contentValues,KEY_ID + "=?",new String[]{String.valueOf(downloadTask.getKeyId())});
+    }
+
+    public void updateDownloadTaskStatus(int dTID,int status)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(CURRENT_STATUS,status);
+        writableDB.update(downloadTasksTBL,contentValues,KEY_ID + "=?",new String[]{String.valueOf(dTID)});
+    }
+
+    public void initPauseOfDownloadTask(int dTID)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(CURRENT_STATUS,4);
+        contentValues.put(TIME_LEFT,"Pausing");
+        writableDB.update(downloadTasksTBL,contentValues,KEY_ID + "=?",new String[]{String.valueOf(dTID)});
+    }
+
+    public void updateDownloadTaskTimeSpeed(DownloadTask downloadTask)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DOWNLOAD_SPEED,downloadTask.getDownloadSpeed());
+        contentValues.put(TIME_LEFT,downloadTask.getTimeLeft());
+        writableDB.update(downloadTasksTBL,contentValues,KEY_ID + "=?",new String[]{String.valueOf(downloadTask.getKeyId())});
+    }
+
+    public void deleteDownloadTask(int dTID)
+    {
+        writableDB.delete(downloadTasksTBL,KEY_ID + "=?",new String[]{String.valueOf(dTID)});
+    }
+
+    void deleteDownloadTaskFromCompletedTable(int dTID)
+    {
+        writableDB.delete(completedTasksTBL,CDT_KEY_ID + "=?",new String[]{String.valueOf(dTID)});
+    }
+
+    public int getSimultaneousTasks()
+    {
+        Cursor cursor = readableDB.query(userPreferencesTBL, new String[]{SIMULTANEOUS_TASKS
+                }
+                , UP_KEY_ID + "=?",
+                new String[]{String.valueOf(1)}, null, null, null);
+
+        cursor.moveToFirst();
+        int result = cursor.getInt(cursor.getColumnIndexOrThrow(SIMULTANEOUS_TASKS));
+        cursor.close();
+        return result;
     }
 
 }

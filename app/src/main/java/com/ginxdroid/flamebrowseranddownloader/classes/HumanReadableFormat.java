@@ -148,6 +148,8 @@ public class HumanReadableFormat {
 //6 = "DirectoryNotFoundException"
 //7 = "SeveralRetriedException"
 //8 = "Unknown"
+// = "NetworkInterruptedAndPRNOException"
+//"OutOfSpaceException"
 
 //Download Task Status
 // CURRENT_STATUS

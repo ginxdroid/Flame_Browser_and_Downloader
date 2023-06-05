@@ -25,7 +25,6 @@ import androidx.fragment.app.FragmentActivity;
 
 import com.ginxdroid.flamebrowseranddownloader.DatabaseHandler;
 import com.ginxdroid.flamebrowseranddownloader.R;
-import com.ginxdroid.flamebrowseranddownloader.activities.MainActivity;
 import com.ginxdroid.flamebrowseranddownloader.classes.FileNameEditText;
 import com.ginxdroid.flamebrowseranddownloader.classes.HelperTextUtility;
 import com.ginxdroid.flamebrowseranddownloader.classes.HumanReadableFormat;
@@ -237,370 +236,367 @@ public class AddNewDTaskSheet extends BottomSheetDialogFragment {
                     }
                 });
 
-                View.OnClickListener onClickListener = new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        int id = view.getId();
-                        if(id == R.id.shareIB)
-                        {
-                            try {
-                                Intent share = new Intent(Intent.ACTION_SEND);
-                                share.setTypeAndNormalize("text/plain");
-                                share.putExtra(Intent.EXTRA_TEXT,url);
+                View.OnClickListener onClickListener = view12 -> {
+                    int id = view12.getId();
+                    if(id == R.id.shareIB)
+                    {
+                        try {
+                            Intent share = new Intent(Intent.ACTION_SEND);
+                            share.setTypeAndNormalize("text/plain");
+                            share.putExtra(Intent.EXTRA_TEXT,url);
 
-                                //noinspection ConstantConditions
-                                activity.startActivity(Intent.createChooser(share,context.getString(R.string.share_via)));
-                            } catch (Exception e)
-                            {
-                                showToast(R.string.app_not_found,context);
-                            }
-                        } else if(id == R.id.copyIB)
-                        {
-                            if(url != null)
-                            {
-                                ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-                                ClipData clipData = ClipData.newPlainText("file URL",url);
-
-                                if(clipboardManager != null)
-                                {
-                                    clipboardManager.setPrimaryClip(clipData);
-                                    showToast(R.string.copied_to_clipboard,context);
-                                } else {
-                                    showToast(R.string.oops_general_message,context);
-                                }
-                            }
-                        } else if(id == R.id.downloadBtn)
-                        {
-                            try {
-                                UserPreferences userPreferences = db.getHalfUserPreferences();
-
-                                final Editable editable = fileNameET.getText();
-
-                                if(HelperTextUtility.isNotEmpty(editable))
-                                {
-                                    String downloadPath = userPreferences.getDownloadPath();
-                                    String editableString = editable.toString();
-                                    ArrayList<String> fileNamesInDB = db.getAllDownloadTaskNames();
-
-                                    if(fileNamesInDB.contains(editableString))
-                                    {
-                                        statusTextView.setText(R.string.download_task_with);
-                                        statusTextView.setVisibility(View.VISIBLE);
-                                    }
-                                    else {
-                                        DocumentFile pickedDir = DocumentFile.fromTreeUri(context, Uri.parse(downloadPath));
-                                        if(pickedDir != null)
-                                        {
-                                            DocumentFile[] files = pickedDir.listFiles();
-                                            ArrayList<String> fileNames = new ArrayList<>();
-
-                                            for(DocumentFile documentFile : files)
-                                            {
-                                                fileNames.add(documentFile.getName());
-                                            }
-
-                                            if(fileNames.contains(editableString))
-                                            {
-                                                statusTextView.setText(R.string.file_with);
-                                                statusTextView.setVisibility(View.VISIBLE);
-                                            } else {
-
-                                                if(chunkMode == 0)
-                                                {
-
-                                                    int segmentsForDownloadTask = 1;
-
-                                                            switch (pauseResumeSupported) {
-                                                                case "Unresumable":
-                                                                    break;
-                                                                case "Resumable":
-                                                                    switch (((int) segmentsSliderNewTaskPopup.getValue())) {
-                                                                        case 0:
-                                                                            break;
-                                                                        case 1:
-                                                                            segmentsForDownloadTask = 2;
-                                                                            break;
-                                                                        case 2:
-                                                                            segmentsForDownloadTask = 4;
-                                                                            break;
-                                                                        case 3:
-                                                                            segmentsForDownloadTask = 6;
-                                                                            break;
-                                                                        case 4:
-                                                                            segmentsForDownloadTask = 8;
-                                                                            break;
-                                                                        case 5:
-                                                                            segmentsForDownloadTask = 16;
-                                                                            break;
-                                                                        case 6:
-                                                                            segmentsForDownloadTask = 32;
-                                                                            break;
-                                                                    }
-                                                            }
-
-                                                            if(contentLength < segmentsForDownloadTask)
-                                                            {
-                                                                statusTextView.setText(R.string.segments_for_download_task_are_less);
-                                                                statusTextView.setVisibility(View.VISIBLE);
-                                                            } else {
-
-                                                                int finalSegmentsForDownloadTask = segmentsForDownloadTask;
-
-                                                                new Thread(() -> {
-                                                                    int recentTaskId = -1;
-
-                                                                    try {
-                                                                        //noinspection ConstantConditions
-                                                                        activity.runOnUiThread(() -> showToast(R.string.creating_new_task,context));
-
-                                                                        DownloadTask downloadTask = new DownloadTask();
-                                                                        downloadTask.setSegmentsForDownloadTask(finalSegmentsForDownloadTask);
-                                                                        downloadTask.setFileName(editableString);
-                                                                        downloadTask.setUrl(url);
-                                                                        downloadTask.setTotalBytes(contentLength);
-                                                                        downloadTask.setDirPath(downloadPath);
-                                                                        downloadTask.setDownloadedBytes(0L);
-                                                                        downloadTask.setCurrentStatus(1);
-                                                                        downloadTask.setCurrentProgress(0);
-                                                                        downloadTask.setDownloadSpeed("Queued");
-                                                                        downloadTask.setTimeLeft("-");
-                                                                        downloadTask.setPauseResumeSupported(pauseResumeSupported);
-                                                                        downloadTask.setWhichError("NotAny");
-                                                                        downloadTask.setUserAgentString(userAgent);
-                                                                        downloadTask.setPageURL(pageURL);
-                                                                        downloadTask.setMimeType(mimeType);
-                                                                        downloadTask.setIsPauseResumeSupported(isPauseResumeSupported);
-                                                                        downloadTask.setChunkMode(chunkMode);
-
-                                                                        downloadTask.setTPB1(0);
-                                                                        downloadTask.setTPB2(0);
-                                                                        downloadTask.setTPB3(0);
-                                                                        downloadTask.setTPB4(0);
-                                                                        downloadTask.setTPB5(0);
-                                                                        downloadTask.setTPB6(0);
-                                                                        downloadTask.setTPB7(0);
-                                                                        downloadTask.setTPB8(0);
-                                                                        downloadTask.setTPB9(0);
-                                                                        downloadTask.setTPB10(0);
-                                                                        downloadTask.setTPB11(0);
-                                                                        downloadTask.setTPB12(0);
-                                                                        downloadTask.setTPB13(0);
-                                                                        downloadTask.setTPB14(0);
-                                                                        downloadTask.setTPB15(0);
-                                                                        downloadTask.setTPB16(0);
-                                                                        downloadTask.setTPB17(0);
-                                                                        downloadTask.setTPB18(0);
-                                                                        downloadTask.setTPB19(0);
-                                                                        downloadTask.setTPB20(0);
-                                                                        downloadTask.setTPB21(0);
-                                                                        downloadTask.setTPB22(0);
-                                                                        downloadTask.setTPB23(0);
-                                                                        downloadTask.setTPB24(0);
-                                                                        downloadTask.setTPB25(0);
-                                                                        downloadTask.setTPB26(0);
-                                                                        downloadTask.setTPB27(0);
-                                                                        downloadTask.setTPB28(0);
-                                                                        downloadTask.setTPB29(0);
-                                                                        downloadTask.setTPB30(0);
-                                                                        downloadTask.setTPB31(0);
-                                                                        downloadTask.setTPB32(0);
-
-                                                                        downloadTask.setTSS1(0L);
-                                                                        downloadTask.setTSS2(0L);
-                                                                        downloadTask.setTSS3(0L);
-                                                                        downloadTask.setTSS4(0L);
-                                                                        downloadTask.setTSS5(0L);
-                                                                        downloadTask.setTSS6(0L);
-                                                                        downloadTask.setTSS7(0L);
-                                                                        downloadTask.setTSS8(0L);
-                                                                        downloadTask.setTSS9(0L);
-                                                                        downloadTask.setTSS10(0L);
-                                                                        downloadTask.setTSS11(0L);
-                                                                        downloadTask.setTSS12(0L);
-                                                                        downloadTask.setTSS13(0L);
-                                                                        downloadTask.setTSS14(0L);
-                                                                        downloadTask.setTSS15(0L);
-                                                                        downloadTask.setTSS16(0L);
-                                                                        downloadTask.setTSS17(0L);
-                                                                        downloadTask.setTSS18(0L);
-                                                                        downloadTask.setTSS19(0L);
-                                                                        downloadTask.setTSS20(0L);
-                                                                        downloadTask.setTSS21(0L);
-                                                                        downloadTask.setTSS22(0L);
-                                                                        downloadTask.setTSS23(0L);
-                                                                        downloadTask.setTSS24(0L);
-                                                                        downloadTask.setTSS25(0L);
-                                                                        downloadTask.setTSS26(0L);
-                                                                        downloadTask.setTSS27(0L);
-                                                                        downloadTask.setTSS28(0L);
-                                                                        downloadTask.setTSS29(0L);
-                                                                        downloadTask.setTSS30(0L);
-                                                                        downloadTask.setTSS31(0L);
-                                                                        downloadTask.setTSS32(0L);
-
-                                                                        DocumentFile pickedDir1 = DocumentFile.fromTreeUri(context,Uri.parse(downloadTask.getDirPath()));
-
-                                                                        if(pickedDir1 != null)
-                                                                        {
-                                                                            pickedDir1.createFile(downloadTask.getMimeType(),downloadTask.getFileName());
-                                                                        }
-
-                                                                        db.addTask(downloadTask);
-                                                                        recentTaskId = db.getRecentTaskID();
-
-                                                                    } catch (Exception ignored){}
-                                                                    finally {
-                                                                        int finalRecentTaskId = recentTaskId;
-                                                                        if(finalRecentTaskId != -1)
-                                                                        {
-                                                                            // todo call download now!
-                                                                        }
-                                                                    }
-
-                                                                }).start();
-
-                                                                listener.addTaskSheetDismissed();
-                                                                AddNewDTaskSheet.this.dismiss();
-
-                                                            }
-                                                } else {
-
-                                                    new Thread(() -> {
-                                                        int recentTaskId = -1;
-
-                                                        try {
-                                                            //noinspection ConstantConditions
-                                                            activity.runOnUiThread(() -> showToast(R.string.creating_new_task,context));
-
-                                                            DownloadTask downloadTask = new DownloadTask();
-                                                            downloadTask.setSegmentsForDownloadTask(1);
-                                                            downloadTask.setFileName(editableString);
-                                                            downloadTask.setUrl(url);
-                                                            downloadTask.setTotalBytes(contentLength);
-                                                            downloadTask.setDirPath(downloadPath);
-                                                            downloadTask.setDownloadedBytes(0L);
-                                                            downloadTask.setCurrentStatus(1);
-                                                            downloadTask.setCurrentProgress(0);
-                                                            downloadTask.setDownloadSpeed("Queued");
-                                                            downloadTask.setTimeLeft("-");
-                                                            downloadTask.setPauseResumeSupported(pauseResumeSupported);
-                                                            downloadTask.setWhichError("NotAny");
-                                                            downloadTask.setUserAgentString(userAgent);
-                                                            downloadTask.setPageURL(pageURL);
-                                                            downloadTask.setMimeType(mimeType);
-                                                            downloadTask.setIsPauseResumeSupported(isPauseResumeSupported);
-                                                            downloadTask.setChunkMode(chunkMode);
-
-                                                            downloadTask.setTPB1(0);
-                                                            downloadTask.setTPB2(0);
-                                                            downloadTask.setTPB3(0);
-                                                            downloadTask.setTPB4(0);
-                                                            downloadTask.setTPB5(0);
-                                                            downloadTask.setTPB6(0);
-                                                            downloadTask.setTPB7(0);
-                                                            downloadTask.setTPB8(0);
-                                                            downloadTask.setTPB9(0);
-                                                            downloadTask.setTPB10(0);
-                                                            downloadTask.setTPB11(0);
-                                                            downloadTask.setTPB12(0);
-                                                            downloadTask.setTPB13(0);
-                                                            downloadTask.setTPB14(0);
-                                                            downloadTask.setTPB15(0);
-                                                            downloadTask.setTPB16(0);
-                                                            downloadTask.setTPB17(0);
-                                                            downloadTask.setTPB18(0);
-                                                            downloadTask.setTPB19(0);
-                                                            downloadTask.setTPB20(0);
-                                                            downloadTask.setTPB21(0);
-                                                            downloadTask.setTPB22(0);
-                                                            downloadTask.setTPB23(0);
-                                                            downloadTask.setTPB24(0);
-                                                            downloadTask.setTPB25(0);
-                                                            downloadTask.setTPB26(0);
-                                                            downloadTask.setTPB27(0);
-                                                            downloadTask.setTPB28(0);
-                                                            downloadTask.setTPB29(0);
-                                                            downloadTask.setTPB30(0);
-                                                            downloadTask.setTPB31(0);
-                                                            downloadTask.setTPB32(0);
-
-                                                            downloadTask.setTSS1(0L);
-                                                            downloadTask.setTSS2(0L);
-                                                            downloadTask.setTSS3(0L);
-                                                            downloadTask.setTSS4(0L);
-                                                            downloadTask.setTSS5(0L);
-                                                            downloadTask.setTSS6(0L);
-                                                            downloadTask.setTSS7(0L);
-                                                            downloadTask.setTSS8(0L);
-                                                            downloadTask.setTSS9(0L);
-                                                            downloadTask.setTSS10(0L);
-                                                            downloadTask.setTSS11(0L);
-                                                            downloadTask.setTSS12(0L);
-                                                            downloadTask.setTSS13(0L);
-                                                            downloadTask.setTSS14(0L);
-                                                            downloadTask.setTSS15(0L);
-                                                            downloadTask.setTSS16(0L);
-                                                            downloadTask.setTSS17(0L);
-                                                            downloadTask.setTSS18(0L);
-                                                            downloadTask.setTSS19(0L);
-                                                            downloadTask.setTSS20(0L);
-                                                            downloadTask.setTSS21(0L);
-                                                            downloadTask.setTSS22(0L);
-                                                            downloadTask.setTSS23(0L);
-                                                            downloadTask.setTSS24(0L);
-                                                            downloadTask.setTSS25(0L);
-                                                            downloadTask.setTSS26(0L);
-                                                            downloadTask.setTSS27(0L);
-                                                            downloadTask.setTSS28(0L);
-                                                            downloadTask.setTSS29(0L);
-                                                            downloadTask.setTSS30(0L);
-                                                            downloadTask.setTSS31(0L);
-                                                            downloadTask.setTSS32(0L);
-
-                                                            DocumentFile pickedDir1 = DocumentFile.fromTreeUri(context,Uri.parse(downloadTask.getDirPath()));
-
-                                                            if(pickedDir1 != null)
-                                                            {
-                                                                pickedDir1.createFile(downloadTask.getMimeType(),downloadTask.getFileName());
-                                                            }
-
-                                                            db.addTask(downloadTask);
-                                                            recentTaskId = db.getRecentTaskID();
-
-                                                        } catch (Exception ignored){}
-                                                        finally {
-                                                            int finalRecentTaskId = recentTaskId;
-                                                            if(finalRecentTaskId != -1)
-                                                            {
-                                                                // todo call download now!
-                                                            }
-                                                        }
-
-                                                    }).start();
-
-                                                    listener.addTaskSheetDismissed();
-                                                    AddNewDTaskSheet.this.dismiss();
-
-                                                }
-
-
-                                            }
-
-                                        } else {
-                                            statusTextView.setText(R.string.set_download_path);
-                                            statusTextView.setVisibility(View.VISIBLE);
-                                        }
-                                    }
-                                } else {
-                                    statusTextView.setText(R.string.enter_file_name);
-                                    statusTextView.setVisibility(View.VISIBLE);
-                                }
-
-
+                            //noinspection ConstantConditions
+                            activity.startActivity(Intent.createChooser(share,context.getString(R.string.share_via)));
                         } catch (Exception e)
                         {
-                            showToast(R.string.oops_general_message,context);
+                            showToast(R.string.app_not_found,context);
                         }
+                    } else if(id == R.id.copyIB)
+                    {
+                        if(url != null)
+                        {
+                            ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+                            ClipData clipData = ClipData.newPlainText("file URL",url);
+
+                            if(clipboardManager != null)
+                            {
+                                clipboardManager.setPrimaryClip(clipData);
+                                showToast(R.string.copied_to_clipboard,context);
+                            } else {
+                                showToast(R.string.oops_general_message,context);
+                            }
+                        }
+                    } else if(id == R.id.downloadBtn)
+                    {
+                        try {
+                            UserPreferences userPreferences = db.getHalfUserPreferences();
+
+                            final Editable editable = fileNameET.getText();
+
+                            if(HelperTextUtility.isNotEmpty(editable))
+                            {
+                                String downloadPath = userPreferences.getDownloadPath();
+                                String editableString = editable.toString();
+                                ArrayList<String> fileNamesInDB = db.getAllDownloadTaskNames();
+
+                                if(fileNamesInDB.contains(editableString))
+                                {
+                                    statusTextView.setText(R.string.download_task_with);
+                                    statusTextView.setVisibility(View.VISIBLE);
+                                }
+                                else {
+                                    DocumentFile pickedDir = DocumentFile.fromTreeUri(context, Uri.parse(downloadPath));
+                                    if(pickedDir != null)
+                                    {
+                                        DocumentFile[] files = pickedDir.listFiles();
+                                        ArrayList<String> fileNames = new ArrayList<>();
+
+                                        for(DocumentFile documentFile : files)
+                                        {
+                                            fileNames.add(documentFile.getName());
+                                        }
+
+                                        if(fileNames.contains(editableString))
+                                        {
+                                            statusTextView.setText(R.string.file_with);
+                                            statusTextView.setVisibility(View.VISIBLE);
+                                        } else {
+
+                                            if(chunkMode == 0)
+                                            {
+
+                                                int segmentsForDownloadTask = 1;
+
+                                                        switch (pauseResumeSupported) {
+                                                            case "Unresumable":
+                                                                break;
+                                                            case "Resumable":
+                                                                switch (((int) segmentsSliderNewTaskPopup.getValue())) {
+                                                                    case 0:
+                                                                        break;
+                                                                    case 1:
+                                                                        segmentsForDownloadTask = 2;
+                                                                        break;
+                                                                    case 2:
+                                                                        segmentsForDownloadTask = 4;
+                                                                        break;
+                                                                    case 3:
+                                                                        segmentsForDownloadTask = 6;
+                                                                        break;
+                                                                    case 4:
+                                                                        segmentsForDownloadTask = 8;
+                                                                        break;
+                                                                    case 5:
+                                                                        segmentsForDownloadTask = 16;
+                                                                        break;
+                                                                    case 6:
+                                                                        segmentsForDownloadTask = 32;
+                                                                        break;
+                                                                }
+                                                        }
+
+                                                        if(contentLength < segmentsForDownloadTask)
+                                                        {
+                                                            statusTextView.setText(R.string.segments_for_download_task_are_less);
+                                                            statusTextView.setVisibility(View.VISIBLE);
+                                                        } else {
+
+                                                            int finalSegmentsForDownloadTask = segmentsForDownloadTask;
+
+                                                            new Thread(() -> {
+                                                                int recentTaskId = -1;
+
+                                                                try {
+                                                                    //noinspection ConstantConditions
+                                                                    activity.runOnUiThread(() -> showToast(R.string.creating_new_task,context));
+
+                                                                    DownloadTask downloadTask = new DownloadTask();
+                                                                    downloadTask.setSegmentsForDownloadTask(finalSegmentsForDownloadTask);
+                                                                    downloadTask.setFileName(editableString);
+                                                                    downloadTask.setUrl(url);
+                                                                    downloadTask.setTotalBytes(contentLength);
+                                                                    downloadTask.setDirPath(downloadPath);
+                                                                    downloadTask.setDownloadedBytes(0L);
+                                                                    downloadTask.setCurrentStatus(1);
+                                                                    downloadTask.setCurrentProgress(0);
+                                                                    downloadTask.setDownloadSpeed("Queued");
+                                                                    downloadTask.setTimeLeft("-");
+                                                                    downloadTask.setPauseResumeSupported(pauseResumeSupported);
+                                                                    downloadTask.setWhichError("NotAny");
+                                                                    downloadTask.setUserAgentString(userAgent);
+                                                                    downloadTask.setPageURL(pageURL);
+                                                                    downloadTask.setMimeType(mimeType);
+                                                                    downloadTask.setIsPauseResumeSupported(isPauseResumeSupported);
+                                                                    downloadTask.setChunkMode(chunkMode);
+
+                                                                    downloadTask.setTPB1(0);
+                                                                    downloadTask.setTPB2(0);
+                                                                    downloadTask.setTPB3(0);
+                                                                    downloadTask.setTPB4(0);
+                                                                    downloadTask.setTPB5(0);
+                                                                    downloadTask.setTPB6(0);
+                                                                    downloadTask.setTPB7(0);
+                                                                    downloadTask.setTPB8(0);
+                                                                    downloadTask.setTPB9(0);
+                                                                    downloadTask.setTPB10(0);
+                                                                    downloadTask.setTPB11(0);
+                                                                    downloadTask.setTPB12(0);
+                                                                    downloadTask.setTPB13(0);
+                                                                    downloadTask.setTPB14(0);
+                                                                    downloadTask.setTPB15(0);
+                                                                    downloadTask.setTPB16(0);
+                                                                    downloadTask.setTPB17(0);
+                                                                    downloadTask.setTPB18(0);
+                                                                    downloadTask.setTPB19(0);
+                                                                    downloadTask.setTPB20(0);
+                                                                    downloadTask.setTPB21(0);
+                                                                    downloadTask.setTPB22(0);
+                                                                    downloadTask.setTPB23(0);
+                                                                    downloadTask.setTPB24(0);
+                                                                    downloadTask.setTPB25(0);
+                                                                    downloadTask.setTPB26(0);
+                                                                    downloadTask.setTPB27(0);
+                                                                    downloadTask.setTPB28(0);
+                                                                    downloadTask.setTPB29(0);
+                                                                    downloadTask.setTPB30(0);
+                                                                    downloadTask.setTPB31(0);
+                                                                    downloadTask.setTPB32(0);
+
+                                                                    downloadTask.setTSS1(0L);
+                                                                    downloadTask.setTSS2(0L);
+                                                                    downloadTask.setTSS3(0L);
+                                                                    downloadTask.setTSS4(0L);
+                                                                    downloadTask.setTSS5(0L);
+                                                                    downloadTask.setTSS6(0L);
+                                                                    downloadTask.setTSS7(0L);
+                                                                    downloadTask.setTSS8(0L);
+                                                                    downloadTask.setTSS9(0L);
+                                                                    downloadTask.setTSS10(0L);
+                                                                    downloadTask.setTSS11(0L);
+                                                                    downloadTask.setTSS12(0L);
+                                                                    downloadTask.setTSS13(0L);
+                                                                    downloadTask.setTSS14(0L);
+                                                                    downloadTask.setTSS15(0L);
+                                                                    downloadTask.setTSS16(0L);
+                                                                    downloadTask.setTSS17(0L);
+                                                                    downloadTask.setTSS18(0L);
+                                                                    downloadTask.setTSS19(0L);
+                                                                    downloadTask.setTSS20(0L);
+                                                                    downloadTask.setTSS21(0L);
+                                                                    downloadTask.setTSS22(0L);
+                                                                    downloadTask.setTSS23(0L);
+                                                                    downloadTask.setTSS24(0L);
+                                                                    downloadTask.setTSS25(0L);
+                                                                    downloadTask.setTSS26(0L);
+                                                                    downloadTask.setTSS27(0L);
+                                                                    downloadTask.setTSS28(0L);
+                                                                    downloadTask.setTSS29(0L);
+                                                                    downloadTask.setTSS30(0L);
+                                                                    downloadTask.setTSS31(0L);
+                                                                    downloadTask.setTSS32(0L);
+
+                                                                    DocumentFile pickedDir1 = DocumentFile.fromTreeUri(context,Uri.parse(downloadTask.getDirPath()));
+
+                                                                    if(pickedDir1 != null)
+                                                                    {
+                                                                        pickedDir1.createFile(downloadTask.getMimeType(),downloadTask.getFileName());
+                                                                    }
+
+                                                                    db.addTask(downloadTask);
+                                                                    recentTaskId = db.getRecentTaskID();
+
+                                                                } catch (Exception ignored){}
+                                                                finally {
+                                                                    int finalRecentTaskId = recentTaskId;
+                                                                    if(finalRecentTaskId != -1)
+                                                                    {
+                                                                        // todo call download now!
+                                                                    }
+                                                                }
+
+                                                            }).start();
+
+                                                            listener.addTaskSheetDismissed();
+                                                            AddNewDTaskSheet.this.dismiss();
+
+                                                        }
+                                            } else {
+
+                                                new Thread(() -> {
+                                                    int recentTaskId = -1;
+
+                                                    try {
+                                                        //noinspection ConstantConditions
+                                                        activity.runOnUiThread(() -> showToast(R.string.creating_new_task,context));
+
+                                                        DownloadTask downloadTask = new DownloadTask();
+                                                        downloadTask.setSegmentsForDownloadTask(1);
+                                                        downloadTask.setFileName(editableString);
+                                                        downloadTask.setUrl(url);
+                                                        downloadTask.setTotalBytes(contentLength);
+                                                        downloadTask.setDirPath(downloadPath);
+                                                        downloadTask.setDownloadedBytes(0L);
+                                                        downloadTask.setCurrentStatus(1);
+                                                        downloadTask.setCurrentProgress(0);
+                                                        downloadTask.setDownloadSpeed("Queued");
+                                                        downloadTask.setTimeLeft("-");
+                                                        downloadTask.setPauseResumeSupported(pauseResumeSupported);
+                                                        downloadTask.setWhichError("NotAny");
+                                                        downloadTask.setUserAgentString(userAgent);
+                                                        downloadTask.setPageURL(pageURL);
+                                                        downloadTask.setMimeType(mimeType);
+                                                        downloadTask.setIsPauseResumeSupported(isPauseResumeSupported);
+                                                        downloadTask.setChunkMode(chunkMode);
+
+                                                        downloadTask.setTPB1(0);
+                                                        downloadTask.setTPB2(0);
+                                                        downloadTask.setTPB3(0);
+                                                        downloadTask.setTPB4(0);
+                                                        downloadTask.setTPB5(0);
+                                                        downloadTask.setTPB6(0);
+                                                        downloadTask.setTPB7(0);
+                                                        downloadTask.setTPB8(0);
+                                                        downloadTask.setTPB9(0);
+                                                        downloadTask.setTPB10(0);
+                                                        downloadTask.setTPB11(0);
+                                                        downloadTask.setTPB12(0);
+                                                        downloadTask.setTPB13(0);
+                                                        downloadTask.setTPB14(0);
+                                                        downloadTask.setTPB15(0);
+                                                        downloadTask.setTPB16(0);
+                                                        downloadTask.setTPB17(0);
+                                                        downloadTask.setTPB18(0);
+                                                        downloadTask.setTPB19(0);
+                                                        downloadTask.setTPB20(0);
+                                                        downloadTask.setTPB21(0);
+                                                        downloadTask.setTPB22(0);
+                                                        downloadTask.setTPB23(0);
+                                                        downloadTask.setTPB24(0);
+                                                        downloadTask.setTPB25(0);
+                                                        downloadTask.setTPB26(0);
+                                                        downloadTask.setTPB27(0);
+                                                        downloadTask.setTPB28(0);
+                                                        downloadTask.setTPB29(0);
+                                                        downloadTask.setTPB30(0);
+                                                        downloadTask.setTPB31(0);
+                                                        downloadTask.setTPB32(0);
+
+                                                        downloadTask.setTSS1(0L);
+                                                        downloadTask.setTSS2(0L);
+                                                        downloadTask.setTSS3(0L);
+                                                        downloadTask.setTSS4(0L);
+                                                        downloadTask.setTSS5(0L);
+                                                        downloadTask.setTSS6(0L);
+                                                        downloadTask.setTSS7(0L);
+                                                        downloadTask.setTSS8(0L);
+                                                        downloadTask.setTSS9(0L);
+                                                        downloadTask.setTSS10(0L);
+                                                        downloadTask.setTSS11(0L);
+                                                        downloadTask.setTSS12(0L);
+                                                        downloadTask.setTSS13(0L);
+                                                        downloadTask.setTSS14(0L);
+                                                        downloadTask.setTSS15(0L);
+                                                        downloadTask.setTSS16(0L);
+                                                        downloadTask.setTSS17(0L);
+                                                        downloadTask.setTSS18(0L);
+                                                        downloadTask.setTSS19(0L);
+                                                        downloadTask.setTSS20(0L);
+                                                        downloadTask.setTSS21(0L);
+                                                        downloadTask.setTSS22(0L);
+                                                        downloadTask.setTSS23(0L);
+                                                        downloadTask.setTSS24(0L);
+                                                        downloadTask.setTSS25(0L);
+                                                        downloadTask.setTSS26(0L);
+                                                        downloadTask.setTSS27(0L);
+                                                        downloadTask.setTSS28(0L);
+                                                        downloadTask.setTSS29(0L);
+                                                        downloadTask.setTSS30(0L);
+                                                        downloadTask.setTSS31(0L);
+                                                        downloadTask.setTSS32(0L);
+
+                                                        DocumentFile pickedDir1 = DocumentFile.fromTreeUri(context,Uri.parse(downloadTask.getDirPath()));
+
+                                                        if(pickedDir1 != null)
+                                                        {
+                                                            pickedDir1.createFile(downloadTask.getMimeType(),downloadTask.getFileName());
+                                                        }
+
+                                                        db.addTask(downloadTask);
+                                                        recentTaskId = db.getRecentTaskID();
+
+                                                    } catch (Exception ignored){}
+                                                    finally {
+                                                        int finalRecentTaskId = recentTaskId;
+                                                        if(finalRecentTaskId != -1)
+                                                        {
+                                                            // todo call download now!
+                                                        }
+                                                    }
+
+                                                }).start();
+
+                                                listener.addTaskSheetDismissed();
+                                                AddNewDTaskSheet.this.dismiss();
+
+                                            }
+
+
+                                        }
+
+                                    } else {
+                                        statusTextView.setText(R.string.set_download_path);
+                                        statusTextView.setVisibility(View.VISIBLE);
+                                    }
+                                }
+                            } else {
+                                statusTextView.setText(R.string.enter_file_name);
+                                statusTextView.setVisibility(View.VISIBLE);
+                            }
+
+
+                    } catch (Exception e)
+                    {
+                        showToast(R.string.oops_general_message,context);
                     }
                 }
             };
