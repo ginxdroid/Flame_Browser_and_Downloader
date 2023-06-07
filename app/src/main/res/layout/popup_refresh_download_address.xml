@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardElevation="8dp"
+    app:cardCornerRadius="6dp">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:overScrollMode="never">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="10dp"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="?attr/primaryText"
+                android:textStyle="bold"
+                android:layout_gravity="center_horizontal"
+                android:padding="8dp"
+                android:textAppearance="?textAppearanceHeadline6"
+                android:text="@string/refresh_download_address" />
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fillViewport="true"
+                android:scrollbars="none"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp">
+
+                <TextView
+                    android:id="@+id/fileNameTVRefreshPopup"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="?attr/primaryText"
+                    android:textStyle="bold"
+                    android:maxLines="1"
+                    android:textAppearance="?textAppearanceSubtitle1"
+                    android:text="@string/file_name" />
+
+            </HorizontalScrollView>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="10dp"
+                android:weightSum="10">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="3"
+                    android:textColor="?attr/primaryText"
+                    android:textStyle="bold"
+                    android:text="@string/file_url" />
+
+                <com.ginxdroid.flamebrowseranddownloader.classes.URLEditText
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="6"
+                    android:id="@+id/urlEditTextRefreshPopup"
+                    android:hint="@string/paste_file_url_here"
+                    android:inputType="textMultiLine"
+                    android:maxLines="3"
+                    android:textColorHint="?attr/secondaryText"
+                    android:textColor="?attr/primaryText"
+                    android:layout_gravity="top"
+                    android:focusable="false" />
+
+                <ImageButton
+                    android:id="@+id/pasteRLIBRefreshPopup"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_gravity="center"
+                    android:src="@drawable/round_content_paste_24"
+                    android:background="@drawable/unbounded_light_ripple"
+                    android:contentDescription="@string/paste_file_url_here" />
+
+            </LinearLayout>
+
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/myProgressbarRefreshPopup"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                android:indeterminate="true"
+                android:progressDrawable="@drawable/progress_drawable_dark" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:text="@string/yes_no"
+                android:id="@+id/pauseResumeSupportedTVRefreshPopup"
+                android:visibility="gone"
+                android:textColor="?attr/primaryText" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/colorError"
+                    android:text="@string/error"
+                    android:id="@+id/errorTVRefreshPopup"
+                    android:visibility="gone"
+                    android:textColor="?attr/colorOnError" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/status"
+                    android:id="@+id/statusTVRefreshPopup"
+                    android:visibility="gone"
+                     />
+
+            </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="10dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                style="@style/CustomFilledButton"
+                android:id="@+id/refreshAndResumeButtonRefreshPopup"
+                 />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/start_from_beginning"
+                style="@style/CustomFilledButton"
+                android:id="@+id/startFromBeginningRefreshPopup"
+                android:visibility="gone" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/ok"
+                style="@style/CustomFilledButton"
+                android:id="@+id/okButtonRefreshPopup"
+                android:visibility="gone" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/cancel"
+                style="@style/CancelButtonStyle"
+                android:visibility="gone"
+                android:id="@+id/cancelButtonRefreshPopup"
+                />
+
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+
+</com.google.android.material.card.MaterialCardView>

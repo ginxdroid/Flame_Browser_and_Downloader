@@ -238,7 +238,6 @@ public class DownloadingService extends Service {
 
             CustomNotificationGenerator customNotificationGenerator = new CustomNotificationGenerator(DownloadingService.this,notificationManager);
             NotificationCompat.Builder builder = customNotificationGenerator.getRawBuilder();
-
             DownloadTask downloadTask = db.getDownloadTask(dId);
             if(downloadTask.getChunkMode() == 0)
             {
@@ -464,11 +463,11 @@ public class DownloadingService extends Service {
         private DownloadTask downloadTask;
         private long sizeOfEachSegment;
         private long bytesDone;
-        
+
         private AtomicLong tZero,tOne,tTwo,tThree,tFour,tFive,tSix,tSeven,tEight,tNine,tTen,tEleven,tTwelve,tThirteen,tFourteen,tFifteen,
         tSixteen,tSeventeen,tEighteen,tNineteen,tTwenty,tTwentyOne,tTwentyTwo,tTwentyThree,tTwentyFour,tTwentyFive,tTwentySix,tTwentySeven,
                 tTwentyEight,tTwentyNine,tThirty,tThirtyOne;
-        
+
         private AtomicInteger pZero,pOne,pTwo,pThree,pFour,pFive,pSix,pSeven,pEight,pNine,pTen,pEleven,pTwelve,pThirteen,pFourteen,pFifteen,
                 pSixteen,pSeventeen,pEighteen,pNineteen,pTwenty,pTwentyOne,pTwentyTwo,pTwentyThree,pTwentyFour,pTwentyFive,pTwentySix,pTwentySeven,
                 pTwentyEight,pTwentyNine,pThirty,pThirtyOne;
@@ -496,8 +495,8 @@ public class DownloadingService extends Service {
             customNotificationGenerator = new CustomNotificationGenerator(DownloadingService.this,notificationManager);
             builder = customNotificationGenerator.getRawBuilder();
         }
-        
-        
+
+
         @Override
         public void run() {
             if(submittedTasks.contains(dTID))
@@ -3423,7 +3422,7 @@ public class DownloadingService extends Service {
                     directoryNotFoundExceptionOccurred(downloadTask);
                     break;
                 case 7:
-                    connectionTimedOutOrSeveralRetries(downloadTask,"SeveralRetriedException");
+                    connectionTimedOutOrSeveralRetries(downloadTask,"SeveralRetriesException");
                     break;
                 case 8:
                     unknownError(downloadTask);
@@ -3779,7 +3778,7 @@ public class DownloadingService extends Service {
                     directoryNotFoundExceptionOccurred(downloadTask);
                     break;
                 case 7:
-                    connectionTimedOutOrSeveralRetries(downloadTask,"SeveralRetriedException");
+                    connectionTimedOutOrSeveralRetries(downloadTask,"SeveralRetriesException");
                     break;
                 case 8:
                     unknownError(downloadTask);
@@ -4947,7 +4946,7 @@ public class DownloadingService extends Service {
                                 totalDownloaded += count;
                                 int currentProgress = (int) (totalDownloaded * 100 / sizeOfEachSegment);
 
-                                pZero.set(currentProgress);
+                                pOne.set(currentProgress);
                                 tOne.set(totalDownloaded);
                             }
                         }
@@ -5238,7 +5237,7 @@ public class DownloadingService extends Service {
                                 totalDownloaded += count;
                                 int currentProgress = (int) (totalDownloaded * 100 / sizeOfEachSegment);
 
-                                pZero.set(currentProgress);
+                                pTwo.set(currentProgress);
                                 tTwo.set(totalDownloaded);
                             }
                         }
@@ -5529,7 +5528,7 @@ public class DownloadingService extends Service {
                                 totalDownloaded += count;
                                 int currentProgress = (int) (totalDownloaded * 100 / sizeOfEachSegment);
 
-                                pZero.set(currentProgress);
+                                pThree.set(currentProgress);
                                 tThree.set(totalDownloaded);
                             }
                         }
@@ -5820,7 +5819,7 @@ public class DownloadingService extends Service {
                                 totalDownloaded += count;
                                 int currentProgress = (int) (totalDownloaded * 100 / sizeOfEachSegment);
 
-                                pZero.set(currentProgress);
+                                pFour.set(currentProgress);
                                 tFour.set(totalDownloaded);
                             }
                         }
@@ -6111,7 +6110,7 @@ public class DownloadingService extends Service {
                                 totalDownloaded += count;
                                 int currentProgress = (int) (totalDownloaded * 100 / sizeOfEachSegment);
 
-                                pZero.set(currentProgress);
+                                pFive.set(currentProgress);
                                 tFive.set(totalDownloaded);
                             }
                         }
@@ -6402,7 +6401,7 @@ public class DownloadingService extends Service {
                                 totalDownloaded += count;
                                 int currentProgress = (int) (totalDownloaded * 100 / sizeOfEachSegment);
 
-                                pZero.set(currentProgress);
+                                pSix.set(currentProgress);
                                 tSix.set(totalDownloaded);
                             }
                         }
@@ -6693,7 +6692,7 @@ public class DownloadingService extends Service {
                                 totalDownloaded += count;
                                 int currentProgress = (int) (totalDownloaded * 100 / sizeOfEachSegment);
 
-                                pZero.set(currentProgress);
+                                pSeven.set(currentProgress);
                                 tSeven.set(totalDownloaded);
                             }
                         }
@@ -6984,7 +6983,7 @@ public class DownloadingService extends Service {
                                 totalDownloaded += count;
                                 int currentProgress = (int) (totalDownloaded * 100 / sizeOfEachSegment);
 
-                                pZero.set(currentProgress);
+                                pEight.set(currentProgress);
                                 tEight.set(totalDownloaded);
                             }
                         }
@@ -7275,7 +7274,7 @@ public class DownloadingService extends Service {
                                 totalDownloaded += count;
                                 int currentProgress = (int) (totalDownloaded * 100 / sizeOfEachSegment);
 
-                                pZero.set(currentProgress);
+                                pNine.set(currentProgress);
                                 tNine.set(totalDownloaded);
                             }
                         }
@@ -7566,7 +7565,7 @@ public class DownloadingService extends Service {
                                 totalDownloaded += count;
                                 int currentProgress = (int) (totalDownloaded * 100 / sizeOfEachSegment);
 
-                                pZero.set(currentProgress);
+                                pTen.set(currentProgress);
                                 tTen.set(totalDownloaded);
                             }
                         }
@@ -7857,7 +7856,7 @@ public class DownloadingService extends Service {
                                 totalDownloaded += count;
                                 int currentProgress = (int) (totalDownloaded * 100 / sizeOfEachSegment);
 
-                                pZero.set(currentProgress);
+                                pEleven.set(currentProgress);
                                 tEleven.set(totalDownloaded);
                             }
                         }
@@ -8148,7 +8147,7 @@ public class DownloadingService extends Service {
                                 totalDownloaded += count;
                                 int currentProgress = (int) (totalDownloaded * 100 / sizeOfEachSegment);
 
-                                pZero.set(currentProgress);
+                                pTwelve.set(currentProgress);
                                 tTwelve.set(totalDownloaded);
                             }
                         }
@@ -8439,7 +8438,7 @@ public class DownloadingService extends Service {
                                 totalDownloaded += count;
                                 int currentProgress = (int) (totalDownloaded * 100 / sizeOfEachSegment);
 
-                                pZero.set(currentProgress);
+                                pThirteen.set(currentProgress);
                                 tThirteen.set(totalDownloaded);
                             }
                         }
@@ -8730,7 +8729,7 @@ public class DownloadingService extends Service {
                                 totalDownloaded += count;
                                 int currentProgress = (int) (totalDownloaded * 100 / sizeOfEachSegment);
 
-                                pZero.set(currentProgress);
+                                pFourteen.set(currentProgress);
                                 tFourteen.set(totalDownloaded);
                             }
                         }
@@ -9021,7 +9020,7 @@ public class DownloadingService extends Service {
                                 totalDownloaded += count;
                                 int currentProgress = (int) (totalDownloaded * 100 / sizeOfEachSegment);
 
-                                pZero.set(currentProgress);
+                                pFifteen.set(currentProgress);
                                 tFifteen.set(totalDownloaded);
                             }
                         }
@@ -9312,7 +9311,7 @@ public class DownloadingService extends Service {
                                 totalDownloaded += count;
                                 int currentProgress = (int) (totalDownloaded * 100 / sizeOfEachSegment);
 
-                                pZero.set(currentProgress);
+                                pSixteen.set(currentProgress);
                                 tSixteen.set(totalDownloaded);
                             }
                         }
@@ -9603,7 +9602,7 @@ public class DownloadingService extends Service {
                                 totalDownloaded += count;
                                 int currentProgress = (int) (totalDownloaded * 100 / sizeOfEachSegment);
 
-                                pZero.set(currentProgress);
+                                pSeventeen.set(currentProgress);
                                 tSeventeen.set(totalDownloaded);
                             }
                         }
@@ -9894,7 +9893,7 @@ public class DownloadingService extends Service {
                                 totalDownloaded += count;
                                 int currentProgress = (int) (totalDownloaded * 100 / sizeOfEachSegment);
 
-                                pZero.set(currentProgress);
+                                pEighteen.set(currentProgress);
                                 tEighteen.set(totalDownloaded);
                             }
                         }
@@ -10185,7 +10184,7 @@ public class DownloadingService extends Service {
                                 totalDownloaded += count;
                                 int currentProgress = (int) (totalDownloaded * 100 / sizeOfEachSegment);
 
-                                pZero.set(currentProgress);
+                                pNineteen.set(currentProgress);
                                 tNineteen.set(totalDownloaded);
                             }
                         }
@@ -10476,7 +10475,7 @@ public class DownloadingService extends Service {
                                 totalDownloaded += count;
                                 int currentProgress = (int) (totalDownloaded * 100 / sizeOfEachSegment);
 
-                                pZero.set(currentProgress);
+                                pTwenty.set(currentProgress);
                                 tTwenty.set(totalDownloaded);
                             }
                         }
@@ -10767,7 +10766,7 @@ public class DownloadingService extends Service {
                                 totalDownloaded += count;
                                 int currentProgress = (int) (totalDownloaded * 100 / sizeOfEachSegment);
 
-                                pZero.set(currentProgress);
+                                pTwentyOne.set(currentProgress);
                                 tTwentyOne.set(totalDownloaded);
                             }
                         }
@@ -11058,7 +11057,7 @@ public class DownloadingService extends Service {
                                 totalDownloaded += count;
                                 int currentProgress = (int) (totalDownloaded * 100 / sizeOfEachSegment);
 
-                                pZero.set(currentProgress);
+                                pTwentyTwo.set(currentProgress);
                                 tTwentyTwo.set(totalDownloaded);
                             }
                         }
@@ -11349,7 +11348,7 @@ public class DownloadingService extends Service {
                                 totalDownloaded += count;
                                 int currentProgress = (int) (totalDownloaded * 100 / sizeOfEachSegment);
 
-                                pZero.set(currentProgress);
+                                pTwentyThree.set(currentProgress);
                                 tTwentyThree.set(totalDownloaded);
                             }
                         }
@@ -11640,7 +11639,7 @@ public class DownloadingService extends Service {
                                 totalDownloaded += count;
                                 int currentProgress = (int) (totalDownloaded * 100 / sizeOfEachSegment);
 
-                                pZero.set(currentProgress);
+                                pTwentyFour.set(currentProgress);
                                 tTwentyFour.set(totalDownloaded);
                             }
                         }
@@ -11931,7 +11930,7 @@ public class DownloadingService extends Service {
                                 totalDownloaded += count;
                                 int currentProgress = (int) (totalDownloaded * 100 / sizeOfEachSegment);
 
-                                pZero.set(currentProgress);
+                                pTwentyFive.set(currentProgress);
                                 tTwentyFive.set(totalDownloaded);
                             }
                         }
@@ -12222,7 +12221,7 @@ public class DownloadingService extends Service {
                                 totalDownloaded += count;
                                 int currentProgress = (int) (totalDownloaded * 100 / sizeOfEachSegment);
 
-                                pZero.set(currentProgress);
+                                pTwentySix.set(currentProgress);
                                 tTwentySix.set(totalDownloaded);
                             }
                         }
@@ -12513,7 +12512,7 @@ public class DownloadingService extends Service {
                                 totalDownloaded += count;
                                 int currentProgress = (int) (totalDownloaded * 100 / sizeOfEachSegment);
 
-                                pZero.set(currentProgress);
+                                pTwentySeven.set(currentProgress);
                                 tTwentySeven.set(totalDownloaded);
                             }
                         }
@@ -12804,7 +12803,7 @@ public class DownloadingService extends Service {
                                 totalDownloaded += count;
                                 int currentProgress = (int) (totalDownloaded * 100 / sizeOfEachSegment);
 
-                                pZero.set(currentProgress);
+                                pTwentyEight.set(currentProgress);
                                 tTwentyEight.set(totalDownloaded);
                             }
                         }
@@ -13095,7 +13094,7 @@ public class DownloadingService extends Service {
                                 totalDownloaded += count;
                                 int currentProgress = (int) (totalDownloaded * 100 / sizeOfEachSegment);
 
-                                pZero.set(currentProgress);
+                                pTwentyNine.set(currentProgress);
                                 tTwentyNine.set(totalDownloaded);
                             }
                         }
@@ -13386,7 +13385,7 @@ public class DownloadingService extends Service {
                                 totalDownloaded += count;
                                 int currentProgress = (int) (totalDownloaded * 100 / sizeOfEachSegment);
 
-                                pZero.set(currentProgress);
+                                pThirty.set(currentProgress);
                                 tThirty.set(totalDownloaded);
                             }
                         }
@@ -13677,7 +13676,7 @@ public class DownloadingService extends Service {
                                 totalDownloaded += count;
                                 int currentProgress = (int) (totalDownloaded * 100 / sizeOfEachSegment);
 
-                                pZero.set(currentProgress);
+                                pThirtyOne.set(currentProgress);
                                 tThirtyOne.set(totalDownloaded);
                             }
                         }

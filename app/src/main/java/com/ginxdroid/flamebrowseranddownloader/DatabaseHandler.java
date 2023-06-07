@@ -2036,7 +2036,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         setWriteAheadLoggingEnabled(true);
     }
 
-    boolean isTaskCompleted(int dTID)
+    public boolean isTaskCompleted(int dTID)
     {
         Cursor cursor = readableDB.query(downloadTasksTBL,new String[]{CURRENT_STATUS},KEY_ID + "=?",new String[]{String.valueOf(dTID)},
                 null,null,null,null);
@@ -2076,6 +2076,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 MIME_TYPE},KEY_ID + "=?",new String[]{String.valueOf(id)},null,null,null,null);
 
         DownloadTask downloadTask = new DownloadTask();
+
+        cursor.moveToFirst();
 
         downloadTask.setKeyId(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_ID)));
         downloadTask.setFileName(cursor.getString(cursor.getColumnIndexOrThrow(FILE_NAME)));
@@ -2176,13 +2178,15 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return result == 1;
     }
 
-    PartialDetailsTask getDownloadTaskDetails(int dTID)
+    public PartialDetailsTask getDownloadTaskDetails(int dTID)
     {
         Cursor cursor = readableDB.query(downloadTasksTBL,new String[]{FILE_NAME,URL,DIR_PATH,TOTAL_BYTES,DOWNLOADED_BYTES,
                 CURRENT_STATUS,PAUSE_RESUME_SUPPORTED,CHUNK_MODE,
                 PAGE_URL,SEGMENTS_FOR_DOWNLOAD_TASK},KEY_ID + "=?",new String[]{String.valueOf(dTID)},null,null,null,null);
 
         PartialDetailsTask downloadTask = new PartialDetailsTask();
+
+        cursor.moveToFirst();
         downloadTask.setFileName(cursor.getString(cursor.getColumnIndexOrThrow(FILE_NAME)));
         downloadTask.setUrl(cursor.getString(cursor.getColumnIndexOrThrow(URL)));
         downloadTask.setTotalBytes(cursor.getLong(cursor.getColumnIndexOrThrow(TOTAL_BYTES)));
@@ -2195,16 +2199,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         downloadTask.setDirPath(cursor.getString(cursor.getColumnIndexOrThrow(DIR_PATH)));
         cursor.close();
         return downloadTask;
-    }
-
-    public int getDownloadTaskCurrentStatus(int dTID)
-    {
-        Cursor cursor = readableDB.query(downloadTasksTBL,new String[]{CURRENT_STATUS},KEY_ID + "=?",new String[]{String.valueOf(dTID)},
-                null,null,null,null);
-        cursor.moveToFirst();
-        int result = cursor.getInt(cursor.getColumnIndexOrThrow(CURRENT_STATUS));
-        cursor.close();
-        return result;
     }
 
     public DownloadTask getBindDownloadTaskCompleteDM(int dTID)
@@ -2222,7 +2216,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return downloadTask;
     }
 
-    int getPauseResumeSupported(int dTID)
+    public int getPauseResumeSupported(int dTID)
     {
         Cursor cursor = readableDB.query(downloadTasksTBL,new String[]{IS_PAUSE_RESUME_SUPPORTED},KEY_ID + "=?",new String[]{String.valueOf(dTID)},
                 null,null,null,null);
@@ -2232,7 +2226,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return result;
     }
 
-    PartialHalfTask getHalfDownloadTask(int dTID)
+    public PartialHalfTask getHalfDownloadTask(int dTID)
     {
         Cursor cursor = readableDB.query(downloadTasksTBL,new String[]{KEY_ID,FILE_NAME,DIR_PATH
                 },KEY_ID + "=?",
@@ -2247,7 +2241,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return downloadTask;
     }
 
-    int getCurrentStatusOfDT(int dTID)
+    public int getCurrentStatusOfDT(int dTID)
     {
         Cursor cursor = readableDB.query(downloadTasksTBL,new String[]{CURRENT_STATUS},KEY_ID + "=?",new String[]{String.valueOf(dTID)},
                 null,null,null,null);
@@ -2267,107 +2261,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return result;
     }
 
-    public int getRecentCompletedTaskID()
-    {
-        Cursor cursor = readableDB.query(downloadTasksTBL, new String[]{KEY_ID
-                }
-                , CURRENT_STATUS + "=?",
-                new String[]{"7"}, null, null, KEY_ID
-                        + " DESC", String.valueOf(1)
-        );
 
-        cursor.moveToFirst();
-        final int recentTaskID = cursor.getInt(cursor.getColumnIndexOrThrow(KEY_ID));
-        cursor.close();
-        return recentTaskID;
-    }
-
-    public boolean isTaskResumable(int dTID, long contentLength)
-    {
-        Cursor cursor = readableDB.query(downloadTasksTBL, new String[]{TOTAL_BYTES,IS_PAUSE_RESUME_SUPPORTED
-                }
-                , KEY_ID + "=?",
-                new String[]{String.valueOf(dTID)}, null, null, null);
-
-        cursor.moveToFirst();
-        final long totalBytes = cursor.getLong(cursor.getColumnIndexOrThrow(TOTAL_BYTES));
-        final int isPauseResumeSupported = cursor.getInt(cursor.getColumnIndexOrThrow(IS_PAUSE_RESUME_SUPPORTED));
-        cursor.close();
-        return isPauseResumeSupported == 1 && contentLength == totalBytes;
-    }
-
-    public boolean isComplete(int dTID, long contentLength)
-    {
-        Cursor cursor = readableDB.query(downloadTasksTBL, new String[]{TOTAL_BYTES,CURRENT_STATUS
-                }
-                , KEY_ID + "=?",
-                new String[]{String.valueOf(dTID)}, null, null, null);
-
-        cursor.moveToFirst();
-        final long totalBytes = cursor.getLong(cursor.getColumnIndexOrThrow(TOTAL_BYTES));
-        final int currentStatus = cursor.getInt(cursor.getColumnIndexOrThrow(CURRENT_STATUS));
-        cursor.close();
-        return currentStatus == 7 && contentLength == totalBytes;
-    }
-
-    public int isNotChunkTask(String name)
-    {
-        Cursor cursor = readableDB.query(downloadTasksTBL, new String[]{KEY_ID,TOTAL_BYTES
-                }
-                , FILE_NAME + "=?",
-                new String[]{name}, null, null, null);
-
-        cursor.moveToFirst();
-        int id = cursor.getInt(cursor.getColumnIndexOrThrow(KEY_ID));
-        final long totalBytes = cursor.getLong(cursor.getColumnIndexOrThrow(TOTAL_BYTES));
-        cursor.close();
-
-        if(-1 != totalBytes)
-        {
-            return id;
-        } else {
-            return -1;
-        }
-    }
-
-    public int isTaskExists(String name)
-    {
-        Cursor cursor = readableDB.query(downloadTasksTBL, new String[]{KEY_ID
-                }
-                , FILE_NAME + "=? AND " + TOTAL_BYTES +"!=?",
-                new String[]{name,"-1"}, null, null, null);
-
-        int result = -1;
-        if(cursor.getCount() > 0)
-        {
-            cursor.moveToFirst();
-            result = cursor.getInt(cursor.getColumnIndexOrThrow(KEY_ID));
-
-        }
-        cursor.close();
-        return result;
-    }
-
-    public int isLinkExists(String link)
-    {
-        Cursor cursor = readableDB.query(downloadTasksTBL, new String[]{KEY_ID
-                }
-                , URL + "=? AND " + TOTAL_BYTES +"!=?",
-                new String[]{link,"-1"}, null, null, null);
-
-        int result = -1;
-        if(cursor.getCount() > 0)
-        {
-            cursor.moveToFirst();
-            result = cursor.getInt(cursor.getColumnIndexOrThrow(KEY_ID));
-
-        }
-        cursor.close();
-        return result;
-    }
-
-
-    void updateDownloadTask(DownloadTask downloadTask)
+    public void updateDownloadTask(DownloadTask downloadTask)
     {
         ContentValues contentValues = new ContentValues();
         contentValues.put(FILE_NAME,downloadTask.getFileName());
@@ -2950,7 +2845,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         writableDB.delete(downloadTasksTBL,KEY_ID + "=?",new String[]{String.valueOf(dTID)});
     }
 
-    void deleteDownloadTaskFromCompletedTable(int dTID)
+    public void deleteDownloadTaskFromCompletedTable(int dTID)
     {
         writableDB.delete(completedTasksTBL,CDT_KEY_ID + "=?",new String[]{String.valueOf(dTID)});
     }

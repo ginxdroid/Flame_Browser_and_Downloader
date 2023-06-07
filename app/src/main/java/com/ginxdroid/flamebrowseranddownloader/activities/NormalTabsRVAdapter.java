@@ -781,7 +781,7 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
         webView.setWebChromeClient(viewHolder.webChromeClient);
         webView.setWebViewClient(viewHolder.webViewClient);
         webView.setDownloadListener((url, userAgent, contentDisposition, mimeType, contentLength) ->
-                viewHolder.onListenDownload(url,userAgent,contentDisposition,mimeType,viewHolder.webViewURLString,contentLength,null));
+                viewHolder.onListenDownload(url,userAgent,contentDisposition,mimeType,viewHolder.webViewURLString,contentLength));
 
         webView.setOnTouchListener(viewHolder.onTouchListener);
 
@@ -991,8 +991,7 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
         private final GestureDetector gestureDetector;
         private TemporaryTask temporaryTask = null;
 
-        void onListenDownload(String url, String userAgent, String contentDisposition, String mimeType, String pageURL, long contentLength,
-                             String name)
+        void onListenDownload(String url, String userAgent, String contentDisposition, String mimeType, String pageURL, long contentLength)
         {
             if(!HelperTextUtility.isNotEmpty(pageURL))
             {
@@ -1019,7 +1018,7 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
                         throw new Exception();
                     } else {
                         //call downloadTaskFetcher which will fetch downloadTaskDetails
-                        new DownloadTaskFetcher(url,userAgent,contentDisposition,mimeType,pageURL,contentLength,name,NormalTabsRVAdapter.this,
+                        new DownloadTaskFetcher(url,userAgent,contentDisposition,mimeType,pageURL,contentLength, null,NormalTabsRVAdapter.this,
                                 db,context,mainActivity).start();
                     }
                 } catch (Exception e)
@@ -1031,7 +1030,7 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
                     temporaryTask.setMimeType(mimeType);
                     temporaryTask.setPageURL(pageURL);
                     temporaryTask.setContentLength(contentLength);
-                    temporaryTask.setName(name);
+                    temporaryTask.setName(null);
                 }
             } else {
                 try {
@@ -1047,7 +1046,7 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
                         throw new Exception();
                     } else {
                         //call downloadTaskFetcher which will fetch downloadTaskDetails
-                        new DownloadTaskFetcher(url,userAgent,contentDisposition,mimeType,pageURL,contentLength,name,NormalTabsRVAdapter.this,
+                        new DownloadTaskFetcher(url,userAgent,contentDisposition,mimeType,pageURL,contentLength, null,NormalTabsRVAdapter.this,
                                 db,context,mainActivity).start();
                     }
                 } catch (Exception e)
@@ -1090,7 +1089,7 @@ public class NormalTabsRVAdapter extends RecyclerView.Adapter<NormalTabsRVAdapte
 
                     if(fetcher == null)
                     {
-                        fetcher = new DownloadTaskFetcher(url,userAgent,contentDisposition,mimeType,pageURL,contentLength,name,NormalTabsRVAdapter.this,
+                        fetcher = new DownloadTaskFetcher(url,userAgent,contentDisposition,mimeType,pageURL,contentLength, null,NormalTabsRVAdapter.this,
                                 db,context,mainActivity);
                     }
 

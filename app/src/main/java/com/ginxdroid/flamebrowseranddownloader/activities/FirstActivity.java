@@ -20,6 +20,7 @@ import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -48,11 +49,11 @@ public class FirstActivity extends BaseActivity implements View.OnClickListener,
     private DatabaseHandler db;
 
     private RelativeLayout tabsRL;
-
+    private int loadedCount = 0;
     private ViewPager2 viewPager;
     private TabLayout tabs;
 
-    private String[] tabTitles = new String[] {"Downloading","Completed"};
+    private final String[] tabTitles = new String[] {"Downloading","Completed"};
 
     private RecyclerViewAdapter recyclerViewAdapter;
     private CompletedRecyclerViewAdapter completedRecyclerViewAdapter;
@@ -61,7 +62,8 @@ public class FirstActivity extends BaseActivity implements View.OnClickListener,
 
     private MaterialTextView loadingMTV;
 
-    private MaterialButton backButtonDeleteIB,selectAllIB,deselectAllIB,deleteIB;
+    private MaterialButton selectAllIB;
+    private MaterialButton deselectAllIB;
     private MaterialTextView countTV;
 
     private BroadcastReceiver broadcastReceiver;
@@ -74,7 +76,13 @@ public class FirstActivity extends BaseActivity implements View.OnClickListener,
 
     void resumeBroadcastReceiver()
     {
+        IntentFilter filter = new IntentFilter(DOWNLOADING_INTENT);
+        filter.addAction(DOWNLOAD_PAUSED_INTENT);
+        filter.addAction(ERROR_OCCURRED_INTENT);
+        filter.addAction(RESUMING_INTENT);
+        filter.addAction(DOWNLOAD_COMPLETE_INTENT);
 
+        LocalBroadcastManager.getInstance(FirstActivity.this).registerReceiver(broadcastReceiver,filter);
     }
 
     private void setUpBroadcastReceiver()
@@ -99,12 +107,12 @@ public class FirstActivity extends BaseActivity implements View.OnClickListener,
                             case DOWNLOAD_COMPLETE_INTENT:
                             {
                                 LocalBroadcastManager.getInstance(FirstActivity.this).unregisterReceiver(broadcastReceiver);
-                                //todo recyclerViewAdapter.setTasksCompletion();
+                                recyclerViewAdapter.setTasksCompletion();
                                 break;
                             }
                             case DO_DELETION_WORK_INTENT:
                             {
-                                //todo recyclerViewAdapter.doDeletionWork();
+                                recyclerViewAdapter.doDeletionWork();
                                 break;
                             }
                         }
@@ -114,7 +122,69 @@ public class FirstActivity extends BaseActivity implements View.OnClickListener,
         };
     }
 
+    void pauseBroadCastReceiver()
+    {
+        LocalBroadcastManager.getInstance(FirstActivity.this).unregisterReceiver(broadcastReceiver);
+        IntentFilter filter = new IntentFilter(DO_DELETION_WORK_INTENT);
+        LocalBroadcastManager.getInstance(FirstActivity.this).registerReceiver(broadcastReceiver,filter);
+    }
 
+    void resumeBRAfterDeletion()
+    {
+        LocalBroadcastManager.getInstance(FirstActivity.this).unregisterReceiver(broadcastReceiver);
+
+        IntentFilter filter = new IntentFilter(DOWNLOADING_INTENT);
+        filter.addAction(DOWNLOAD_PAUSED_INTENT);
+        filter.addAction(ERROR_OCCURRED_INTENT);
+        filter.addAction(RESUMING_INTENT);
+        filter.addAction(DOWNLOAD_COMPLETE_INTENT);
+
+        LocalBroadcastManager.getInstance(FirstActivity.this).registerReceiver(broadcastReceiver,filter);
+    }
+
+    void analyzeCurrentQueuedTasks()
+    {
+        recyclerViewAdapter.analyzeCurrentQueuedTasks();
+    }
+
+    void notifyCompletedTask(Integer dTID)
+    {
+        completedRecyclerViewAdapter.insertCompletedTask(dTID);
+    }
+
+    void setCompletedTasksCount()
+    {
+        setCompletedCount(completedRecyclerViewAdapter.getItemCount());
+    }
+
+    void deselectSelectedCompleteTasks()
+    {
+        completedRecyclerViewAdapter.setTasksCompletion();
+    }
+
+    void setQueuedTasksCount()
+    {
+        setQueuedCount(recyclerViewAdapter.getItemCount());
+    }
+
+    void setCountTVText(int count)
+    {
+        if(count>99)
+        {
+            countTV.setText(R.string.max_count);
+        }else
+        {
+            countTV.setText(String.valueOf(count));
+        }
+    }
+
+    void setEditInvisible()
+    {
+        editLL.setVisibility(View.GONE);
+        tabsRL.setVisibility(View.VISIBLE);
+        selectAllIB.setVisibility(View.VISIBLE);
+        deselectAllIB.setVisibility(View.GONE);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -167,7 +237,7 @@ public class FirstActivity extends BaseActivity implements View.OnClickListener,
             public void onTabUnselected(TabLayout.Tab tab) {
                 if(editLL.getVisibility() == View.VISIBLE)
                 {
-                    //todo doHideWork(tab.getPosition());
+                    doHideWork(tab.getPosition());
                 }
             }
 
@@ -178,6 +248,18 @@ public class FirstActivity extends BaseActivity implements View.OnClickListener,
         });
 
 
+    }
+
+    private void doHideWork(int currentItem)
+    {
+        if(currentItem == 0)
+        {
+            recyclerViewAdapter.hideSelectCheckbox();
+        } else {
+            completedRecyclerViewAdapter.hideSelectCheckbox();
+        }
+
+        setEditInvisible();
     }
 
     void setQueuedCount(int count)
@@ -207,28 +289,56 @@ public class FirstActivity extends BaseActivity implements View.OnClickListener,
 
     @Override
     public void onClick(View v) {
+        int currentItem = viewPager.getCurrentItem();
         int id = v.getId();
         if(id == R.id.downloaderSettingsIB)
         {
             startActivity(new Intent(FirstActivity.this, DownloaderSettings.class));
         } else if(id == R.id.backButtonDeleteIB)
         {
-
+            doHideWork(currentItem);
         } else if(id == R.id.refreshIB)
         {
-
+            recyclerViewAdapter.showRefreshAddress();
         } else if(id == R.id.propertiesIB)
         {
-
+            if(currentItem == 0){
+                recyclerViewAdapter.showProperties();
+            } else {
+                completedRecyclerViewAdapter.showProperties();
+            }
         } else if(id == R.id.selectAllIB)
         {
+            if(currentItem == 0){
+                recyclerViewAdapter.selectAllTasks();
+            } else {
+                completedRecyclerViewAdapter.selectAllCompletedTasks();
+            }
 
+            selectAllIB.setVisibility(View.GONE);
+            deselectAllIB.setVisibility(View.VISIBLE);
         } else if(id == R.id.deselectAllIB)
         {
+            if(currentItem == 0){
+                recyclerViewAdapter.deselectAllTasks();
+            } else {
+                completedRecyclerViewAdapter.deselectAllCompletedTasks();
+            }
 
+            deselectAllIB.setVisibility(View.GONE);
+            selectAllIB.setVisibility(View.VISIBLE);
         } else if(id == R.id.deleteIB)
         {
+            if(currentItem == 0){
+                recyclerViewAdapter.showDeleteDialog();
+            } else {
+                completedRecyclerViewAdapter.showDeleteDialog();
+            }
 
+            editLL.setVisibility(View.GONE);
+            tabsRL.setVisibility(View.VISIBLE);
+            selectAllIB.setVisibility(View.VISIBLE);
+            deselectAllIB.setVisibility(View.GONE);
         }
     }
 
@@ -257,12 +367,12 @@ public class FirstActivity extends BaseActivity implements View.OnClickListener,
         },5);
 
 
-        backButtonDeleteIB = editLL.findViewById(R.id.backButtonDeleteIB);
+        MaterialButton backButtonDeleteIB = editLL.findViewById(R.id.backButtonDeleteIB);
         countTV = editLL.findViewById(R.id.countTV);
 
         selectAllIB = editLL.findViewById(R.id.selectAllIB);
         deselectAllIB = editLL.findViewById(R.id.deselectAllIB);
-        deleteIB = editLL.findViewById(R.id.deleteIB);
+        MaterialButton deleteIB = editLL.findViewById(R.id.deleteIB);
 
         backButtonDeleteIB.setOnClickListener(FirstActivity.this);
 
@@ -412,5 +522,61 @@ public class FirstActivity extends BaseActivity implements View.OnClickListener,
         public int getItemCount() {
             return 2;
         }
+    }
+
+    @Override
+    protected void onStop() {
+        try {
+            loadedCount = 1;
+            try {
+                LocalBroadcastManager.getInstance(FirstActivity.this).unregisterReceiver(broadcastReceiver);
+            } catch (Exception ignored) {
+            }
+        }catch (Exception ignored) {}
+        super.onStop();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        try {
+            if(loadedCount == 1)
+            {
+                loadedCount = 0;
+                try {
+                    recyclerViewAdapter.refreshTasks();
+                } catch (Exception ignored) {}
+            }
+        }catch (Exception ignored) {}
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        try {
+            if (editLL.getVisibility() == View.VISIBLE) {
+                if (viewPager.getCurrentItem() == 0) {
+                    recyclerViewAdapter.hideSelectCheckbox();
+                } else {
+                    completedRecyclerViewAdapter.hideSelectCheckbox();
+                }
+
+                setEditInvisible();
+            } else {
+                super.onBackPressed();
+            }
+        } catch (Exception e)
+        {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        try {
+            LocalBroadcastManager.getInstance(FirstActivity.this).unregisterReceiver(broadcastReceiver);
+            super.onDestroy();
+        } catch (Exception ignored) {}
     }
 }

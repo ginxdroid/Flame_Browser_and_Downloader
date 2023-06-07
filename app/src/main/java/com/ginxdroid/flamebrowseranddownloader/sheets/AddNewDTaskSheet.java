@@ -6,6 +6,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -25,6 +26,7 @@ import androidx.fragment.app.FragmentActivity;
 
 import com.ginxdroid.flamebrowseranddownloader.DatabaseHandler;
 import com.ginxdroid.flamebrowseranddownloader.R;
+import com.ginxdroid.flamebrowseranddownloader.activities.DownloadingService;
 import com.ginxdroid.flamebrowseranddownloader.classes.FileNameEditText;
 import com.ginxdroid.flamebrowseranddownloader.classes.HelperTextUtility;
 import com.ginxdroid.flamebrowseranddownloader.classes.HumanReadableFormat;
@@ -95,15 +97,12 @@ public class AddNewDTaskSheet extends BottomSheetDialogFragment {
         final String mimeType = bundle.getString("mimeType");
         final int defaultSegments = bundle.getInt("defaultSegments");
         final String extension = bundle.getString("extension");
-        final String originalName = bundle.getString("originalName");
         final int isPauseResumeSupported = bundle.getInt("isPauseResumeSupported");
 
         final Context context = getContext();
         final DatabaseHandler db = DatabaseHandler.getInstance(context);
         final FragmentActivity activity = getActivity();
 
-        @SuppressWarnings("ConstantConditions")
-        final String downloadTaskWith = context.getString(R.string.download_task_with);
 
         final TextView urlTV,fileSizeTV,pauseResumeSupportedTV,statusTextView,segmentsForTaskValueTV;
         final FileNameEditText fileNameET;
@@ -195,6 +194,7 @@ public class AddNewDTaskSheet extends BottomSheetDialogFragment {
                 });
 
                 fileNameET.setText(fileName);
+                //noinspection ConstantConditions
                 if(chunkMode == 1)
                 {
                     fileSizeTV.setText(context.getString(R.string.unknown));
@@ -255,6 +255,7 @@ public class AddNewDTaskSheet extends BottomSheetDialogFragment {
                     {
                         if(url != null)
                         {
+                            //noinspection ConstantConditions
                             ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
                             ClipData clipData = ClipData.newPlainText("file URL",url);
 
@@ -285,6 +286,7 @@ public class AddNewDTaskSheet extends BottomSheetDialogFragment {
                                     statusTextView.setVisibility(View.VISIBLE);
                                 }
                                 else {
+                                    //noinspection ConstantConditions
                                     DocumentFile pickedDir = DocumentFile.fromTreeUri(context, Uri.parse(downloadPath));
                                     if(pickedDir != null)
                                     {
@@ -450,7 +452,21 @@ public class AddNewDTaskSheet extends BottomSheetDialogFragment {
                                                                     int finalRecentTaskId = recentTaskId;
                                                                     if(finalRecentTaskId != -1)
                                                                     {
-                                                                        // todo call download now!
+                                                                        //data saved download now
+                                                                        activity.runOnUiThread(() -> {
+                                                                            Intent intent = new Intent(context, DownloadingService.class);
+                                                                            Bundle bundle1 = new Bundle();
+                                                                            bundle1.putInt("dId",finalRecentTaskId);
+                                                                            bundle1.putString("dStatus","downloadNow");
+                                                                            intent.putExtras(bundle1);
+                                                                            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                                                                            {
+                                                                                activity.startForegroundService(intent);
+                                                                            } else {
+                                                                                activity.startService(intent);
+                                                                            }
+                                                                            showToast(R.string.new_task_added,context);
+                                                                        });
                                                                     }
                                                                 }
 
@@ -569,7 +585,21 @@ public class AddNewDTaskSheet extends BottomSheetDialogFragment {
                                                         int finalRecentTaskId = recentTaskId;
                                                         if(finalRecentTaskId != -1)
                                                         {
-                                                            // todo call download now!
+                                                            //data saved download now
+                                                            activity.runOnUiThread(() -> {
+                                                                Intent intent = new Intent(context, DownloadingService.class);
+                                                                Bundle bundle1 = new Bundle();
+                                                                bundle1.putInt("dId",finalRecentTaskId);
+                                                                bundle1.putString("dStatus","downloadNow");
+                                                                intent.putExtras(bundle1);
+                                                                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                                                                {
+                                                                    activity.startForegroundService(intent);
+                                                                } else {
+                                                                    activity.startService(intent);
+                                                                }
+                                                                showToast(R.string.new_task_added,context);
+                                                            });
                                                         }
                                                     }
 

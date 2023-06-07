@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardElevation="8dp"
+    app:cardCornerRadius="6dp">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:overScrollMode="never">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/fileNameErrorDetailsPopupTV"
+                android:textColor="?attr/primaryText"
+                android:textStyle="bold"
+                android:textAppearance="?textAppearanceHeadline6"
+                android:text="@string/file_name" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_margin="5dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/errorErrorDetailsPopupTV"
+                    android:background="?attr/colorError"
+                    android:textColor="?attr/colorOnError"
+                    android:textAppearance="?textAppearanceSubtitle1"
+                    android:layout_marginStart="5dp"
+                    android:text="@string/error" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/youMayErrorDetailsPopupTV"
+                    android:textColor="?attr/primaryText"
+                    android:textAppearance="?textAppearanceSubtitle1"
+                    android:layout_marginTop="5dp"
+                    android:text="@string/you_may" />
+
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/retry"
+                style="@style/CustomFilledButton"
+                android:id="@+id/retryButtonErrorDetailsPopup"
+                android:visibility="gone" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/start_from_beginning"
+                style="@style/CustomFilledButton"
+                android:id="@+id/startFromBeginningErrorDetailsPopup"
+                android:visibility="gone" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/refresh_download_address"
+                style="@style/CustomFilledButton"
+                android:id="@+id/refreshDownloadAddressErrorDetailsPopup"
+                android:visibility="gone" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/close"
+                style="@style/CancelButtonStyle"
+                android:id="@+id/closeButtonErrorDetailsPopup"
+                />
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</com.google.android.material.card.MaterialCardView>

@@ -932,8 +932,71 @@ public class MainActivity extends BaseActivity implements ThemesSheet.BottomShee
 
     @Override
     public void addTaskSheetDismissed() {
-        //todo  showNotificationPermissionPrompt();
+        showNotificationPermissionPrompt();
     }
+
+    private void showNotificationPermissionPrompt()
+    {
+        try {
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+            {
+                if(ContextCompat.checkSelfPermission(MainActivity.this,Manifest.permission.POST_NOTIFICATIONS)
+                        != PackageManager.PERMISSION_GRANTED)
+                {
+                    if(ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,Manifest.permission.POST_NOTIFICATIONS))
+                    {
+                        //Explain to the user why we needed this permission
+                        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(MainActivity.this);
+                        View view = MainActivity.this.getLayoutInflater().inflate(R.layout.popup_permission_needed,
+                                recyclerViewContainer,false);
+
+                        TextView whyNeededTV = view.findViewById(R.id.whyNeededTV);
+                        whyNeededTV.setText(R.string.why_need_notification_permission);
+
+                        builder.setView(view);
+                        final android.app.AlertDialog dialog = builder.create();
+
+                        MaterialButton grantPermissionDialogBtn,closePermissionDialogBtn;
+                        grantPermissionDialogBtn = view.findViewById(R.id.grantPermissionDialogBtn);
+                        closePermissionDialogBtn = view.findViewById(R.id.closePermissionDialogBtn);
+
+                        grantPermissionDialogBtn.setOnClickListener(view1 -> {
+                            dialog.dismiss();
+                            postNotifications.launch(Manifest.permission.POST_NOTIFICATIONS);
+                        });
+
+                        closePermissionDialogBtn.setOnClickListener(view12 -> dialog.dismiss());
+
+                        dialog.setCancelable(true);
+                        dialog.setCanceledOnTouchOutside(true);
+                        dialog.show();
+                    } else {
+                        postNotifications.launch(Manifest.permission.POST_NOTIFICATIONS);
+                    }
+                }
+            }
+        } catch (Exception e)
+        {
+            showToast(R.string.maybe_notifications_turned_off);
+        }
+    }
+
+    final ActivityResultLauncher<String> postNotifications = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+        if(isGranted)
+        {
+            //notification permission is granted
+            showToast(R.string.permission_granted);
+        } else {
+            //no notification permission granted
+            if(ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, Manifest.permission.POST_NOTIFICATIONS))
+            {
+                //User selected never ask again option
+                showToast(R.string.notifications_turned_off);
+            } else {
+                showToast(R.string.permission_denied);
+            }
+        }
+    });
 
 
     private class IncognitoClearRecords extends Thread

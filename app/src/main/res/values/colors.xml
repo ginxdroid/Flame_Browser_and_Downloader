@@ -6,4 +6,6 @@
     <color name="primaryTextDark">#deFFFFFF</color>
     <color name="dividerAndProgressBarColorDark">#1FFFFFFF</color>
     <color name="dividerAndProgressBarColor">#1F000000</color>
+    <color name="dividerAndProgressColorDark">#1FFFFFFF</color>
+    <color name="secondaryTextDark">#99FFFFFF</color>
 </resources>

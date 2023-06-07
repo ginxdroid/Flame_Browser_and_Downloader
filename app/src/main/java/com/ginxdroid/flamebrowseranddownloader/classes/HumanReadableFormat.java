@@ -146,10 +146,11 @@ public class HumanReadableFormat {
 //4 = "ServerTemporarilyUnavailable"
 //5 = "ConnectionTimedOutException"
 //6 = "DirectoryNotFoundException"
-//7 = "SeveralRetriedException"
-//8 = "Unknown"
+//7 = "SeveralRetriesException"
+//8 = "UnknownError"
 // = "NetworkInterruptedAndPRNOException"
 //"OutOfSpaceException"
+//"PauseResumeNotSupportedException"
 
 //Download Task Status
 // CURRENT_STATUS

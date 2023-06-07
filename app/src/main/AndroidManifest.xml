@@ -47,11 +47,16 @@
             tools:replace="screenOrientation" />
 
         <activity
+            android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout"
+            android:windowSoftInputMode="adjustResize"
+            android:name=".activities.FileDetailsActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".activities.DownloaderSettings"
             android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
-
         <activity
             android:name=".activities.FirstActivity"
             android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout"
@@ -158,7 +163,6 @@
             android:name=".activities.DownloadingService"
             android:enabled="true"
             android:exported="false" />
-
     </application>
 
 </manifest>

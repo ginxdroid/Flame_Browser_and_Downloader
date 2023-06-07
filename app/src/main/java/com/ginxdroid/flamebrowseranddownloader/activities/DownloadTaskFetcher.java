@@ -27,7 +27,7 @@ public class DownloadTaskFetcher extends Thread {
     private int chunkMode;
     private String pauseResumeSupported;
     private int isPauseResumeSupported;
-    private String fName,originalName;
+    private String fName;
     private final String pageURL;
     private long contentLength;
     private int defaultSegments;
@@ -88,7 +88,7 @@ public class DownloadTaskFetcher extends Thread {
                         extension = "."+ url.substring(url.indexOf("/") + 1, url.indexOf(";"));
 
                         fileName = fileRoot + extension;
-                        originalName = fileName;
+
 
                         UserPreferences userPreferences = db.getHalfUserPreferences();
 
@@ -137,7 +137,7 @@ public class DownloadTaskFetcher extends Thread {
                             if(finalS == 1)
                             {
                                 createPopupDialog(url,userAgent,contentLength,pauseResumeSupported,fName,chunkMode,pageURL,
-                                        mimeType,defaultSegments,finalExtension,originalName,isPauseResumeSupported);
+                                        mimeType,defaultSegments,finalExtension, isPauseResumeSupported);
                             } else {
                                 Toast.makeText(context, R.string.oops_general_message, Toast.LENGTH_SHORT).show();
                             }
@@ -200,7 +200,7 @@ public class DownloadTaskFetcher extends Thread {
                     }
 
                     fileName = fileRoot + extension;
-                    originalName = fileName;
+
 
                     UserPreferences userPreferences = db.getHalfUserPreferences();
 
@@ -257,7 +257,7 @@ public class DownloadTaskFetcher extends Thread {
                         if(finalS == 1)
                         {
                             createPopupDialog(url,userAgent,contentLength,pauseResumeSupported,fName,chunkMode,pageURL,
-                                    mimeType,defaultSegments,finalExtension,originalName,isPauseResumeSupported);
+                                    mimeType,defaultSegments,finalExtension, isPauseResumeSupported);
                         } else {
                             Toast.makeText(context, R.string.oops_general_message, Toast.LENGTH_SHORT).show();
                         }
@@ -272,7 +272,7 @@ public class DownloadTaskFetcher extends Thread {
 
     private void createPopupDialog(final String url,final String userAgent,final long contentLength,final String pauseResumeSupported, final String fileName,
                                    final int chunkMode, final String pageURL, final String mimeType, final int defaultSegments,final String extension,
-                                   final String originalName,final int isPauseResumeSupported)
+                                   final int isPauseResumeSupported)
     {
         try {
             AddNewDTaskSheet addNewDTaskSheet = new AddNewDTaskSheet();
@@ -287,7 +287,6 @@ public class DownloadTaskFetcher extends Thread {
             bundle.putString("mimeType",mimeType);
             bundle.putInt("defaultSegments",defaultSegments);
             bundle.putString("extension",extension);
-            bundle.putString("originalName",originalName);
             bundle.putInt("isPauseResumeSupported",isPauseResumeSupported);
 
             addNewDTaskSheet.setArguments(bundle);

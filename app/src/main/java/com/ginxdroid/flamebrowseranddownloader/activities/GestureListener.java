@@ -562,7 +562,7 @@ public class GestureListener extends GestureDetector.SimpleOnGestureListener {
                                     {
                                         case 1:
                                             viewHolder.onListenDownload(downloadImageURL,newUserAgent,null,null,pageURL,
-                                                    -1,null);
+                                                    -1);
                                             break;
                                         case 0:
                                             normalTabsRVAdapter.showToastFromMainActivity(R.string.oops_general_message);
@@ -629,11 +629,11 @@ public class GestureListener extends GestureDetector.SimpleOnGestureListener {
                                 {
                                     try {
                                         viewHolder.onListenDownload(downloadImageURL,newUserAgent,contentDisposition,contentType,pageURL,
-                                                Long.parseLong(length),null);
+                                                Long.parseLong(length));
                                     } catch (NumberFormatException e)
                                     {
                                         viewHolder.onListenDownload(downloadImageURL,newUserAgent,contentDisposition,contentType,pageURL,
-                                                -1,null);
+                                                -1);
                                     } catch (Exception e2)
                                     {
                                         normalTabsRVAdapter.showToastFromMainActivity(R.string.oops_general_message);
