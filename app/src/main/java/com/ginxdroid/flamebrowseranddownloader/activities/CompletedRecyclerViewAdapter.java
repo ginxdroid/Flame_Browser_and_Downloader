@@ -405,6 +405,10 @@ public class CompletedRecyclerViewAdapter extends RecyclerView.Adapter<Completed
                 new DeleteTasks(deleteMultipleSourceFilesCheckBox.isChecked(),innerDialog).start();
             });
 
+            dialog.setOnDismissListener(dialogInterface -> firstActivity.resumeAd());
+
+            firstActivity.removeAndPauseAd();
+
             dialog.setCanceledOnTouchOutside(false);
             dialog.setCancelable(false);
             dialog.show();

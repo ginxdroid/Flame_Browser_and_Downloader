@@ -24,6 +24,7 @@ import com.ginxdroid.flamebrowseranddownloader.sheets.MessageSheet;
 import com.ginxdroid.flamebrowseranddownloader.sheets.ResetSettingsSheet;
 import com.ginxdroid.flamebrowseranddownloader.sheets.TipsSheet;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.ump.UserMessagingPlatform;
 
 public class SettingsActivity extends BaseActivity implements View.OnClickListener, ResetSettingsSheet.BottomSheetListener {
     private DatabaseHandler db;
@@ -47,7 +48,7 @@ public class SettingsActivity extends BaseActivity implements View.OnClickListen
         backIB.setOnClickListener(SettingsActivity.this);
 
         MaterialButton manageBTV,manageHPTV,manageHTV,manageSHTV,securityTV,tipsTV,clearRecordsTV,
-                resetToDefaultTV,shareLinkBtn,aboutBtn,startupAndExitFeaturesTV,downloaderSettingsTV;
+                resetToDefaultTV,shareLinkBtn,aboutBtn,startupAndExitFeaturesTV,downloaderSettingsTV,resetConsentBtn;
 
         manageHPTV = findViewById(R.id.manageHPTV);
         manageHPTV.setOnClickListener(SettingsActivity.this);
@@ -84,6 +85,9 @@ public class SettingsActivity extends BaseActivity implements View.OnClickListen
 
         downloaderSettingsTV = findViewById(R.id.downloaderSettingsTV);
         downloaderSettingsTV.setOnClickListener(SettingsActivity.this);
+
+        resetConsentBtn = findViewById(R.id.resetConsentBtn);
+        resetConsentBtn.setOnClickListener(SettingsActivity.this);
     }
 
     @Override
@@ -142,6 +146,15 @@ public class SettingsActivity extends BaseActivity implements View.OnClickListen
             startActivity(new Intent(SettingsActivity.this, StartupAndExitFeatures.class));
         } else if (id == R.id.downloaderSettingsTV) {
             startActivity(new Intent(SettingsActivity.this, DownloaderSettings.class));
+        } else if(id == R.id.resetConsentBtn)
+        {
+            try {
+                UserMessagingPlatform.getConsentInformation(SettingsActivity.this).reset();
+                Toast.makeText(this, R.string.success, Toast.LENGTH_SHORT).show();
+            } catch (Exception e)
+            {
+                Toast.makeText(this, R.string.oops_something_went_wrong_please_try_again_later, Toast.LENGTH_SHORT).show();
+            }
         }
     }
 

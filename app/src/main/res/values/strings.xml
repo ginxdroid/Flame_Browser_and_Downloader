@@ -387,6 +387,8 @@
     <string name="downloading">Downloading</string>
     <string name="paused">Paused</string>
     <string name="just_started">Just started</string>
+    <string name="reset_consent_state">Reset consent state</string>
+    <string name="oops_something_went_wrong_please_try_again_later">Oops… something went wrong. Please try again later.</string>
 
 
 </resources>

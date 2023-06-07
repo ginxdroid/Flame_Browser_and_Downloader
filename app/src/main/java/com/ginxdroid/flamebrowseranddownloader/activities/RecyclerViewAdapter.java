@@ -1489,8 +1489,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 {
                     executorService.shutdown();
                 }
+                firstActivity.resumeAd();
                 singleTaskPos = -1;
             });
+
+            firstActivity.removeAndPauseAd();
 
             dialog.setCanceledOnTouchOutside(true);
             dialog.setCancelable(true);
@@ -2113,6 +2116,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     new DeleteTasks(deleteSourceFileCB.isChecked(),innerDialog).start();
                 }
             });
+
+            dialog.setOnDismissListener(dialogInterface -> firstActivity.resumeAd());
+            firstActivity.removeAndPauseAd();
+
 
             dialog.setCanceledOnTouchOutside(false);
             dialog.setCancelable(false);

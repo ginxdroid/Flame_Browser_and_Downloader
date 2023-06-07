@@ -1,5 +1,28 @@
 package com.ginxdroid.flamebrowseranddownloader.activities;
 
+import android.Manifest;
+import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.InstallSourceInfo;
+import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.PowerManager;
+import android.util.DisplayMetrics;
+import android.view.View;
+import android.view.ViewTreeObserver;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -15,31 +38,23 @@ import androidx.recyclerview.widget.SimpleItemAnimator;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
-import android.Manifest;
-import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.PackageManager;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.PowerManager;
-import android.view.View;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
-
 import com.ginxdroid.flamebrowseranddownloader.DatabaseHandler;
 import com.ginxdroid.flamebrowseranddownloader.R;
+import com.ginxdroid.flamebrowseranddownloader.classes.HelperTextUtility;
 import com.ginxdroid.flamebrowseranddownloader.sheets.OptimizationsSheet;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.common.GooglePlayServicesUtilLight;
 import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.android.material.textview.MaterialTextView;
+import com.google.android.ump.ConsentInformation;
+import com.google.android.ump.ConsentRequestParameters;
+import com.google.android.ump.UserMessagingPlatform;
 
 public class FirstActivity extends BaseActivity implements View.OnClickListener, DownloadingFragment.DFListener,
         CompletedFragment.CFListener, OptimizationsSheet.BottomSheetListener {
@@ -65,6 +80,11 @@ public class FirstActivity extends BaseActivity implements View.OnClickListener,
     private MaterialButton selectAllIB;
     private MaterialButton deselectAllIB;
     private MaterialTextView countTV;
+
+    private AdView abAdView;
+    private FrameLayout adContainerView;
+    private ConsentInformation consentInformation;
+
 
     private BroadcastReceiver broadcastReceiver;
     private final String DOWNLOADING_INTENT = "dI";
@@ -364,6 +384,10 @@ public class FirstActivity extends BaseActivity implements View.OnClickListener,
             completedRecyclerViewAdapter.setTasks();
             loadingMTV.setVisibility(View.GONE);
             checkOptimizations(FirstActivity.this);
+
+            adContainerView = findViewById(R.id.adContainerView);
+            checkForConsent();
+
         },5);
 
 
@@ -528,6 +552,14 @@ public class FirstActivity extends BaseActivity implements View.OnClickListener,
     protected void onStop() {
         try {
             loadedCount = 1;
+
+            try {
+                if(abAdView != null)
+                {
+                    abAdView.pause();
+                }
+            } catch (Exception ignored) {}
+
             try {
                 LocalBroadcastManager.getInstance(FirstActivity.this).unregisterReceiver(broadcastReceiver);
             } catch (Exception ignored) {
@@ -544,8 +576,16 @@ public class FirstActivity extends BaseActivity implements View.OnClickListener,
             if(loadedCount == 1)
             {
                 loadedCount = 0;
+
                 try {
                     recyclerViewAdapter.refreshTasks();
+                } catch (Exception ignored) {}
+
+                try {
+                    if(abAdView != null)
+                    {
+                        abAdView.resume();
+                    }
                 } catch (Exception ignored) {}
             }
         }catch (Exception ignored) {}
@@ -575,8 +615,188 @@ public class FirstActivity extends BaseActivity implements View.OnClickListener,
     @Override
     protected void onDestroy() {
         try {
+            if(abAdView != null)
+            {
+                abAdView.pause();
+                adContainerView.removeAllViews();
+                abAdView.destroy();
+                abAdView = null;
+            }
+
             LocalBroadcastManager.getInstance(FirstActivity.this).unregisterReceiver(broadcastReceiver);
             super.onDestroy();
         } catch (Exception ignored) {}
     }
+
+    private void checkForConsent()
+    {
+        try {
+            if(!isSideLoaded())
+            {
+                abAdView = new AdView(FirstActivity.this);
+
+                abAdView.setAdUnitId("ca-app-pub-3940256099942544/6300978111");
+
+                adContainerView.removeAllViews();
+                adContainerView.addView(abAdView);
+
+                AdSize adSize = getAdSize();
+                abAdView.setAdSize(adSize);
+
+                MobileAds.initialize(FirstActivity.this);
+
+                ConsentRequestParameters params = new ConsentRequestParameters.Builder().build();
+
+                consentInformation = UserMessagingPlatform.getConsentInformation(FirstActivity.this);
+                consentInformation.requestConsentInfoUpdate(FirstActivity.this, params, (ConsentInformation.OnConsentInfoUpdateSuccessListener) () -> {
+                            //The consent information state was updated
+                            //You are now ready to check if a form is available
+
+                            if (consentInformation.isConsentFormAvailable()) {
+                                loadForm();
+                            }
+                        }, formError -> {
+                            //Handle the error
+                        }
+                );
+
+                AdRequest adRequest = new AdRequest.Builder().build();
+                abAdView.loadAd(adRequest);
+
+            }
+        } catch (Exception e)
+        {
+            try {
+                if(abAdView != null)
+                {
+                    abAdView.pause();
+                    adContainerView.removeAllViews();
+                    abAdView.destroy();
+                    abAdView = null;
+                }
+            } catch (Exception ignored) {}
+        }
+    }
+
+    public void loadForm()
+    {
+        UserMessagingPlatform.loadConsentForm(FirstActivity.this, consentForm -> {
+            if (consentInformation.getConsentStatus() == ConsentInformation.ConsentStatus.REQUIRED) {
+                consentForm.show(FirstActivity.this, formError -> {
+                    // Handle dismissal by reloading form
+                    loadForm();
+                });
+            }
+        }, formError -> {
+            //Handle the error
+        });
+    }
+
+
+    private ViewTreeObserver.OnGlobalLayoutListener listener = null;
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        try {
+            final int oldWidth = mainContainer.getWidth();
+            final int oldHeight = mainContainer.getHeight();
+
+            if(listener != null)
+            {
+                mainContainer.getViewTreeObserver().removeOnGlobalLayoutListener(listener);
+                listener = null;
+            }
+
+            listener = new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    final int containerWidth = mainContainer.getWidth();
+                    final int containerHeight = mainContainer.getHeight();
+
+                    if(containerWidth != oldWidth || containerHeight != oldHeight)
+                    {
+                        checkForConsent();
+                        mainContainer.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        listener = null;
+                    }
+                }
+            };
+
+            mainContainer.getViewTreeObserver().addOnGlobalLayoutListener(listener);
+
+        } catch (Exception ignored) {}
+
+        super.onConfigurationChanged(newConfig);
+    }
+
+    private AdSize getAdSize()
+    {
+        Resources resources = FirstActivity.this.getResources();
+        DisplayMetrics outMetrics = resources.getDisplayMetrics();
+
+        float density = outMetrics.density;
+
+        float adWidthPixels = adContainerView.getWidth();
+
+        if(adWidthPixels == 0)
+        {
+            adWidthPixels = outMetrics.widthPixels;
+        }
+
+        int adWidth = (int) (adWidthPixels / density);
+
+        return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(FirstActivity.this,adWidth);
+    }
+
+    void removeAndPauseAd()
+    {
+        try {
+            if(abAdView != null)
+            {
+                abAdView.pause();
+                adContainerView.removeAllViews();
+                abAdView.destroy();
+                abAdView = null;
+            }
+        } catch (Exception ignored) {}
+    }
+
+    void resumeAd()
+    {
+        checkForConsent();
+    }
+
+    private boolean isSideLoaded()
+    {
+        try {
+            final String packageName = FirstActivity.this.getPackageName();
+            final PackageManager pm = FirstActivity.this.getPackageManager();
+            String mName;
+
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+            {
+                InstallSourceInfo info = pm.getInstallSourceInfo(packageName);
+
+                if(info != null)
+                {
+                    mName = info.getInstallingPackageName();
+                } else {
+                    mName = null;
+                }
+            } else {
+                mName = pm.getInstallerPackageName(packageName);
+            }
+
+            if(HelperTextUtility.isNotEmpty(mName))
+            {
+                return !mName.equals(GooglePlayServicesUtilLight.GOOGLE_PLAY_STORE_PACKAGE);
+            } else {
+                return true;
+            }
+        } catch (Exception e)
+        {
+            return true;
+        }
+    }
+
+
 }

@@ -7,6 +7,16 @@
     android:id="@+id/mainContainer"
     tools:context=".activities.FirstActivity">
 
+    <FrameLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/adContainerView"
+        app:layout_constraintVertical_bias="1.0"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
     <androidx.constraintlayout.widget.Guideline
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -154,7 +164,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/guideLine"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintBottom_toTopOf="@id/adContainerView" />
 
     <com.google.android.material.textview.MaterialTextView
         android:layout_width="wrap_content"
@@ -164,9 +174,9 @@
         app:layout_constraintTop_toBottomOf="@id/guideLine"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
         android:textAppearance="?textAppearanceHeadline7"
         android:textColor="?attr/primaryText"
+        app:layout_constraintBottom_toTopOf="@id/adContainerView"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
